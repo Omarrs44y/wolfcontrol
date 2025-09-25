@@ -1,0 +1,65 @@
+<div id="linkedUsersModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
+  <div class="bg-[#2a2a2a] rounded-lg w-full max-w-4xl p-6 max-h-[90vh] overflow-y-auto">
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="text-xl font-bold">إدارة المستخدمين المرتبطين</h3>
+      <button onclick="closeLinkedUsersModal()" class="text-gray-400 hover:text-white"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="bg-[#1a1a1a] rounded-lg p-4 mb-6">
+      <h4 class="text-lg font-semibold mb-4"><i class="fas fa-user-plus ml-2"></i>إضافة مستخدم مرتبط جديد</h4>
+      <form id="addLinkedUserForm" class="space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-gray-400 mb-2 text-sm">البريد الإلكتروني</label>
+            <input type="email" id="linkedUserEmail" required class="w-full p-2 rounded bg-[#2a2a2a] border border-gray-700 focus:border-purple-500 text-sm" placeholder="سيتم إنشاؤه تلقائياً" />
+            <button type="button" onclick="generateRandomEmail()" class="text-purple-500 text-xs mt-1 hover:text-purple-400"><i class="fas fa-random ml-1"></i>إنشاء بريد تلقائي</button>
+          </div>
+          <div>
+            <label class="block text-gray-400 mb-2 text-sm">كلمة المرور</label>
+            <input type="text" id="linkedUserPassword" required class="w-full p-2 rounded bg-[#2a2a2a] border border-gray-700 focus:border-purple-500 text-sm" placeholder="سيتم إنشاؤها تلقائياً" />
+            <button type="button" onclick="generateRandomPassword()" class="text-purple-500 text-xs mt-1 hover:text-purple-400"><i class="fas fa-random ml-1"></i>إنشاء كلمة مرور تلقائية</button>
+          </div>
+        </div>
+        <div class="border-t border-gray-700 pt-4">
+          <h5 class="text-md font-semibold mb-3">الصلاحيات</h5>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <label class="flex items-center"><input type="checkbox" name="permissions" value="edit_profile" class="ml-2" /><span class="text-sm">تعديل المعلومات الشخصية</span></label>
+            <label class="flex items-center"><input type="checkbox" name="permissions" value="change_password" class="ml-2" /><span class="text-sm">تغيير كلمة السر</span></label>
+            <label class="flex items-center"><input type="checkbox" name="permissions" value="change_date_format" class="ml-2" /><span class="text-sm">تغيير التاريخ (هجري/ميلادي)</span></label>
+            <label class="flex items-center"><input type="checkbox" name="permissions" value="add_subscriptions" class="ml-2" /><span class="text-sm">إضافة اشتراكات</span></label>
+            <label class="flex items-center"><input type="checkbox" name="permissions" value="view_subscriptions" class="ml-2" /><span class="text-sm">عرض معلومات الاشتراكات</span></label>
+            <label class="flex items-center"><input type="checkbox" name="permissions" value="delete_subscriptions" class="ml-2" /><span class="text-sm">حذف اشتراكات</span></label>
+            <label class="flex items-center"><input type="checkbox" name="permissions" value="edit_subscriptions" class="ml-2" /><span class="text-sm">تعديل اشتراكات</span></label>
+            <label class="flex items-center"><input type="checkbox" name="permissions" value="add_categories" class="ml-2" /><span class="text-sm">إضافة تصنيفات</span></label>
+          </div>
+          <div class="mt-4">
+            <h6 class="text-sm font-semibold mb-2">نوع الاشتراكات المسموحة</h6>
+            <div class="flex gap-4">
+              <label class="flex items-center"><input type="radio" name="subscription_access" value="both" checked class="ml-2" /><span class="text-sm">الاشتراكات العادية والملفات</span></label>
+              <label class="flex items-center"><input type="radio" name="subscription_access" value="regular" class="ml-2" /><span class="text-sm">الاشتراكات العادية فقط</span></label>
+              <label class="flex items-center"><input type="radio" name="subscription_access" value="files" class="ml-2" /><span class="text-sm">اشتراكات الملفات فقط</span></label>
+            </div>
+          </div>
+          <div class="mt-4">
+            <div class="flex items-center mb-2"><input type="checkbox" id="limitSpecificSubscriptions" class="ml-2" /><label for="limitSpecificSubscriptions" class="text-sm cursor-pointer">تحديد اشتراكات معينة فقط</label></div>
+            <div id="specificSubscriptionsSection" class="hidden">
+              <div class="grid grid-cols-2 md:grid-cols-3 gap-2 text-xs">
+                <label class="flex items-center"><input type="checkbox" name="specific_subscriptions" value="netflix" class="ml-1" /><span>نتفلكس</span></label>
+                <label class="flex items-center"><input type="checkbox" name="specific_subscriptions" value="shahid_vip" class="ml-1" /><span>شاهد مسلسلات</span></label>
+                <label class="flex items-center"><input type="checkbox" name="specific_subscriptions" value="youtube_premium" class="ml-1" /><span>يوتيوب بريميوم</span></label>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="flex justify-end gap-2 pt-4 border-t border-gray-700">
+          <button type="button" onclick="resetLinkedUserForm()" class="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700">إعادة تعيين</button>
+          <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"><i class="fas fa-plus ml-1"></i>إضافة المستخدم</button>
+        </div>
+      </form>
+    </div>
+    <div class="bg-[#1a1a1a] rounded-lg p-4">
+      <h4 class="text-lg font-semibold mb-4"><i class="fas fa-users ml-2"></i>المستخدمون المرتبطون (<span id="linkedUsersCount">0</span>/3)</h4>
+      <div id="linkedUsersList" class="space-y-3"></div>
+    </div>
+  </div>
+</div>
+

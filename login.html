@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل الدخول - وولف كنترول</title>
+    <script>
+        // تعطيل تحذيرات Tailwind في الإنتاج
+        window.tailwindConfig = { corePlugins: { preflight: false } };
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <script src="js/theme.js"></script>
+    <style>
+        body {
+            font-family: 'Tajawal', sans-serif;
+            direction: rtl;
+        }
+        
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .animated-bg {
+            background: linear-gradient(45deg, 
+                #1a1a1a 0%,
+                #2a2a2a 25%,
+                #1f1f1f 50%,
+                #2d2d2d 75%,
+                #1a1a1a 100%
+            );
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+        }
+        
+        .login-card {
+            backdrop-filter: blur(10px);
+            background: rgba(42, 42, 42, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .input-field {
+            background: rgba(26, 26, 26, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .input-field:focus {
+            border-color: #ef4444;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+        }
+        
+        .login-btn {
+            background: linear-gradient(45deg, #ef4444, #dc2626);
+            transition: all 0.3s ease;
+        }
+        
+        .login-btn:hover {
+            background: linear-gradient(45deg, #dc2626, #b91c1c);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(239, 68, 68, 0.3);
+        }
+        
+        .error-message {
+            animation: shake 0.5s ease-in-out;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        
+        .loading {
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+
+    </style>
+</head>
+<body class="bg-[#1a1a1a] text-white min-h-screen animated-bg flex items-center justify-center overflow-x-hidden">
+    <!-- Background Pattern -->
+    <div class="absolute inset-0 opacity-10">
+        <div class="absolute inset-0" style="background-image: url('data:image/svg+xml,<svg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"><g fill="none" fill-rule="evenodd"><g fill="%23ffffff" fill-opacity="0.1"><circle cx="30" cy="30" r="2"/></g></svg>');"></div>
+    </div>
+
+    <!-- Login Container -->
+    <div class="relative z-10 w-full max-w-md mx-4">
+        <!-- Logo Section -->
+        <div class="text-center mb-6 md:mb-8">
+            <img src="./assets/logowolfco_dark.png" alt="Wolf Control Logo" class="logo login-logo mx-auto mb-4">
+            <h1 class="text-2xl md:text-3xl font-bold text-white mb-2">وولف كنترول</h1>
+            <p class="text-gray-400 text-sm md:text-base">تسجيل الدخول إلى لوحة التحكم</p>
+
+
+        </div>
+
+        <!-- Login Card -->
+        <div class="login-card rounded-2xl p-4 md:p-8 shadow-2xl">
+            <form id="loginForm" class="space-y-4 md:space-y-6">
+                <!-- Email Field -->
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-300 mb-2">
+                        <i class="fas fa-envelope ml-2"></i>البريد الإلكتروني
+                    </label>
+                    <input 
+                        type="email" 
+                        id="email" 
+                        name="email"
+                        required
+                        class="input-field w-full px-4 py-3 rounded-lg text-white placeholder-gray-400 focus:outline-none"
+                        placeholder="أدخل بريدك الإلكتروني"
+                        autocomplete="email"
+                    >
+                </div>
+
+                <!-- Password Field -->
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-300 mb-2">
+                        <i class="fas fa-lock ml-2"></i>كلمة المرور
+                    </label>
+                    <div class="relative">
+                        <input 
+                            type="password" 
+                            id="password" 
+                            name="password"
+                            required
+                            class="input-field w-full px-4 py-3 rounded-lg text-white placeholder-gray-400 focus:outline-none pr-12"
+                            placeholder="أدخل كلمة المرور"
+                            autocomplete="current-password"
+                        >
+                        <button 
+                            type="button" 
+                            id="togglePassword"
+                            class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+                        >
+                            <i class="fas fa-eye" id="eyeIcon"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Error Message -->
+                <div id="errorMessage" class="hidden error-message bg-red-500/20 border border-red-500/50 text-red-400 px-4 py-3 rounded-lg text-sm">
+                    <i class="fas fa-exclamation-triangle ml-2"></i>
+                    <span id="errorText">بيانات تسجيل الدخول غير صحيحة</span>
+                </div>
+
+                <!-- Login Button -->
+                <button 
+                    type="submit" 
+                    id="loginBtn"
+                    class="login-btn w-full py-3 px-4 rounded-lg text-white font-medium focus:outline-none focus:ring-4 focus:ring-red-500/50"
+                >
+                    <span id="loginBtnText">
+                        <i class="fas fa-sign-in-alt ml-2"></i>تسجيل الدخول
+                    </span>
+                    <span id="loginBtnLoading" class="hidden">
+                        <i class="fas fa-spinner loading ml-2"></i>جاري التحقق...
+                    </span>
+                </button>
+            </form>
+
+
+
+            <!-- Footer Links -->
+            <div class="mt-6 text-center">
+                <a href="index.html" class="text-gray-400 hover:text-white transition-colors text-sm">
+                    <i class="fas fa-home ml-1"></i>العودة للصفحة الرئيسية
+                </a>
+            </div>
+        </div>
+
+
+    </div>
+
+    <!-- Configuration -->
+    <script src="./js/config.js"></script>
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="./js/supabase-config.js"></script>
+    
+    <script>
+        // Admin credentials loaded from environment
+        const ADMIN_EMAIL = window.ENV?.ADMIN_EMAIL || '';
+        const ADMIN_PASSWORD = window.ENV?.ADMIN_PASSWORD || '';
+
+        // DOM Elements
+        const loginForm = document.getElementById('loginForm');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const togglePasswordBtn = document.getElementById('togglePassword');
+        const eyeIcon = document.getElementById('eyeIcon');
+        const errorMessage = document.getElementById('errorMessage');
+        const errorText = document.getElementById('errorText');
+        const loginBtn = document.getElementById('loginBtn');
+        const loginBtnText = document.getElementById('loginBtnText');
+        const loginBtnLoading = document.getElementById('loginBtnLoading');
+
+        // Toggle password visibility
+        togglePasswordBtn.addEventListener('click', function() {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            
+            if (type === 'text') {
+                eyeIcon.classList.remove('fa-eye');
+                eyeIcon.classList.add('fa-eye-slash');
+            } else {
+                eyeIcon.classList.remove('fa-eye-slash');
+                eyeIcon.classList.add('fa-eye');
+            }
+        });
+
+        // Hide error message when user starts typing
+        [emailInput, passwordInput].forEach(input => {
+            input.addEventListener('input', function() {
+                hideError();
+            });
+        });
+
+        // Show error message
+        function showError(message) {
+            errorText.textContent = message;
+            errorMessage.classList.remove('hidden');
+        }
+
+        // Hide error message
+        function hideError() {
+            errorMessage.classList.add('hidden');
+        }
+
+        // Show loading state
+        function showLoading() {
+            loginBtn.disabled = true;
+            loginBtnText.classList.add('hidden');
+            loginBtnLoading.classList.remove('hidden');
+        }
+
+        // Hide loading state
+        function hideLoading() {
+            loginBtn.disabled = false;
+            loginBtnText.classList.remove('hidden');
+            loginBtnLoading.classList.add('hidden');
+        }
+
+        // Handle form submission
+        loginForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const email = emailInput.value.trim();
+            const password = passwordInput.value;
+
+            // Basic validation
+            if (!email || !password) {
+                showError('يرجى ملء جميع الحقول');
+                return;
+            }
+
+            showLoading();
+            hideError();
+
+            try {
+                console.log('🔄 بدء عملية تسجيل الدخول...');
+
+                // استخدام Supabase للمصادقة
+                const result = await supabaseDbManager.authenticateUser(email, password);
+                
+                if (result.success) {
+                    // حفظ بيانات المستخدم في localStorage
+                    const userData = {
+                        id: result.user.id,
+                        email: result.user.email,
+                        isAdmin: result.user.is_admin, // استخدام isAdmin بدلاً من is_admin للتوافق
+                        is_admin: result.user.is_admin,
+                        whatsapp: result.user.whatsapp,
+                        expiry_date: result.user.expiry_date,
+                        expiryDate: result.user.expiry_date, // إضافة الحقل بصيغة camelCase للتوافق مع صفحات أخرى
+                        loginTime: new Date().toISOString()
+                    };
+
+                    localStorage.setItem('isLoggedIn', 'true');
+                    localStorage.setItem('userData', JSON.stringify(userData));
+                    console.log('✅ تم حفظ بيانات المستخدم:', userData);
+
+                    // Check if subscription is expired for non-admin users
+                    if (!result.user.is_admin && result.user.expiry_date && new Date(result.user.expiry_date) < new Date()) {
+                        window.location.href = 'subscription-expired.html';
+                    } else {
+                        // Redirect to dashboard
+                        window.location.href = 'dashboard.html';
+                    }
+                } else {
+                    hideLoading();
+
+                    // Check if it's an expired subscription
+                    if (result.expired) {
+                        showError('انتهت صلاحية اشتراكك. يرجى التجديد للمتابعة.');
+                    } else {
+                        showError(result.error || 'بيانات تسجيل الدخول غير صحيحة.');
+                    }
+
+                    // Clear password field
+                    passwordInput.value = '';
+                    passwordInput.focus();
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                hideLoading();
+                showError('حدث خطأ أثناء تسجيل الدخول. يرجى المحاولة مرة أخرى.');
+                
+                // Clear password field
+                passwordInput.value = '';
+                passwordInput.focus();
+            }
+        });
+
+        // Update admin password hash if needed
+        async function ensureAdminPasswordHashed() {
+            try {
+                // Check if admin password is already hashed (longer than 20 characters)
+                const { data: user, error } = await dbManager.supabase
+                    .from('users')
+                    .select('password_hash')
+                    .eq('email', 'mtjgrwolf@gmail.com')
+                    .single();
+
+                if (error) {
+                    console.error('Error checking admin password:', error);
+                    return;
+                }
+
+                // If password is not hashed (too short), hash it
+                if (user && user.password_hash && user.password_hash.length < 50) {
+                    const hashedPassword = await PasswordManager.hashPassword(user.password_hash);
+
+                    const { error: updateError } = await dbManager.supabase
+                        .from('users')
+                        .update({ password_hash: hashedPassword })
+                        .eq('email', 'mtjgrwolf@gmail.com');
+
+                    if (updateError) {
+                        console.error('Error updating admin password:', updateError);
+                    } else {
+                        console.log('Admin password hashed successfully');
+                    }
+                }
+            } catch (error) {
+                console.error('Error ensuring admin password hashed:', error);
+            }
+        }
+
+        // تحقق من حالة تسجيل الدخول عند تحميل الصفحة
+        document.addEventListener('DOMContentLoaded', async function() {
+            const isLoggedIn = localStorage.getItem('isLoggedIn');
+            
+            if (isLoggedIn === 'true') {
+                // التحقق من حالة المستخدم في قاعدة البيانات حتى لو كان مسجل دخول
+                try {
+                    const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+                    if (userData.email) {
+                        // التحقق من حالة المستخدم في قاعدة البيانات
+                        const { data: users, error } = await supabaseDbManager.supabase
+                            .from('users')
+                            .select('is_active, expiry_date, is_admin')
+                            .eq('email', userData.email)
+                            .single();
+
+                        if (!error && users) {
+                            // إذا كان المستخدم غير نشط أو انتهى اشتراكه، قم بتسجيل الخروج
+                            if (!users.is_active || (!users.is_admin && users.expiry_date && new Date(users.expiry_date) < new Date())) {
+                                localStorage.removeItem('isLoggedIn');
+                                localStorage.removeItem('userData');
+                                console.log('❌ تم تسجيل الخروج: المستخدم غير نشط أو منتهي الاشتراك');
+                                // لا نعيد توجيه، نترك المستخدم في صفحة تسجيل الدخول
+                            } else {
+                                // المستخدم نشط ومؤهل للدخول
+                                window.location.href = 'dashboard.html';
+                                return;
+                            }
+                        } else {
+                            // خطأ في جلب بيانات المستخدم، قم بتسجيل الخروج
+                            localStorage.removeItem('isLoggedIn');
+                            localStorage.removeItem('userData');
+                            console.log('❌ تم تسجيل الخروج: لم يتم العثور على المستخدم');
+                        }
+                    } else {
+                        // بيانات مستخدم غير صحيحة
+                        localStorage.removeItem('isLoggedIn');
+                        localStorage.removeItem('userData');
+                    }
+                } catch (error) {
+                    console.error('❌ خطأ في التحقق من حالة المستخدم:', error);
+                    localStorage.removeItem('isLoggedIn');
+                    localStorage.removeItem('userData');
+                }
+            }
+
+            // التأكد من وجود المدير
+            try {
+                await supabaseDbManager.ensureAdminExists();
+                console.log('✅ تم التحقق من وجود المدير');
+            } catch (error) {
+                console.error('❌ خطأ في التحقق من المدير:', error);
+            }
+        });
+
+        // Auto-focus email field
+        emailInput.focus();
+
+    </script>
+</body>
+</html>

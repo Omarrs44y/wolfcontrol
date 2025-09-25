@@ -1,0 +1,71 @@
+/**
+ * Wolf Control Configuration Template
+ * ===================================
+ * Copy this file to config.js and update with your actual values
+ * 
+ * IMPORTANT: Update these values with your actual data before deployment
+ */
+
+window.ENV = {
+    // Supabase Configuration - UPDATE THESE WITH YOUR ACTUAL VALUES
+    SUPABASE_URL: 'https://your-project-id.supabase.co',
+    SUPABASE_ANON_KEY: 'your_supabase_anon_key_here',
+
+    // Admin Credentials - UPDATE THESE WITH YOUR ACTUAL VALUES
+    ADMIN_EMAIL: 'your_admin_email@example.com',
+    ADMIN_PASSWORD: 'your_secure_admin_password',
+
+    // Security Settings
+    PASSWORD_SALT: 'your_unique_salt_string',
+    SESSION_TIMEOUT: '3600000',
+    MAX_LOGIN_ATTEMPTS: '5',
+
+    // Application Settings
+    APP_NAME: 'Wolf Control',
+    APP_VERSION: '1.0.0',
+    APP_ENVIRONMENT: 'production',
+
+    // Contact Information - UPDATE WITH YOUR ACTUAL CONTACT INFO
+    SUPPORT_WHATSAPP: '+966XXXXXXXXX',
+    SUPPORT_EMAIL: 'support@yourdomain.com',
+    SUPPORT_PHONE: '+966XXXXXXXXX',
+
+    // Renewal Website URL - UPDATE WITH YOUR ACTUAL RENEWAL WEBSITE
+    RENEWAL_WEBSITE_URL: 'https://your-renewal-website.com',
+
+    // Database Settings
+    DB_CONNECTION_TIMEOUT: '30000',
+    DB_QUERY_TIMEOUT: '10000',
+
+    // Security Headers
+    ENABLE_SECURITY_HEADERS: 'true',
+    ENABLE_RATE_LIMITING: 'true',
+    RATE_LIMIT_REQUESTS: '100',
+    RATE_LIMIT_WINDOW: '900000',
+
+    // Logging
+    LOG_LEVEL: 'info',
+    ENABLE_ERROR_LOGGING: 'true',
+    ENABLE_ACCESS_LOGGING: 'false',
+
+    // Cache Settings
+    CACHE_ENABLED: 'true',
+    CACHE_DURATION: '300000',
+
+    // Backup Settings
+    AUTO_BACKUP_ENABLED: 'true',
+    BACKUP_INTERVAL: '86400000',
+    BACKUP_RETENTION_DAYS: '30'
+};
+
+// Dispatch environment loaded event
+document.addEventListener('DOMContentLoaded', function() {
+    window.dispatchEvent(new CustomEvent('environmentLoaded', {
+        detail: { env: window.ENV }
+    }));
+});
+
+// For debugging (remove in production)
+if (window.ENV.APP_ENVIRONMENT !== 'production') {
+    console.log('Environment variables loaded:', window.ENV);
+}

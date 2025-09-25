@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل الخروج - وولف كنترول</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/responsive.css">
+    <script src="js/theme.js"></script>
+    <style>
+        body {
+            font-family: 'Tajawal', sans-serif;
+            direction: rtl;
+        }
+        
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .animated-bg {
+            background: linear-gradient(45deg, 
+                #1a1a1a 0%,
+                #2a2a2a 25%,
+                #1f1f1f 50%,
+                #2d2d2d 75%,
+                #1a1a1a 100%
+            );
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+        }
+        
+        .logout-card {
+            backdrop-filter: blur(10px);
+            background: rgba(42, 42, 42, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .btn-logout {
+            background: linear-gradient(45deg, #ef4444, #dc2626);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-logout:hover {
+            background: linear-gradient(45deg, #dc2626, #b91c1c);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(239, 68, 68, 0.3);
+        }
+        
+        .btn-cancel {
+            background: linear-gradient(45deg, #6b7280, #4b5563);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-cancel:hover {
+            background: linear-gradient(45deg, #4b5563, #374151);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(107, 114, 128, 0.3);
+        }
+        
+        .countdown {
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-[#1a1a1a] text-white min-h-screen animated-bg flex items-center justify-center">
+    <!-- Background Pattern -->
+    <div class="absolute inset-0 opacity-10">
+        <div class="absolute inset-0" style="background-image: url('data:image/svg+xml,<svg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"><g fill="none" fill-rule="evenodd"><g fill="%23ffffff" fill-opacity="0.1"><circle cx="30" cy="30" r="2"/></g></svg>');"></div>
+    </div>
+
+    <!-- Logout Container -->
+    <div class="relative z-10 w-full max-w-md mx-4 fade-in">
+        <!-- Logo Section -->
+        <div class="text-center mb-8">
+            <img src="./assets/logowolfco.png" alt="Wolf Control Logo" class="w-24 h-24 mx-auto mb-4">
+            <h1 class="text-2xl font-bold text-white mb-2">وولف كنترول</h1>
+        </div>
+
+        <!-- Logout Card -->
+        <div class="logout-card rounded-2xl p-8 shadow-2xl text-center">
+            <div class="mb-6">
+                <i class="fas fa-sign-out-alt text-6xl text-red-500 mb-4"></i>
+                <h2 class="text-2xl font-bold mb-2">تسجيل الخروج</h2>
+                <p class="text-gray-400">هل أنت متأكد من رغبتك في تسجيل الخروج من لوحة التحكم؟</p>
+            </div>
+
+            <!-- User Info -->
+            <div class="bg-gray-800/50 rounded-lg p-4 mb-6">
+                <div class="flex items-center justify-center mb-2">
+                    <i class="fas fa-user-circle text-2xl text-gray-400 ml-2"></i>
+                    <span id="userEmail" class="text-gray-300">جاري التحميل...</span>
+                </div>
+                <div class="text-sm text-gray-500">
+                    <i class="fas fa-clock ml-1"></i>
+                    وقت تسجيل الدخول: <span id="loginTime">جاري التحميل...</span>
+                </div>
+            </div>
+
+            <!-- Auto Logout Warning -->
+            <div id="autoLogoutWarning" class="hidden bg-yellow-500/20 border border-yellow-500/50 text-yellow-400 px-4 py-3 rounded-lg text-sm mb-6">
+                <i class="fas fa-exclamation-triangle ml-2"></i>
+                سيتم تسجيل الخروج تلقائياً خلال <span id="countdown" class="countdown font-bold">10</span> ثانية
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex gap-4">
+                <button 
+                    id="confirmLogout"
+                    class="btn-logout flex-1 py-3 px-4 rounded-lg text-white font-medium focus:outline-none focus:ring-4 focus:ring-red-500/50"
+                >
+                    <i class="fas fa-sign-out-alt ml-2"></i>تأكيد الخروج
+                </button>
+                <button 
+                    id="cancelLogout"
+                    class="btn-cancel flex-1 py-3 px-4 rounded-lg text-white font-medium focus:outline-none focus:ring-4 focus:ring-gray-500/50"
+                >
+                    <i class="fas fa-times ml-2"></i>إلغاء
+                </button>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="mt-6 pt-6 border-t border-gray-700">
+                <p class="text-sm text-gray-400 mb-3">أو يمكنك:</p>
+                <div class="flex gap-2 text-sm">
+                    <a href="dashboard.html" class="text-blue-400 hover:text-blue-300 transition-colors">
+                        <i class="fas fa-tachometer-alt ml-1"></i>العودة للوحة التحكم
+                    </a>
+                    <span class="text-gray-600">|</span>
+                    <a href="index.html" class="text-green-400 hover:text-green-300 transition-colors">
+                        <i class="fas fa-home ml-1"></i>الصفحة الرئيسية
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const userEmailElement = document.getElementById('userEmail');
+        const loginTimeElement = document.getElementById('loginTime');
+        const autoLogoutWarning = document.getElementById('autoLogoutWarning');
+        const countdownElement = document.getElementById('countdown');
+        const confirmLogoutBtn = document.getElementById('confirmLogout');
+        const cancelLogoutBtn = document.getElementById('cancelLogout');
+
+        let countdownTimer;
+        let countdownValue = 10;
+
+        // Load user data
+        function loadUserData() {
+            const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+            
+            if (userData.email) {
+                userEmailElement.textContent = userData.email;
+
+                if (userData.loginTime) {
+                    const loginDate = new Date(userData.loginTime);
+                    loginTimeElement.textContent = loginDate.toLocaleString('ar-SA');
+                } else {
+                    loginTimeElement.textContent = 'غير محدد';
+                }
+            } else {
+                // If no user data, redirect to login
+                window.location.href = 'login.html';
+            }
+        }
+
+        // Start auto logout countdown
+        function startAutoLogout() {
+            autoLogoutWarning.classList.remove('hidden');
+            
+            countdownTimer = setInterval(() => {
+                countdownValue--;
+                countdownElement.textContent = countdownValue;
+                
+                if (countdownValue <= 0) {
+                    clearInterval(countdownTimer);
+                    performLogout();
+                }
+            }, 1000);
+        }
+
+        // Stop auto logout countdown
+        function stopAutoLogout() {
+            if (countdownTimer) {
+                clearInterval(countdownTimer);
+                countdownTimer = null;
+            }
+            autoLogoutWarning.classList.add('hidden');
+            countdownValue = 10;
+            countdownElement.textContent = countdownValue;
+        }
+
+        // Perform logout
+        function performLogout() {
+            // Clear all stored data
+            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('userData');
+            localStorage.removeItem('regularSubscriptions');
+            localStorage.removeItem('fileSubscriptions');
+            localStorage.removeItem('users');
+            
+            // Show success message briefly
+            document.body.innerHTML = `
+                <div class="fixed inset-0 bg-[#1a1a1a] flex items-center justify-center">
+                    <div class="text-center">
+                        <i class="fas fa-check-circle text-6xl text-green-500 mb-4"></i>
+                        <h2 class="text-2xl font-bold text-white mb-2">تم تسجيل الخروج بنجاح</h2>
+                        <p class="text-gray-400">جاري إعادة التوجيه...</p>
+                    </div>
+                </div>
+            `;
+            
+            // Redirect after a short delay
+            setTimeout(() => {
+                window.location.href = 'login.html';
+            }, 2000);
+        }
+
+        // Event Listeners
+        confirmLogoutBtn.addEventListener('click', performLogout);
+        
+        cancelLogoutBtn.addEventListener('click', () => {
+            window.location.href = 'dashboard.html';
+        });
+
+        // Check if user came from dashboard (has referrer)
+        document.addEventListener('DOMContentLoaded', () => {
+            loadUserData();
+            
+            // Start auto logout if user didn't come from dashboard
+            const referrer = document.referrer;
+            if (!referrer.includes('dashboard.html')) {
+                setTimeout(startAutoLogout, 3000); // Start after 3 seconds
+            }
+        });
+
+        // Handle browser back button
+        window.addEventListener('popstate', () => {
+            stopAutoLogout();
+        });
+
+        // Handle page visibility change (when user switches tabs)
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                stopAutoLogout();
+            }
+        });
+    </script>
+</body>
+</html>

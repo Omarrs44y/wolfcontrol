@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة المستخدمين - مبسط</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <link rel="stylesheet" href="css/responsive.css">
+    <script src="js/theme.js"></script>
+    <script src="./js/config.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="./js/supabase-config.js"></script>
+</head>
+<body class="bg-[#1a1a1a] text-white overflow-x-hidden">
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-2xl font-bold mb-8">إدارة المستخدمين - مبسط</h1>
+        
+        <!-- جدول المستخدمين -->
+        <div class="bg-gray-800 rounded-lg overflow-hidden">
+            <table class="w-full">
+                <thead class="bg-gray-700">
+                    <tr>
+                        <th class="px-6 py-3 text-right">البريد الإلكتروني</th>
+                        <th class="px-6 py-3 text-right">نوع المستخدم</th>
+                        <th class="px-6 py-3 text-right">الحالة</th>
+                        <th class="px-6 py-3 text-right">الإجراءات</th>
+                    </tr>
+                </thead>
+                <tbody id="usersTableBody" class="divide-y divide-gray-700">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- نموذج إضافة اشتراك -->
+    <div id="addSubscriptionModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+        <div class="bg-gray-800 rounded-lg p-6 w-full max-w-md mx-4">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold">إضافة اشتراك للمستخدم</h3>
+                <button onclick="closeAddSubscriptionModal()" class="text-gray-400 hover:text-white">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <form id="addSubscriptionForm" onsubmit="handleAddSubscription(event)">
+                <input type="hidden" id="targetUserId" name="targetUserId">
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium mb-2">البريد الإلكتروني</label>
+                    <input type="email" id="targetUserEmail" name="targetUserEmail" 
+                           class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white" readonly>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium mb-2">نوع الاشتراك</label>
+                    <select name="subscriptionType" required 
+                            class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white">
+                        <option value="">اختر نوع الاشتراك</option>
+                        <option value="netflix">Netflix</option>
+                        <option value="disney">Disney Plus</option>
+                        <option value="shahid">Shahid VIP</option>
+                        <option value="other">أخرى</option>
+                    </select>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium mb-2">رقم الواتساب</label>
+                    <div class="flex gap-2">
+                        <select name="countryCode" class="px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white">
+                            <option value="+966">+966</option>
+                        </select>
+                        <input type="tel" name="whatsapp" required 
+                               class="flex-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"
+                               placeholder="5xxxxxxxx">
+                    </div>
+                </div>
+                
+                <div class="flex gap-3">
+                    <button type="submit" class="flex-1 bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded">
+                        إضافة الاشتراك
+                    </button>
+                    <button type="button" onclick="closeAddSubscriptionModal()" 
+                            class="flex-1 bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded">
+                        إلغاء
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // تحديث جدول المستخدمين
+        async function updateUsersTable() {
+            try {
+                const result = await dbManager.getAllUsers();
+                if (!result.success) {
+                    console.error('Error loading users:', result.error);
+                    return;
+                }
+
+                const users = result.users;
+                const tbody = document.getElementById('usersTableBody');
+                tbody.innerHTML = '';
+
+                users.forEach(user => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td class="px-6 py-4">${user.email}</td>
+                        <td class="px-6 py-4">${user.is_admin ? 'مدير' : 'مستخدم عادي'}</td>
+                        <td class="px-6 py-4">
+                            <span class="px-2 py-1 rounded text-sm ${user.is_active ? 'bg-green-600' : 'bg-red-600'}">
+                                ${user.is_active ? 'نشط' : 'معطل'}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex gap-2">
+                                ${!user.is_admin ? `
+                                    <button onclick="openEditUser('${user.id}')" class="text-blue-500 hover:text-blue-600" title="تعديل">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button onclick="openAddSubscriptionModal('${user.id}', '${user.email}')" class="text-purple-500 hover:text-purple-600" title="إضافة اشتراك">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                    <button onclick="deleteUser('${user.id}')" class="text-red-500 hover:text-red-600" title="حذف">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                ` : '<span class="text-gray-500">مدير</span>'}
+                            </div>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Error updating users table:', error);
+            }
+        }
+
+        // فتح نموذج إضافة اشتراك
+        function openAddSubscriptionModal(userId, userEmail) {
+            document.getElementById('targetUserId').value = userId;
+            document.getElementById('targetUserEmail').value = userEmail;
+            document.getElementById('addSubscriptionModal').classList.remove('hidden');
+            document.getElementById('addSubscriptionModal').classList.add('flex');
+        }
+
+        // إغلاق نموذج إضافة اشتراك
+        function closeAddSubscriptionModal() {
+            document.getElementById('addSubscriptionModal').classList.add('hidden');
+            document.getElementById('addSubscriptionModal').classList.remove('flex');
+            document.getElementById('addSubscriptionForm').reset();
+        }
+
+        // معالجة إضافة اشتراك
+        async function handleAddSubscription(event) {
+            event.preventDefault();
+            
+            try {
+                const formData = new FormData(event.target);
+                const userId = formData.get('targetUserId');
+                const userEmail = formData.get('targetUserEmail');
+                
+                // حساب تاريخ الانتهاء (شهر واحد من الآن)
+                const expiryDate = new Date();
+                expiryDate.setMonth(expiryDate.getMonth() + 1);
+                
+                // بيانات الاشتراك
+                const subscriptionData = {
+                    email: userEmail,
+                    subscription_type: formData.get('subscriptionType'),
+                    whatsapp: formData.get('countryCode') + formData.get('whatsapp'),
+                    currency: 'SAR',
+                    start_date: new Date().toISOString(),
+                    expiry_date: expiryDate.toISOString(),
+                    created_by: userId
+                };
+
+                // إضافة الاشتراك إلى قاعدة البيانات
+                const result = await dbManager.createSubscription(subscriptionData);
+                
+                if (result.success) {
+                    closeAddSubscriptionModal();
+                    alert(`تم إضافة اشتراك ${subscriptionData.subscription_type} للمستخدم ${userEmail} بنجاح`);
+                } else {
+                    alert(result.error || 'حدث خطأ أثناء إضافة الاشتراك');
+                }
+            } catch (error) {
+                console.error('Error adding subscription:', error);
+                alert('حدث خطأ أثناء إضافة الاشتراك');
+            }
+        }
+
+        // دوال أخرى
+        function openEditUser(userId) {
+            alert('تعديل المستخدم: ' + userId);
+        }
+
+        function deleteUser(userId) {
+            if (confirm('هل أنت متأكد من حذف هذا المستخدم؟')) {
+                alert('حذف المستخدم: ' + userId);
+            }
+        }
+
+        // تهيئة الصفحة
+        document.addEventListener('DOMContentLoaded', function() {
+            updateUsersTable();
+        });
+    </script>
+</body>
+</html>

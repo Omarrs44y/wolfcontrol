@@ -1,0 +1,9 @@
+/* Tabs and customers sub-tabs styles extracted from dashboard.html */
+.tab-button { color: #9ca3af; border-bottom: 2px solid transparent; }
+.tab-button.active { color: #fff; border-bottom: 2px solid #ef4444; }
+
+.customer-tab-button { color: #9ca3af; border-bottom: 2px solid transparent; }
+.customer-tab-button.active { color: #fff; border-bottom: 2px solid #3b82f6; }
+
+.customer-subscriptions-table { max-height: 400px; overflow-y: auto; }
+

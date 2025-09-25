@@ -1,0 +1,11 @@
+<div class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4" id="deleteModal">
+  <div class="bg-[#2a2a2a] rounded-lg p-6 w-full max-w-md">
+    <h2 class="text-xl font-bold mb-4">تأكيد الحذف</h2>
+    <p class="text-gray-400 mb-6">هل أنت متأكد من حذف هذا الاشتراك؟</p>
+    <div class="flex gap-4">
+      <button onclick="confirmDelete()" class="bg-red-500 px-4 py-2 rounded hover:bg-red-600 flex-1">حذف</button>
+      <button onclick='document.getElementById("deleteModal").classList.add("hidden")' class="bg-gray-600 px-4 py-2 rounded hover:bg-gray-700 flex-1">إلغاء</button>
+    </div>
+  </div>
+</div>
+

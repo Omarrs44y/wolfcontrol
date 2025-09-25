@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wolf Control - الصفحة الرئيسية</title>
+    <script>
+        // تعطيل تحذيرات Tailwind في الإنتاج
+        window.tailwindConfig = { corePlugins: { preflight: false } };
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/responsive.css">
+    <script src="js/theme.js"></script>
+    <style>
+        body {
+            font-family: 'Tajawal', sans-serif;
+            direction: rtl;
+        }
+        
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .animated-bg {
+            background: linear-gradient(45deg, 
+                #1a1a1a 0%,
+                #2a2a2a 25%,
+                #1f1f1f 50%,
+                #2d2d2d 75%,
+                #1a1a1a 100%
+            );
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            position: relative;
+        }
+        
+        .animated-bg::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" fill="%23000" fill-opacity="0.03"/></svg>');
+            opacity: 0.5;
+            z-index: 0;
+        }
+
+        .content-wrapper {
+            position: relative;
+            z-index: 1;
+            padding-top: 5rem;
+        }
+        
+        .price-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            animation: fadeInUp 0.6s ease backwards;
+        }
+        
+        .price-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 25px -5px rgba(255, 0, 0, 0.1), 0 10px 10px -5px rgba(255, 0, 0, 0.04);
+        }
+
+        /* إضافة حركة للأيقونات */
+        .feature-card i {
+            transition: transform 0.5s ease;
+            display: inline-block;
+        }
+
+        .feature-card:hover i {
+            animation: bounceIcon 1s infinite;
+        }
+
+        @keyframes bounceIcon {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .faq-item {
+            overflow: hidden;
+            margin-bottom: 1rem;
+            border-radius: 0.5rem;
+            background: rgba(26, 26, 26, 0.8);
+            backdrop-filter: blur(10px);
+        }
+
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+            transition: all 0.5s ease-out;
+            background: rgba(42, 42, 42, 0.3);
+            transform: translateY(-10px);
+        }
+
+        .faq-answer.active {
+            max-height: 1000px;
+            opacity: 1;
+            transform: translateY(0);
+            transition: all 0.5s ease-in;
+        }
+
+        .faq-button {
+            transition: background-color 0.3s ease;
+        }
+
+        .faq-button:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .faq-icon {
+            transition: transform 0.3s ease;
+        }
+
+        .faq-icon.active {
+            transform: rotate(45deg);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero-section {
+            animation: fadeInUp 0.8s ease backwards;
+        }
+
+        .feature-card {
+            animation: fadeInUp 0.6s ease backwards;
+        }
+
+        .feature-card:nth-child(1) { animation-delay: 0.2s; }
+        .feature-card:nth-child(2) { animation-delay: 0.4s; }
+        .feature-card:nth-child(3) { animation-delay: 0.6s; }
+
+        .price-card:nth-child(1) { animation-delay: 0.3s; }
+        .price-card:nth-child(2) { animation-delay: 0.5s; }
+        .price-card:nth-child(3) { animation-delay: 0.7s; }
+
+        /* تنسيق الترويسة */
+        .header-fixed {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 50;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            height: 5rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .header-fixed img {
+            max-height: 50%;
+            width: auto;
+            object-fit: contain;
+        }
+
+        .header-fixed.scrolled {
+            background-color: rgba(26, 26, 26, 0.8);
+        }
+
+        /* تنسيق أزرار وسائل التواصل */
+        .contact-button {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 60px;
+            height: 60px;
+            background-color: #333;
+            border-radius: 8px;
+            margin: 0 5px;
+            transition: all 0.3s ease;
+        }
+
+        .contact-button i {
+            font-size: 1.5rem;
+            margin-bottom: 4px;
+        }
+
+        .contact-button span {
+            font-size: 0.7rem;
+            text-align: center;
+        }
+
+        .contact-button:hover {
+            transform: translateY(-2px);
+            background-color: #444;
+        }
+
+        /* تنسيق قسم وسائل الدفع */
+        .payment-methods {
+            display: flex;
+            justify-content: center;
+            gap: 0.3rem;
+            margin: 1rem 0;
+            flex-wrap: wrap;
+        }
+
+        .payment-method {
+            background: white;
+            border-radius: 6px;
+            padding: 0.3rem;
+            width: 60px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .payment-method img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+
+    </style>
+</head>
+<body class="bg-[#1a1a1a] text-white min-h-screen animated-bg">
+    <div class="content-wrapper">
+        <!-- Header Section -->
+        <header class="bg-[#222] header-fixed">
+            <div class="container mx-auto px-4 flex justify-between items-center h-full">
+                <!-- Logo Section -->
+                <div class="flex items-center">
+                    <img src="./assets/logowolfco_dark.png" alt="Wolf Control Logo" class="logo h-16 md:h-20 lg:h-24 xl:h-28 w-auto">
+                    <div class="mr-3 hidden sm:block">
+                        <h1 class="text-xl md:text-2xl lg:text-3xl font-bold">وولف كنترول</h1>
+                        <p class="text-sm md:text-base lg:text-lg text-gray-400">نظام إدارة الاشتراكات</p>
+                    </div>
+                </div>
+
+                <!-- Navigation Buttons -->
+                <div class="flex items-center gap-2 md:gap-4">
+
+
+                    <a href="store.html" class="px-3 md:px-6 py-2 bg-gradient-to-r from-purple-600 to-purple-800 text-white rounded-lg hover:from-purple-700 hover:to-purple-900 transition-all duration-300 flex items-center gap-1 md:gap-2 text-sm md:text-base">
+                        <i class="fas fa-store"></i>
+                        <span class="hidden sm:inline">المتجر</span>
+                        <span class="sm:hidden">متجر</span>
+                    </a>
+                    <a href="login.html" class="px-3 md:px-6 py-2 bg-gradient-to-r from-red-600 to-red-800 text-white rounded-lg hover:from-red-700 hover:to-red-900 transition-all duration-300 flex items-center gap-1 md:gap-2 text-sm md:text-base">
+                        <i class="fas fa-sign-in-alt"></i>
+                        <span class="hidden sm:inline">تسجيل الدخول</span>
+                        <span class="sm:hidden">دخول</span>
+                    </a>
+                </div>
+            </div>
+        </header>
+
+        <!-- Hero Section -->
+        <section class="py-16 text-center hero-section">
+            <div class="container mx-auto px-4">
+                <h1 class="text-4xl font-bold mb-6">مرحباً بك في وولف كنترول</h1>
+                <p class="text-xl text-gray-400 mb-8">منصتك المتكاملة لإدارة الاشتراكات بكل سهولة</p>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section class="py-16 bg-[#2a2a2a] bg-opacity-50">
+            <div class="container mx-auto px-4">
+                <h2 class="text-3xl font-bold text-center mb-12">مميزات المنصة</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="feature-card text-center p-6">
+                        <i class="fas fa-chart-line text-4xl text-red-500 mb-4"></i>
+                        <h3 class="text-xl font-bold mb-3">تتبع الإحصائيات</h3>
+                        <p class="text-gray-400">تحليلات متقدمة ورؤى مفصلة لأداء اشتراكاتك</p>
+                    </div>
+                    <div class="feature-card text-center p-6">
+                        <i class="fas fa-users text-4xl text-red-500 mb-4"></i>
+                        <h3 class="text-xl font-bold mb-3">إدارة المشتركين</h3>
+                        <p class="text-gray-400">سهولة في إدارة وتنظيم قاعدة المشتركين</p>
+                    </div>
+                    <div class="feature-card text-center p-6">
+                        <i class="fas fa-shield-alt text-4xl text-red-500 mb-4"></i>
+                        <h3 class="text-xl font-bold mb-3">أمان متكامل</h3>
+                        <p class="text-gray-400">حماية قصوى لبياناتك ومعلومات مشتركيك</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Pricing Section -->
+        <section class="py-16">
+            <div class="container mx-auto px-4">
+                <h2 class="text-3xl font-bold text-center mb-12">باقات الاشتراك</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <!-- Monthly Plan -->
+                    <div class="price-card bg-[#2a2a2a] rounded-lg p-8 text-center">
+                        <h3 class="text-xl font-bold mb-4">اشتراك شهري</h3>
+                        <div class="text-3xl font-bold text-red-500 mb-6">
+                            15 ريال
+                            <span class="text-sm text-gray-400">/شهر</span>
+                        </div>
+                        <button class="w-full bg-red-500 text-white p-3 rounded hover:bg-red-600 transition-colors">
+                            اشترك الآن
+                        </button>
+                    </div>
+                    <!-- Quarterly Plan -->
+                    <div class="price-card bg-[#2a2a2a] rounded-lg p-8 text-center">
+                        <h3 class="text-xl font-bold mb-4">اشتراك 3 أشهر</h3>
+                        <div class="text-3xl font-bold text-red-500 mb-6">
+                            25 ريال
+                            <span class="text-sm text-gray-400">/3 أشهر</span>
+                        </div>
+                        <button class="w-full bg-red-500 text-white p-3 rounded hover:bg-red-600 transition-colors">
+                            اشترك الآن
+                        </button>
+                    </div>
+                    <!-- Yearly Plan -->
+                    <div class="price-card bg-[#2a2a2a] rounded-lg p-8 text-center">
+                        <h3 class="text-xl font-bold mb-4">اشتراك سنوي</h3>
+                        <div class="text-3xl font-bold text-red-500 mb-6">
+                            50 ريال
+                            <span class="text-sm text-gray-400">/سنة</span>
+                        </div>
+                        <button class="w-full bg-red-500 text-white p-3 rounded hover:bg-red-600 transition-colors">
+                            اشترك الآن
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FAQ Section -->
+        <section class="py-16 bg-[#2a2a2a] bg-opacity-50">
+            <div class="container mx-auto px-4">
+                <h2 class="text-3xl font-bold text-center mb-12">الأسئلة الشائعة</h2>
+                <div class="max-w-3xl mx-auto space-y-4">
+                    <!-- FAQ Item 1 -->
+                    <div class="faq-item bg-[#1a1a1a] rounded-lg">
+                        <button class="w-full px-6 py-4 text-right flex items-center justify-between hover:bg-opacity-80 transition-all faq-button" onclick="toggleFAQ(this)">
+                            <span class="text-lg font-semibold">ماهو موقع وولف كنترول ؟</span>
+                            <i class="fas fa-plus text-red-500 faq-icon"></i>
+                        </button>
+                        <div class="faq-answer px-6 py-4 text-gray-400">
+                            موقع وولف كنترول هو منصة متكاملة لإدارة الاشتراكات بكل سهولة، يوفر لك أدوات متقدمة لمتابعة وإدارة اشتراكاتك بشكل احترافي.
+                        </div>
+                    </div>
+                    <!-- FAQ Item 2 -->
+                    <div class="faq-item bg-[#1a1a1a] rounded-lg">
+                        <button class="w-full px-6 py-4 text-right flex items-center justify-between hover:bg-opacity-80 transition-all faq-button" onclick="toggleFAQ(this)">
+                            <span class="text-lg font-semibold">كيف اقوم باشتراك في الموقع؟</span>
+                            <i class="fas fa-plus text-red-500 faq-icon"></i>
+                        </button>
+                        <div class="faq-answer px-6 py-4 text-gray-400">
+                            يمكنك الاشتراك بسهولة عن طريق الضغط على زر "اشترك الآن" واختيار الباقة المناسبة لك، ثم إكمال عملية التسجيل وإتمام الدفع.
+                        </div>
+                    </div>
+                    <!-- FAQ Item 3 -->
+                    <div class="faq-item bg-[#1a1a1a] rounded-lg">
+                        <button class="w-full px-6 py-4 text-right flex items-center justify-between hover:bg-opacity-80 transition-all faq-button" onclick="toggleFAQ(this)">
+                            <span class="text-lg font-semibold">هل يوصلني اشعار عند نهاية الاشتراك ؟</span>
+                            <i class="fas fa-plus text-red-500 faq-icon"></i>
+                        </button>
+                        <div class="faq-answer px-6 py-4 text-gray-400">
+                            نعم، سيصلك إشعار تلقائي قبل انتهاء اشتراكك بفترة كافية لتجديد الاشتراك وضمان استمرارية الخدمة.
+                        </div>
+                    </div>
+                    <!-- FAQ Item 4 -->
+                    <div class="faq-item bg-[#1a1a1a] rounded-lg">
+                        <button class="w-full px-6 py-4 text-right flex items-center justify-between hover:bg-opacity-80 transition-all faq-button" onclick="toggleFAQ(this)">
+                            <span class="text-lg font-semibold">كيف احصل على ايميل للتسجيل؟</span>
+                            <i class="fas fa-plus text-red-500 faq-icon"></i>
+                        </button>
+                        <div class="faq-answer px-6 py-4 text-gray-400">
+                            بعد الاشتراك سيتم ارسال لك ايميل والباسورد الخاصة باللوحة خاصتك
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer with Logo and Social Media -->
+        <footer class="bg-[#1a1a1a] py-16">
+            <div class="container mx-auto px-4 text-center">
+                <!-- Logo -->
+                <div class="mb-8">
+                    <img src="./assets/logowolfco_dark.png" alt="Wolf Control Logo" class="logo w-32 h-32 md:w-40 md:h-40 lg:w-48 lg:h-48 mx-auto mb-4">
+                    <p class="text-gray-400 text-lg">منصتك المتكاملة لإدارة الاشتراكات بكل سهولة</p>
+                </div>
+                
+                <!-- Social Media Icons -->
+                <div class="flex justify-center gap-8 mb-12">
+                    <a href="#" class="text-gray-400 hover:text-red-500 transition-colors">
+                        <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                        </svg>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-red-500 transition-colors">
+                        <i class="fab fa-tiktok text-2xl"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-red-500 transition-colors">
+                        <i class="fab fa-instagram text-2xl"></i>
+                    </a>
+                </div>
+
+                <!-- Contact Buttons -->
+                <div class="flex justify-center gap-2 mt-4">
+                    <a href="mailto:info@wolfcontrol.com" class="contact-button">
+                        <i class="far fa-envelope"></i>
+                        <span>ايميل</span>
+                    </a>
+                    <a href="tel:+966500000000" class="contact-button">
+                        <i class="fas fa-mobile-alt"></i>
+                        <span>جوال</span>
+                    </a>
+                    <a href="https://wa.me/966500000000" class="contact-button">
+                        <i class="fab fa-whatsapp"></i>
+                        <span>واتساب</span>
+                    </a>
+                </div>
+
+                <!-- Copyright -->
+                <div class="text-center text-sm text-gray-500 mt-8">
+                    <p>جميع الحقوق محفوظة لدى وولف كنترول 2025</p>
+                </div>
+
+                <!-- Payment Methods -->
+                <div class="payment-methods">
+                    <div class="payment-method">
+                        <img src="./pay/google_pay.webp" alt="Google Pay">
+                    </div>
+                    <div class="payment-method">
+                        <img src="./pay/apple_pay.webp" alt="Apple Pay">
+                    </div>
+                    <div class="payment-method">
+                        <img src="./pay/visa.webp" alt="Visa">
+                    </div>
+                    <div class="payment-method">
+                        <img src="./pay/mastercard.webp" alt="Mastercard">
+                    </div>
+                    <div class="payment-method">
+                        <img src="./pay/mada.webp" alt="Mada">
+                    </div>
+                    <div class="payment-method">
+                        <img src="./pay/stc_pay.webp" alt="STC Pay">
+                    </div>
+                    <div class="payment-method">
+                        <img src="./pay/paypal.webp" alt="PayPal">
+                    </div>
+                </div>
+            </div>
+        </footer>
+
+        <script>
+            function toggleFAQ(button) {
+                const answer = button.nextElementSibling;
+                const icon = button.querySelector('.faq-icon');
+                
+                // إغلاق جميع الإجابات الأخرى
+                document.querySelectorAll('.faq-answer.active').forEach(item => {
+                    if (item !== answer) {
+                        item.classList.remove('active');
+                        item.previousElementSibling.querySelector('.faq-icon').classList.remove('active');
+                    }
+                });
+
+                // تبديل حالة الإجابة الحالية
+                answer.classList.toggle('active');
+                icon.classList.toggle('active');
+            }
+
+            // Add animation on scroll
+            document.addEventListener('DOMContentLoaded', function() {
+                const elements = document.querySelectorAll('.feature-card, .price-card');
+                elements.forEach((el, index) => {
+                    el.style.animationDelay = `${0.2 * (index + 1)}s`;
+                });
+            });
+
+            // Add scroll event listener to header
+            window.addEventListener('scroll', function() {
+                const header = document.querySelector('.header-fixed');
+                if (window.scrollY > 50) {
+                    header.classList.add('scrolled');
+                } else {
+                    header.classList.remove('scrolled');
+                }
+            });
+
+
+        </script>
+    </div>
+</body>
+</html>

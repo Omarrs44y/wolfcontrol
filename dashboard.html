@@ -1,0 +1,2815 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>لوحة التحكم - وولف كو</title>
+    <!-- إزالة الـ Critical CSS الذي يفرض display لأننا الآن نتحكم بالكامل عبر JS -->
+    <script>
+      window.tailwindConfig = { corePlugins: { preflight: !1 } };
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/responsive.css" />
+    <link rel="stylesheet" href="css/mobile-responsive.css" />
+    <script src="js/theme.js"></script>
+    <script src="./js/config.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="./js/supabase-config.js"></script>
+    <script src="./db-manager.js"></script>
+    <script src="./js/dashboard-manager.js"></script>
+    <script src="./js/print-fix.js"></script>
+    <script src="dashboard_assets/js/init.js"></script>
+    <link rel="stylesheet" href="dashboard_assets/css/base.css" />
+  </head>
+  <body class="text-white pb-20 md:pb-0 min-h-screen">
+    <!-- سيتم تحميل شريط التنقل من partials/navbar.html -->
+    <div id="navbar-container"></div>
+    <script>
+      (async function(){
+        try {
+          if (window.Partials?.loadPartial) {
+            await window.Partials.loadPartial('#navbar-container', 'partials/navbar.html');
+          } else {
+            // Fallback بدون Partials: تحميل بسيط
+            const res = await fetch('partials/navbar.html', { cache: 'no-store' });
+            document.getElementById('navbar-container').innerHTML = await res.text();
+          }
+        } catch(e){ console.error('Failed to load navbar partial', e); }
+      })();
+    </script>
+    <div id="sidebar" class="sidebar">
+      <div class="flex justify-between items-center mb-4 md:mb-6 p-2">
+        <h2 class="text-lg md:text-xl font-bold text-white">
+          القائمة الرئيسية
+        </h2>
+        <button
+          id="closeSidebar"
+          class="text-gray-400 hover:text-white transition-colors p-2"
+        >
+          <i class="fas fa-times text-lg"></i>
+        </button>
+      </div>
+      <nav>
+        <!-- سيتم تحميل عناصر القائمة من partials/sidebar-nav.html -->
+      </nav>
+      <script src="dashboard_assets/js/partials-loader.js"></script>
+      <script src="dashboard_assets/js/admin-nav.js"></script>
+    </div>
+    <div id="sidebarOverlay" class="sidebar-overlay"></div>
+    <div class="container mx-auto py-8 px-4">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6 mb-4 md:mb-6">
+        <div
+          onclick='filterSubscriptions("all")'
+          class="bg-[#2a2a2a] p-3 md:p-6 rounded-lg cursor-pointer hover:bg-[#3a3a3a] transition-colors"
+        >
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-gray-400 text-xs md:text-sm">
+                إجمالي الاشتراكات
+              </h3>
+              <p class="text-lg md:text-2xl font-bold" id="totalSubscriptions">
+                0
+              </p>
+            </div>
+            <i class="fas fa-users text-lg md:text-3xl text-red-500"></i>
+          </div>
+        </div>
+        <div
+          onclick='filterSubscriptions("active")'
+          class="bg-[#2a2a2a] p-3 md:p-6 rounded-lg cursor-pointer hover:bg-[#3a3a3a] transition-colors"
+        >
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-gray-400 text-xs md:text-sm">اشتراكات نشطة</h3>
+              <p
+                class="text-lg md:text-2xl font-bold text-green-500"
+                id="activeSubscriptions"
+              >
+                0
+              </p>
+            </div>
+            <i
+              class="fas fa-check-circle text-lg md:text-3xl text-green-500"
+            ></i>
+          </div>
+        </div>
+        <div
+          onclick='filterSubscriptions("expiring")'
+          class="bg-[#2a2a2a] p-3 md:p-6 rounded-lg cursor-pointer hover:bg-[#3a3a3a] transition-colors"
+        >
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-gray-400 text-xs md:text-sm">تنتهي قريباً</h3>
+              <p
+                class="text-lg md:text-2xl font-bold text-yellow-500"
+                id="expiringSubscriptions"
+              >
+                0
+              </p>
+            </div>
+            <i class="fas fa-clock text-lg md:text-3xl text-yellow-500"></i>
+          </div>
+        </div>
+        <div
+          onclick='filterSubscriptions("expired")'
+          class="bg-[#2a2a2a] p-3 md:p-6 rounded-lg cursor-pointer hover:bg-[#3a3a3a] transition-colors"
+        >
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-gray-400 text-xs md:text-sm">اشتراكات منتهية</h3>
+              <p
+                class="text-lg md:text-2xl font-bold text-red-500"
+                id="expiredSubscriptions"
+              >
+                0
+              </p>
+            </div>
+            <i class="fas fa-times-circle text-lg md:text-3xl text-red-500"></i>
+          </div>
+        </div>
+      </div>
+      <div class="space-y-4 mb-6">
+        <div class="w-full">
+          <div class="relative">
+            <input
+              type="text"
+              id="searchInput"
+              placeholder="بحث..."
+              onkeyup="filterSubscriptions()"
+              class="w-full p-3 rounded-lg bg-[#1a1a1a] border border-gray-700 focus:border-red-500 focus:outline-none text-sm"
+            /><i
+              class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+            ></i>
+          </div>
+        </div>
+        <div class="flex flex-col sm:flex-row gap-3 sm:gap-4">
+          <div class="flex items-center gap-2 flex-1">
+            <label class="text-gray-400 text-sm whitespace-nowrap"
+              >ترتيب حسب:</label
+            ><select
+              id="sortBy"
+              onchange="updateSubscriptionsTable()"
+              class="flex-1 bg-[#2a2a2a] text-white p-2 rounded border border-gray-700 focus:border-red-500 focus:outline-none text-sm"
+            >
+              <option value="newest">الأحدث</option>
+              <option value="oldest">الأقدم</option>
+              <option value="expiring">تنتهي قريباً</option>
+              <option value="name">اسم العميل</option>
+            </select>
+          </div>
+          <div class="flex items-center gap-2 flex-1">
+            <label class="text-gray-400 text-sm whitespace-nowrap">عرض:</label
+            ><select
+              id="filterStatus"
+              onchange="updateSubscriptionsTable()"
+              class="flex-1 bg-[#2a2a2a] text-white p-2 rounded border border-gray-700 focus:border-red-500 focus:outline-none text-sm"
+            >
+              <option value="all">الكل</option>
+              <option value="active">النشطة</option>
+              <option value="expiring">تنتهي خلال 3 أيام</option>
+              <option value="expired">المنتهية</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div id="actions-bar-placeholder"></div>
+      <script src="dashboard_assets/js/partials-main-loader.js"></script>
+      <div id="tabs-header-placeholder"></div>
+      <div id="subscriptions-section-placeholder"></div>
+      <div id="files-section-placeholder"></div>
+      <div id="customers-section-placeholder"></div>
+      <div
+        id="subscriptionModal"
+        class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-2 sm:p-4"
+      >
+        <div
+          class="bg-[#2a2a2a] rounded-lg w-full max-w-xl mx-auto my-2 sm:my-4 max-h-[95vh] sm:max-h-[90vh] overflow-y-auto"
+        >
+          <div
+            class="p-3 sm:p-4 border-b border-gray-700 sticky top-0 bg-[#2a2a2a] z-10"
+          >
+            <div class="flex justify-between items-center">
+              <h3 class="text-base sm:text-lg font-bold" id="modalTitle">
+                إضافة اشتراك جديد
+              </h3>
+              <button
+                onclick="closeSubscriptionModal()"
+                class="text-gray-400 hover:text-white p-1"
+              >
+                <i class="fas fa-times text-lg"></i>
+              </button>
+            </div>
+          </div>
+          <div class="p-3 sm:p-4">
+            <form
+              id="subscriptionForm"
+              onsubmit="handleSubscriptionSubmit(event)"
+              class="space-y-3 sm:space-y-4"
+            >
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <script></script>
+                <div class="sm:col-span-1">
+                  <label class="block text-gray-400 mb-1 text-xs sm:text-sm"
+                    ><i class="fas fa-user ml-1"></i>اسم العميل (اختياري)</label
+                  ><input
+                    type="text"
+                    id="customerName"
+                    class="w-full p-2 sm:p-3 rounded bg-[#1a1a1a] border border-gray-700 focus:border-red-500 focus:outline-none text-xs sm:text-sm"
+                    placeholder="أدخل اسم العميل"
+                  />
+                </div>
+                <div class="sm:col-span-1">
+                  <label class="block text-gray-400 mb-1 text-xs sm:text-sm"
+                    ><i class="fas fa-tv ml-1"></i>نوع الاشتراك</label
+                  ><select
+                    id="subscriptionType"
+                    required
+                    class="w-full p-2 sm:p-3 rounded bg-[#1a1a1a] border border-gray-700 focus:border-red-500 focus:outline-none text-xs sm:text-sm"
+                  >
+                    <option value="">اختر نوع الاشتراك</option>
+                    <option value="netflix">🎬 نتفلكس</option>
+                    <option value="shahid_vip">📺 شاهد مسلسلات</option>
+                    <option value="shahid_sport">⚽ شاهد رياضي</option>
+                    <option value="shahid_year">📅 شاهد سنة</option>
+                    <option value="shahid_full">🎭 شاهد شامل</option>
+                    <option value="use_pro">📱 يوز برو</option>
+                    <option value="canva_pro">🎨 كانفا برو</option>
+                    <option value="canva_500">
+                      <i class="fas fa-images"></i>كانفا ٥٠٠ دعوة
+                    </option>
+                    <option value="digital_sim">
+                      <i class="fas fa-sim-card"></i>شريحة رقمية
+                    </option>
+                    <option value="youtube_premium">
+                      <i class="fab fa-youtube"></i>يوتيوب بريميوم
+                    </option>
+                    <option value="amazon_prime">
+                      <i class="fab fa-amazon"></i>امازون برايم
+                    </option>
+                    <option value="bein_sports">
+                      <i class="fas fa-football-ball"></i>بي ان سبورت
+                    </option>
+                    <option value="osn_plus">
+                      <i class="fas fa-tv"></i>OSN+
+                    </option>
+                    <option value="disney_plus">
+                      <i class="fas fa-crown"></i>ديزني بلس
+                    </option>
+                    <option value="other">
+                      <i class="fas fa-ellipsis-h"></i>اشتراك آخر
+                    </option>
+                  </select>
+                </div>
+              </div>
+              <div id="otherSubscriptionDiv" class="hidden">
+                <label class="block text-gray-400 mb-1 text-sm"
+                  ><i class="fas fa-pen ml-1"></i>اسم الاشتراك المخصص</label
+                ><input
+                  type="text"
+                  id="customSubscriptionName"
+                  class="w-full p-2 rounded bg-[#1a1a1a] border border-gray-700 focus:border-red-500 focus:outline-none text-sm"
+                  placeholder="أدخل اسم الاشتراك"
+                />
+              </div>
+              <div class="space-y-3">
+                <div>
+                  <label class="block text-gray-400 mb-1 text-sm"
+                    ><i class="fas fa-envelope ml-1"></i>البريد
+                    الإلكتروني</label
+                  ><input
+                    type="email"
+                    id="customerEmail"
+                    required
+                    class="w-full p-2 rounded bg-[#1a1a1a] border border-gray-700 focus:border-red-500 focus:outline-none text-sm"
+                    placeholder="أدخل البريد الإلكتروني"
+                  />
+                </div>
+                <div>
+                  <div class="flex items-center mb-1">
+                    <input
+                      type="checkbox"
+                      id="addPassword"
+                      class="ml-2 w-4 h-4 rounded border-gray-700 bg-[#1a1a1a]"
+                    /><label
+                      for="addPassword"
+                      class="text-gray-400 cursor-pointer select-none text-sm"
+                      ><i class="fas fa-lock ml-1"></i>إضافة كلمة مرور
+                      للاشتراك</label
+                    >
+                  </div>
+                  <div id="passwordFields" class="hidden">
+                    <div class="relative">
+                      <input
+                        type="password"
+                        id="subscriptionPassword"
+                        class="w-full p-2 rounded bg-[#1a1a1a] border border-gray-700 focus:border-red-500 focus:outline-none text-sm"
+                        placeholder="أدخل كلمة المرور"
+                      /><button
+                        type="button"
+                        onclick="toggleSubscriptionPasswordVisibility()"
+                        class="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+                      >
+                        <i
+                          id="subscriptionPasswordToggleIcon"
+                          class="far fa-eye"
+                        ></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <label class="block text-gray-400 mb-1 text-sm"
+                    ><i class="fab fa-whatsapp ml-1"></i>رقم الواتساب</label
+                  >
+                  <div class="flex gap-2">
+                    <select
+                      id="countryCode"
+                      required
+                      class="w-24 p-2 rounded bg-[#1a1a1a] border border-gray-700 focus:border-red-500 focus:outline-none text-sm"
+                    >
+                      <option value="+966">🇸🇦 +966</option>
+                      <option value="+971">🇦🇪 +971</option>
+                      <option value="+974">🇶َ +974</option>
+                      <option value="+973">🇧َح +973</option>
+                      <option value="+968">🇴🇲 +968</option>
+                      <option value="+965">🇰🇼 +965</option>
+                      <option value="+20">🇪🇬 +20</option></select
+                    ><input
+                      type="tel"
+                      id="customerWhatsapp"
+                      required
+                      class="flex-1 p-2 rounded bg-[#1a1a1a] border border-gray-700 focus:border-red-500 focus:outline-none text-sm"
+                      placeholder="أدخل رقم الواتساب"
+                    />
+                  </div>
+                </div>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-gray-400 mb-1 text-sm"
+                    ><i class="fas fa-money-bill ml-1"></i>العملة</label
+                  ><select
+                    id="currency"
+                    required
+                    class="w-full p-2 rounded bg-[#1a1a1a] border border-gray-700 focus:border-red-500 focus:outline-none text-sm"
+                  >
+                    <option value="sar">🇸🇦 ريال سعودي</option>
+                    <option value="aed">🇦🇪 درهم إماراتي</option>
+                    <option value="qar">🇶🇦 ريال قطري</option>
+                    <option value="kwd">🇰🇼 دينار كويتي</option>
+                    <option value="bhd">🇧َح دينار بحريني</option>
+                    <option value="omr">🇴🇲 ريال عماني</option>
+                    <option value="egp">🇪🇬 جنيه مصري</option>
+                    <option value="try">🇹🇷 ليرة تركية</option>
+                    <option value="inr">🇮🇳 روبية هندية</option>
+                    <option value="ngn">🇳🇬 نايرا نيجيري</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-gray-400 mb-1 text-sm"
+                    ><i class="fas fa-clock ml-1"></i>مدة الاشتراك</label
+                  ><select
+                    id="subscriptionDuration"
+                    onchange="handleDurationChange()"
+                    required
+                    class="w-full p-2 rounded bg-[#1a1a1a] border border-gray-700 focus:border-red-500 focus:outline-none text-sm"
+                  >
+                    <option value="">اختر المدة</option>
+                    <option value="1">شهر واحد</option>
+                    <option value="3">3 أشهر</option>
+                    <option value="6">6 أشهر</option>
+                    <option value="12">سنة</option>
+                    <option value="custom">تاريخ محدد</option>
+                  </select>
+                </div>
+              </div>
+              <div id="customDateDiv" class="hidden">
+                <label class="block text-gray-400 mb-1 text-sm"
+                  ><i class="fas fa-calendar ml-1"></i>تاريخ الانتهاء</label
+                ><input
+                  type="date"
+                  id="expiryDate"
+                  class="w-full p-2 rounded bg-[#1a2a2a] border border-gray-700 focus:border-red-500 focus:outline-none text-sm"
+                />
+              </div>
+              <div class="border-t border-gray-700 pt-3">
+                <div class="flex items-center mb-1">
+                  <input
+                    type="checkbox"
+                    id="addGooglePlay"
+                    class="ml-2 w-4 h-4 rounded border-gray-700 bg-[#1a1a1a]"
+                    onchange="toggleGooglePlaySection(this)"
+                  /><label
+                    for="addGooglePlay"
+                    class="text-gray-400 cursor-pointer select-none text-sm"
+                    ><i class="fab fa-google-play ml-1"></i>إضافة حساب جوجل
+                    بلاي</label
+                  >
+                </div>
+                <div id="googlePlaySection" class="hidden space-y-3">
+                  <div>
+                    <label class="block text-gray-400 mb-1 text-sm"
+                      ><i class="far fa-envelope ml-1"></i>البريد
+                      الإلكتروني</label
+                    ><input
+                      type="email"
+                      name="googlePlayEmail"
+                      class="w-full p-2 rounded bg-[#1a1a1a] border border-gray-700 focus:border-purple-500 text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-gray-400 mb-1 text-sm"
+                      ><i class="fas fa-lock ml-1"></i>كلمة المرور</label
+                    >
+                    <div class="relative">
+                      <input
+                        type="password"
+                        name="googlePlayPassword"
+                        class="w-full p-2 rounded bg-[#1a1a1a] border border-gray-700 focus:border-purple-500 text-sm"
+                      /><button
+                        type="button"
+                        onclick="togglePasswordVisibility(this)"
+                        class="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+                      >
+                        <i class="far fa-eye"></i>
+                      </button>
+                    </div>
+                  </div>
+                  <div class="flex items-center mb-1">
+                    <input
+                      type="checkbox"
+                      id="addGpaCode"
+                      class="ml-2 w-4 h-4 rounded border-gray-700 bg-[#1a1a1a]"
+                      onchange="toggleGpaSection(this)"
+                    /><label
+                      for="addGpaCode"
+                      class="text-gray-400 cursor-pointer select-none text-sm"
+                      ><i class="fas fa-barcode ml-1"></i>إضافة كود GPA</label
+                    >
+                  </div>
+                  <div id="gpaSection" class="hidden">
+                    <input
+                      type="text"
+                      name="gpaCode"
+                      class="w-full p-2 rounded bg-[#1a1a1a] border border-gray-700 focus:border-purple-500 text-sm"
+                      placeholder="أدخل كود GPA"
+                    />
+                  </div>
+                </div>
+              </div>
+              <div class="border-t border-gray-700 pt-3">
+                <div class="flex items-center mb-1">
+                  <input
+                    type="checkbox"
+                    id="addNotes"
+                    class="ml-2 w-4 h-4 rounded border-gray-700 bg-[#1a1a1a]"
+                    onchange="toggleNotesSection(this)"
+                  /><label
+                    for="addNotes"
+                    class="text-gray-400 cursor-pointer select-none text-sm"
+                    ><i class="fas fa-sticky-note ml-1"></i>إضافة ملاحظات</label
+                  >
+                </div>
+                <div id="notesSection" class="hidden">
+                  <textarea
+                    name="notes"
+                    rows="3"
+                    class="w-full p-2 rounded bg-[#1a1a1a] border border-gray-700 focus:border-purple-500 text-sm resize-none"
+                    placeholder="أدخل ملاحظاتك هنا..."
+                  ></textarea>
+                </div>
+              </div>
+              <div class="border-t border-gray-700 pt-3">
+                <div class="flex items-center mb-1">
+                  <input
+                    type="checkbox"
+                    id="addInvoiceInfo"
+                    class="ml-2 w-4 h-4 rounded border-gray-700 bg-[#1a1a1a]"
+                    onchange="toggleInvoiceSection(this)"
+                  /><label
+                    for="addInvoiceInfo"
+                    class="text-gray-400 cursor-pointer select-none text-sm"
+                    ><i class="fas fa-file-invoice ml-1"></i>إضافة معلومات
+                    الفاتورة</label
+                  >
+                </div>
+                <div id="invoiceSection" class="hidden space-y-3">
+                  <div>
+                    <label class="block text-gray-400 mb-1 text-sm"
+                      ><i class="fas fa-hashtag ml-1"></i>رقم الفاتورة</label
+                    ><input
+                      type="text"
+                      name="invoiceNumber"
+                      class="w-full p-2 rounded bg-[#1a1a1a] border border-gray-700 focus:border-purple-500 text-sm"
+                      placeholder="أدخل رقم الفاتورة"
+                    />
+                  </div>
+                  <div class="flex items-center mb-1">
+                    <input
+                      type="checkbox"
+                      id="addOrderDate"
+                      class="ml-2 w-4 h-4 rounded border-gray-700 bg-[#1a1a1a]"
+                      onchange="toggleOrderDateSection(this)"
+                    /><label
+                      for="addOrderDate"
+                      class="text-gray-400 cursor-pointer select-none text-sm"
+                      ><i class="fas fa-calendar-alt ml-1"></i>إضافة تاريخ
+                      الطلب</label
+                    >
+                  </div>
+                  <div id="orderDateSection" class="hidden">
+                    <input
+                      type="date"
+                      name="orderDate"
+                      class="w-full p-2 rounded bg-[#1a1a1a] border border-gray-700 focus:border-purple-500 text-sm"
+                    />
+                  </div>
+                </div>
+              </div>
+              <div class="flex justify-end pt-3 border-t border-gray-700">
+                <button
+                  type="submit"
+                  class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-colors flex items-center gap-2 text-sm"
+                >
+                  <i class="fas fa-save"></i>حفظ الاشتراك
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+      <script src="dashboard_assets/js/forms.js"></script>
+      <script src="dashboard_assets/js/partials-modals-loader.js"></script>
+      <div id="subscription-modal-placeholder"></div>
+      <div
+        id="newFileSubscriptionModal"
+        class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-3"
+      >
+        <div
+          class="bg-[#2a2a2a] rounded-lg w-full max-w-xl mx-auto my-4 max-h-[90vh] overflow-y-auto"
+        >
+          <div
+            class="border-b border-gray-700 p-3 sticky top-0 bg-[#2a2a2a] z-10"
+          >
+            <div class="flex justify-between items-center">
+              <h2 class="text-base font-bold">
+                <i class="fas fa-file-plus ml-1.5"></i>إضافة اشتراك ملفات جديد
+              </h2>
+              <button
+                onclick="closeNewFileSubscriptionModal()"
+                class="text-gray-400 hover:text-white transition-colors"
+              >
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          </div>
+          <div class="p-3">
+            <form
+              id="newFileSubscriptionForm"
+              class="grid grid-cols-1 md:grid-cols-2 gap-3"
+            >
+              <div class="col-span-1 md:col-span-2">
+                <label class="block text-gray-400 mb-1 text-xs"
+                  ><i class="far fa-envelope ml-1"></i>ايميل الاشتراك</label
+                ><input
+                  type="email"
+                  name="email"
+                  required
+                  class="w-full bg-[#1a1a1a] text-white p-2 rounded border border-gray-700 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-colors text-xs"
+                />
+              </div>
+              <div class="col-span-1 md:col-span-2">
+                <div class="flex items-center mb-1">
+                  <input
+                    type="checkbox"
+                    id="showPasswordField"
+                    class="ml-1.5 w-3.5 h-3.5 text-purple-600 rounded border-gray-700 focus:ring-purple-500"
+                  /><label
+                    for="showPasswordField"
+                    class="text-gray-400 select-none text-xs"
+                    ><i class="fas fa-lock ml-1"></i>إضافة باسورد</label
+                  >
+                </div>
+                <input
+                  type="password"
+                  id="passwordField"
+                  name="password"
+                  class="w-full bg-[#1a1a1a] text-white p-2 rounded border border-gray-700 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-colors text-xs hidden"
+                />
+              </div>
+              <div class="col-span-1 md:col-span-2">
+                <label class="block text-gray-400 mb-1 text-xs"
+                  ><i class="fas fa-tag ml-1"></i>نوع الاشتراك</label
+                ><select
+                  name="type"
+                  required
+                  class="w-full bg-[#1a1a1a] text-white p-2 rounded border border-gray-700 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-colors text-xs"
+                  onchange="toggleCustomFileSubscriptionField(this)"
+                >
+                  <option value="" disabled="disabled" selected="selected">
+                    اختر نوع الاشتراك
+                  </option>
+                  <option value="shahid_sports">ملف شاهد رياضي</option>
+                  <option value="netflix">ملف نتفلكس</option>
+                  <option value="osn_plus">ملف OSN+</option>
+                  <option value="amazon_prime">ملف امازون برايم</option>
+                  <option value="shahid_series">ملف شاهد مسلسلات</option>
+                  <option value="shahid_full">ملف شاهد شامل</option>
+                  <option value="disney_plus">ملف ديزني بلس</option>
+                  <option value="other">اشتراك آخر</option>
+                </select>
+              </div>
+              <div
+                id="customFileSubscriptionDiv"
+                class="col-span-1 md:col-span-2 hidden"
+              >
+                <label class="block text-gray-400 mb-1 text-xs"
+                  ><i class="fas fa-pen ml-1"></i>اسم الاشتراك المخصص</label
+                ><input
+                  type="text"
+                  name="customSubscriptionName"
+                  class="w-full bg-[#1a1a1a] text-white p-2 rounded border border-gray-700 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-colors text-xs"
+                  placeholder="أدخل اسم الاشتراك"
+                />
+              </div>
+              <div class="col-span-1 md:col-span-2">
+                <label class="block text-gray-400 mb-1 text-xs"
+                  ><i class="fas fa-user-tag ml-1"></i>نوع الحساب</label
+                >
+                <div class="flex space-x-4 rtl:space-x-reverse">
+                  <label class="inline-flex items-center"
+                    ><input
+                      type="radio"
+                      name="accountType"
+                      value="subscriber"
+                      required
+                      class="w-3.5 h-3.5 text-purple-600 border-gray-700 focus:ring-purple-500"
+                    /><span class="text-white mr-1.5 text-xs"
+                      >مشترك</span
+                    ></label
+                  ><label class="inline-flex items-center"
+                    ><input
+                      type="radio"
+                      name="accountType"
+                      value="private"
+                      required
+                      class="w-3.5 h-3.5 text-purple-600 border-gray-700 focus:ring-purple-500"
+                    /><span class="text-white mr-1.5 text-xs">خاص</span></label
+                  >
+                </div>
+              </div>
+              <div class="col-span-1">
+                <label class="block text-gray-400 mb-1 text-xs"
+                  ><i class="far fa-file ml-1"></i>اسم الملف</label
+                ><input
+                  type="text"
+                  name="fileName"
+                  required
+                  class="w-full bg-[#1a1a1a] text-white p-2 rounded border border-gray-700 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-colors text-xs"
+                />
+              </div>
+              <div class="col-span-1">
+                <label class="block text-gray-400 mb-1 text-xs"
+                  ><i class="fab fa-whatsapp ml-1"></i>رقم واتساب العميل</label
+                >
+                <div class="flex gap-1.5">
+                  <select
+                    name="countryCode"
+                    class="w-20 bg-[#1a1a1a] text-white p-2 rounded border border-gray-700 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-colors text-xs"
+                    dir="ltr"
+                  >
+                    <option value="+966">🇸🇦 +966</option>
+                    <option value="+971">🇦🇪 +971</option>
+                    <option value="+974">🇶َ +974</option>
+                    <option value="+965">🇰َو +965</option>
+                    <option value="+973">🇧َح +973</option>
+                    <option value="+968">🇴🇲 +968</option></select
+                  ><input
+                    type="tel"
+                    name="whatsapp"
+                    required
+                    class="flex-1 bg-[#1a1a1a] text-white p-2 rounded border border-gray-700 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-colors text-xs"
+                    dir="ltr"
+                  />
+                </div>
+              </div>
+              <div class="col-span-1">
+                <label class="block text-gray-400 mb-1 text-xs"
+                  ><i class="fas fa-coins ml-1"></i>عملة الحساب</label
+                ><select
+                  name="currency"
+                  required
+                  class="w-full bg-[#1a1a1a] text-white p-2 rounded border border-gray-700 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-colors text-xs"
+                >
+                  <option value="" disabled="disabled" selected="selected">
+                    اختر العملة
+                  </option>
+                  <option value="sar">ريال سعودي</option>
+                  <option value="aed">درهم إماراتي</option>
+                  <option value="qar">ريال قطري</option>
+                  <option value="kwd">دينار كويتي</option>
+                  <option value="bhd">دينار بحريني</option>
+                  <option value="omr">ريال عماني</option>
+                  <option value="egp">جنيه مصري</option>
+                  <option value="try">ليرة تركية</option>
+                  <option value="inr">روبية هندية</option>
+                  <option value="ngn">نايرا نيجيري</option>
+                </select>
+              </div>
+              <div class="col-span-1">
+                <label class="block text-gray-400 mb-1 text-xs"
+                  ><i class="far fa-clock ml-1"></i>مدة الاشتراك</label
+                ><select
+                  name="durationType"
+                  id="subscriptionDurationType"
+                  required
+                  class="w-full bg-[#1a1a1a] text-white p-2 rounded border border-gray-700 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-colors text-xs"
+                >
+                  <option value="" disabled="disabled" selected="selected">
+                    اختر المدة
+                  </option>
+                  <option value="1">شهر</option>
+                  <option value="3">3 أشهر</option>
+                  <option value="6">6 أشهر</option>
+                  <option value="12">سنة</option>
+                  <option value="custom">مدة مخصصة</option>
+                </select>
+                <div id="customDateContainer" class="hidden mt-1.5">
+                  <input
+                    type="date"
+                    name="customDate"
+                    id="customSubscriptionDate"
+                    class="w-full bg-[#1a1a1a] text-white p-2 rounded border border-gray-700 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-colors text-xs"
+                  />
+                </div>
+              </div>
+              <div class="col-span-1 md:col-span-2">
+                <div class="flex items-center mb-1">
+                  <input
+                    type="checkbox"
+                    id="showGooglePlayFields"
+                    class="ml-1.5 w-3.5 h-3.5 text-purple-600 rounded border-gray-700 focus:ring-purple-500"
+                  /><label
+                    for="showGooglePlayFields"
+                    class="text-gray-400 select-none text-xs"
+                    ><i class="fab fa-google-play ml-1"></i>إضافة معلومات جوجل
+                    بلاي</label
+                  >
+                </div>
+                <div id="googlePlayFields" class="space-y-3 hidden">
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                      <label class="block text-gray-400 mb-1 text-xs"
+                        ><i class="far fa-envelope ml-1"></i>ايميل جوجل
+                        بلاي</label
+                      ><input
+                        type="email"
+                        name="googlePlayEmail"
+                        class="w-full bg-[#1a1a1a] text-white p-2 rounded border border-gray-700 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-colors text-xs"
+                      />
+                    </div>
+                    <div>
+                      <label class="block text-gray-400 mb-1 text-xs"
+                        ><i class="fas fa-lock ml-1"></i>باسورد جوجل بلاي</label
+                      ><input
+                        type="password"
+                        name="googlePlayPassword"
+                        class="w-full bg-[#1a1a1a] text-white p-2 rounded border border-gray-700 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-colors text-xs"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div
+                id="otherSubscriptionTypeDiv"
+                class="hidden col-span-1 md:col-span-2"
+              >
+                <label class="block text-gray-400 mb-1 text-xs"
+                  ><i class="fas fa-pen ml-1"></i>اسم الاشتراك المخصص</label
+                ><input
+                  type="text"
+                  name="customSubscriptionName"
+                  class="w-full bg-[#1a1a1a] text-white p-2 rounded border border-gray-700 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-colors text-xs"
+                />
+              </div>
+              <div class="col-span-1 md:col-span-2">
+                <label class="block text-gray-400 mb-1 text-xs"
+                  ><i class="fas fa-tag ml-1"></i>التصنيف</label
+                >
+                <div class="flex gap-2">
+                  <select
+                    name="category"
+                    class="flex-1 bg-[#1a1a1a] text-white p-2 rounded border border-gray-700 focus:border-purple-500 text-xs"
+                  >
+                    <option value="">بدون تصنيف</option></select
+                  ><button
+                    type="button"
+                    onclick="openCategoriesModal()"
+                    class="bg-purple-600 px-3 rounded hover:bg-purple-700"
+                  >
+                    <i class="fas fa-plus"></i>
+                  </button>
+                </div>
+              </div>
+              <div
+                class="col-span-1 md:col-span-2 border-t border-gray-700 pt-3"
+              >
+                <div class="flex items-center mb-1">
+                  <input
+                    type="checkbox"
+                    id="addFileNotes"
+                    class="ml-1.5 w-3.5 h-3.5 text-purple-600 rounded border-gray-700 focus:ring-purple-500"
+                    onchange="toggleFileNotesSection(this)"
+                  /><label
+                    for="addFileNotes"
+                    class="text-gray-400 select-none text-xs"
+                    ><i class="fas fa-sticky-note ml-1"></i>إضافة ملاحظات</label
+                  >
+                </div>
+                <div id="fileNotesSection" class="hidden">
+                  <textarea
+                    name="notes"
+                    rows="2"
+                    class="w-full bg-[#1a1a1a] text-white p-2 rounded border border-gray-700 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-colors text-xs resize-none"
+                    placeholder="أدخل ملاحظاتك هنا..."
+                  ></textarea>
+                </div>
+              </div>
+              <div
+                class="col-span-1 md:col-span-2 border-t border-gray-700 pt-3"
+              >
+                <div class="flex items-center mb-2">
+                  <input
+                    type="checkbox"
+                    id="addFileInvoiceInfo"
+                    class="ml-2 w-3 h-3 rounded border-gray-700 bg-[#1a1a1a]"
+                    onchange="toggleFileInvoiceSection(this)"
+                  /><label
+                    for="addFileInvoiceInfo"
+                    class="text-gray-400 cursor-pointer select-none text-xs"
+                    ><i class="fas fa-file-invoice ml-1"></i>إضافة معلومات
+                    الفاتورة</label
+                  >
+                </div>
+                <div id="fileInvoiceSection" class="hidden space-y-2">
+                  <div>
+                    <label class="block text-gray-400 mb-1 text-xs"
+                      ><i class="fas fa-hashtag ml-1"></i>رقم الفاتورة</label
+                    ><input
+                      type="text"
+                      name="invoiceNumber"
+                      class="w-full bg-[#1a1a1a] text-white p-2 rounded border border-gray-700 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-colors text-xs"
+                      placeholder="أدخل رقم الفاتورة"
+                    />
+                  </div>
+                  <div class="flex items-center mb-1">
+                    <input
+                      type="checkbox"
+                      id="addFileOrderDate"
+                      class="ml-2 w-3 h-3 rounded border-gray-700 bg-[#1a1a1a]"
+                      onchange="toggleFileOrderDateSection(this)"
+                    /><label
+                      for="addFileOrderDate"
+                      class="text-gray-400 cursor-pointer select-none text-xs"
+                      ><i class="fas fa-calendar-alt ml-1"></i>إضافة تاريخ
+                      الطلب</label
+                    >
+                  </div>
+                  <div id="fileOrderDateSection" class="hidden">
+                    <input
+                      type="date"
+                      name="orderDate"
+                      class="w-full bg-[#1a1a1a] text-white p-2 rounded border border-gray-700 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-colors text-xs"
+                    />
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div>
+          <div class="border-t border-gray-700 p-3">
+            <div class="flex justify-end gap-2">
+              <button
+                onclick="closeNewFileSubscriptionModal()"
+                class="px-3 py-1.5 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors text-xs"
+              >
+                <i class="fas fa-times ml-1"></i>إلغاء</button
+              ><button
+                type="submit"
+                form="newFileSubscriptionForm"
+                class="px-3 py-1.5 bg-purple-600 text-white rounded hover:bg-purple-700 transition-colors text-xs"
+              >
+                <i class="fas fa-check ml-1"></i>إضافة الاشتراك
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="profile-modal-placeholder"></div>
+      <div id="linked-users-modal-placeholder"></div>
+      <div id="delete-modal-placeholder"></div>
+      م
+      <div
+        id="createUserModal"
+        class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
+      >
+        <div class="bg-[#2a2a2a] rounded-lg w-full max-w-md">
+          <div class="p-4 border-b border-gray-700">
+            <div class="flex justify-between items-center">
+              <h3 class="text-lg font-bold">إنشاء حساب مشترك جديد</h3>
+              <button
+                onclick="closeCreateUserModal()"
+                class="text-gray-400 hover:text-white"
+              >
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          </div>
+          <form
+            id="createUserForm"
+            onsubmit="handleCreateUser(event)"
+            class="p-4 space-y-4"
+          >
+            <div>
+              <label class="block text-gray-400 mb-2"
+                ><i class="far fa-envelope ml-2"></i>البريد الإلكتروني</label
+              ><input
+                type="email"
+                required
+                class="w-full p-3 rounded bg-[#1a1a1a] text-white border border-gray-700 focus:border-red-500 focus:outline-none"
+              />
+            </div>
+            <div>
+              <label class="block text-gray-400 mb-2"
+                ><i class="fas fa-lock ml-2"></i>كلمة المرور</label
+              ><input
+                type="password"
+                required
+                class="w-full p-3 rounded bg-[#1a1ا] text-white border border-gray-700 focus:border-red-500 focus:outline-none"
+              />
+            </div>
+            <div>
+              <label class="block text-gray-400 mb-2"
+                ><i class="fas fa-clock ml-2"></i>مدة الاشتراك</label
+              ><select
+                required
+                class="w-full p-3 rounded bg-[#1a1a1a] text-white border border-gray-700 focus:border-red-500 focus:outline-none"
+              >
+                <option value="1">شهر واحد</option>
+                <option value="3">3 أشهر</option>
+                <option value="12">سنة</option>
+              </select>
+            </div>
+            <div class="flex justify-end pt-4 border-t border-gray-700">
+              <button
+                type="submit"
+                class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-colors"
+              >
+                إنشاء الحساب
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+      <link rel="stylesheet" href="dashboard_assets/css/tabs.css" />
+      <script>
+        var subscriptions = [],
+          currentSubscriptionId = null,
+          currentSubscriptionType = null,
+          nextCustomerId = 1,
+          regularSubscriptions = [],
+          fileSubscriptions = [];
+        async function loadSubscriptions() {
+          try {
+            if ((console.log("جاري تحميل الاشتراكات..."), !dbManager))
+              return void console.error("خطأ: dbManager غير متوفر");
+            const e = await dbManager.getAllSubscriptions();
+            e.success
+              ? (console.log("تم تحميل الاشتراكات بنجاح:", e.data),
+                await updateSubscriptionsTable(e.data))
+              : console.error("فشل تحميل الاشتراكات:", e.error);
+          } catch (e) {
+            console.error("حدث خطأ أثناء تحميل الاشتراكات:", e);
+          }
+        }
+        function handleDurationChange() {
+          const e = document.getElementById("subscriptionDuration").value,
+            t = document.getElementById("expiryDate");
+          if (e && t) {
+            const n = new Date();
+            switch (e) {
+              case "1":
+                n.setMonth(n.getMonth() + 1);
+                break;
+              case "3":
+                n.setMonth(n.getMonth() + 3);
+                break;
+              case "6":
+                n.setMonth(n.getMonth() + 6);
+                break;
+              case "12":
+                n.setFullYear(n.getFullYear() + 1);
+            }
+            t.value = n.toISOString().split("T")[0];
+          }
+        }
+        function checkAuth() {
+          const e = localStorage.getItem("isLoggedIn"),
+            t = JSON.parse(localStorage.getItem("userData") || "{}");
+          return e && "true" === e && t.email
+            ? !(
+                !t.isAdmin &&
+                t.expiryDate &&
+                new Date(t.expiryDate) < new Date()
+              ) ||
+                (localStorage.removeItem("isLoggedIn"),
+                (window.location.href = "subscription-expired.html"),
+                !1)
+            : (console.log("User not logged in, redirecting to login page"),
+              (window.location.href = "login.html"),
+              !1);
+        }
+        function logout() {
+          (localStorage.removeItem("isLoggedIn"),
+            localStorage.removeItem("userData"),
+            (window.location.href = "login.html"));
+        }
+        function generateCustomerName() {
+          const e = `عميل ${nextCustomerId}`;
+          return (nextCustomerId++, e);
+        }
+        function calculateStats(e, t) {
+          const n = new Date();
+          return (
+            n.setDate(t.getDate() + 3),
+            {
+              total: e.length,
+              active: e.filter(
+                (e) => new Date(e.expiry_date || e.expiryDate) > t,
+              ).length,
+              expiring: e.filter((e) => {
+                const o = new Date(e.expiry_date || e.expiryDate);
+                return o > t && o <= n;
+              }).length,
+              expired: e.filter(
+                (e) => new Date(e.expiry_date || e.expiryDate) <= t,
+              ).length,
+            }
+          );
+        }
+        async function updateStatistics() {
+          try {
+            const e = await dbManager.getStatistics();
+            if (e.success) {
+              const t = e.stats;
+              ((document.getElementById("totalSubscriptions").textContent =
+                t.total),
+                (document.getElementById("activeSubscriptions").textContent =
+                  t.active),
+                (document.getElementById("expiringSubscriptions").textContent =
+                  t.expiring),
+                (document.getElementById("expiredSubscriptions").textContent =
+                  t.expired));
+            } else {
+              console.error("Error loading statistics:", e.error);
+              const t = JSON.parse(
+                  localStorage.getItem("regularSubscriptions") || "[]",
+                ),
+                n = JSON.parse(
+                  localStorage.getItem("fileSubscriptions") || "[]",
+                ),
+                o = new Date(),
+                a = calculateStats(t.concat(n), o);
+              ((document.getElementById("totalSubscriptions").textContent =
+                a.total),
+                (document.getElementById("activeSubscriptions").textContent =
+                  a.active),
+                (document.getElementById("expiringSubscriptions").textContent =
+                  a.expiring),
+                (document.getElementById("expiredSubscriptions").textContent =
+                  a.expired));
+            }
+          } catch (e) {
+            console.error("Error updating statistics:", e);
+          }
+        }
+        async function updateSubscriptionsTable(e = null) {
+          try {
+            if ((console.log("🔄 تحديث جدول الاشتراكات..."), !e))
+              if (
+                (console.log("📡 جلب الاشتراكات من قاعدة البيانات..."),
+                window.dbManager)
+              ) {
+                const t = await window.dbManager.getAllSubscriptions();
+                (console.log("📋 نتيجة جلب الاشتراكات:", t),
+                  t.success
+                    ? ((e = t.subscriptions || t.data || []),
+                      console.log(
+                        "✅ تم جلب",
+                        e.length,
+                        "اشتراك من قاعدة البيانات",
+                      ))
+                    : (console.error(
+                        "❌ فشل جلب الاشتراكات من قاعدة البيانات:",
+                        t.error,
+                      ),
+                      (e = JSON.parse(
+                        localStorage.getItem("regularSubscriptions") || "[]",
+                      )),
+                      console.log(
+                        "📦 تم جلب",
+                        e.length,
+                        "اشتراك من localStorage",
+                      )));
+              } else
+                (console.error("❌ dbManager غير متوفر"),
+                  (e = JSON.parse(
+                    localStorage.getItem("regularSubscriptions") || "[]",
+                  )),
+                  console.log("📦 تم جلب", e.length, "اشتراك من localStorage"));
+            const t = document.getElementById("subscriptionsTableBody"),
+              n = document.getElementById("filterStatus").value,
+              o = document.getElementById("sortBy").value;
+            let a = e;
+            const s = new Date(),
+              r = new Date();
+            (r.setDate(s.getDate() + 3),
+              "all" !== n &&
+                (a = e.filter((e) => {
+                  const t = new Date(e.expiry_date || e.expiryDate);
+                  switch (n) {
+                    case "active":
+                      return t > s;
+                    case "expiring":
+                      return t > s && t <= r;
+                    case "expired":
+                      return t <= s;
+                    default:
+                      return !0;
+                  }
+                })),
+              a.sort((e, t) => {
+                switch (o) {
+                  case "newest":
+                    return (
+                      new Date(t.start_date || t.startDate) -
+                      new Date(e.start_date || e.startDate)
+                    );
+                  case "oldest":
+                    return (
+                      new Date(e.start_date || e.startDate) -
+                      new Date(t.start_date || t.startDate)
+                    );
+                  case "expiring":
+                    return (
+                      new Date(e.expiry_date || e.expiryDate) -
+                      new Date(t.expiry_date || t.expiryDate)
+                    );
+                  case "name":
+                    return (
+                      e.customer_name ||
+                      e.customerName ||
+                      ""
+                    ).localeCompare(t.customer_name || t.customerName || "");
+                  default:
+                    return 0;
+                }
+              }),
+              (t.innerHTML = ""),
+              a.forEach((e) => {
+                const n = new Date(e.expiry_date || e.expiryDate),
+                  o = n <= s,
+                  a = !o && n <= r,
+                  i = Math.ceil((n - s) / 864e5),
+                  l = document.createElement("tr");
+                ((l.className = "hover:bg-[#3a3a3a] transition-colors"),
+                  (l.innerHTML = `\n              <td class="px-6 py-4">\n                <div class="flex items-center gap-2">\n                  <span class="font-medium">${e.customer_name || e.customerName || "غير محدد"}</span>\n                </div>\n              </td>\n              <td class="px-6 py-4">${e.email}</td>\n              <td class="px-6 py-4">\n                <div class="flex items-center gap-2">\n                  <i class="fab fa-whatsapp text-green-500"></i>\n                  <a href="https://wa.me/${e.whatsapp}" target="_blank" class="text-green-500 hover:text-green-400 transition-colors">\n                    ${e.whatsapp}\n                  </a>\n                </div>\n              </td>\n              <td class="px-6 py-4">${getSubscriptionTypeName(e.subscription_type || e.type)}</td>\n              <td class="px-6 py-4">${getCurrencyName(e.currency)}</td>\n              <td class="px-6 py-4">\n                <div class="space-y-1">\n                  <div>${formatDate(e.expiry_date || e.expiryDate)}</div>\n                  <div class="text-sm ${i <= 7 ? "text-yellow-500" : "text-green-500"}">\n                    متبقي ${i} يوم\n                  </div>\n                </div>\n              </td>\n              <td class="px-6 py-4">\n                <span class="px-2 py-1 rounded text-sm ${getStatusClass(o, a)}">\n                  ${getStatusText(o, a)}\n                </span>\n              </td>\n              <td class="px-6 py-4">\n                <div class="max-w-32 truncate" title="${e.notes || ""}">\n                  ${e.notes ? `<i class="fas fa-sticky-note text-yellow-500 ml-1"></i>${e.notes}` : '<span class="text-gray-500">-</span>'}\n                </div>\n              </td>\n              <td class="px-6 py-4">\n                ${updateTableActionButtons(e, "regular")}\n              </td>\n            `),
+                  t.appendChild(l));
+              }),
+              await updateStatistics());
+          } catch (e) {
+            console.error("Error updating subscriptions table:", e);
+          }
+        }
+        function getSubscriptionTypeName(e) {
+          return (
+            {
+              netflix: "نتفلكس",
+              shahid_vip: "شاهد مسلسلات",
+              shahid_sport: "شاهد رياضي",
+              shahid_year: "شاهد سنة",
+              shahid_full: "شاهد شامل",
+              use_pro: "يوز برو",
+              canva_pro: "كانفا برو",
+              canva_500: "كانفا ٥٠٠ دعوة",
+              digital_sim: "شريحة رقمية",
+              youtube_premium: "يوتيوب بريميوم",
+              amazon_prime: "امازون برايم",
+              bein_sports: "بي ان سبورت",
+              osn_plus: "OSN+",
+              disney_plus: "ديزني بلس",
+              other: "اشتراك آخر",
+            }[e] || e
+          );
+        }
+        function getCurrencyName(e) {
+          return (
+            {
+              sar: "ريال سعودي",
+              aed: "درهم إماراتي",
+              qar: "ريال قطري",
+              kwd: "دينار كويتي",
+              bhd: "دينار بحريني",
+              omr: "ريال عماني",
+              egp: "جنيه مصري",
+              try: "ليرة تركية",
+              inr: "روبية هندية",
+              ngn: "نايرا نيجيري",
+            }[e] || e
+          );
+        }
+        function formatDate(e) {
+          return new Date(e).toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+          });
+        }
+        function getStatusClass(e, t) {
+          return e
+            ? "bg-red-500/20 text-red-500"
+            : t
+              ? "bg-yellow-500/20 text-yellow-500"
+              : "bg-green-500/20 text-green-500";
+        }
+        function getStatusText(e, t) {
+          return e ? "منتهي" : t ? "ينتهي خلال 3 أيام" : "نشط";
+        }
+        async function handleSubscriptionSubmit(e) {
+          e.preventDefault();
+          try {
+            if (!dbManager)
+              return void alert(
+                "خطأ: قاعدة البيانات غير متاحة. يرجى إعادة تحميل الصفحة.",
+              );
+            const e = JSON.parse(localStorage.getItem("userData") || "{}");
+            if ((console.log("👤 بيانات المستخدم الحالي:", e), !e.id))
+              return (
+                console.error("❌ لم يتم العثور على معرف المستخدم"),
+                void alert("خطأ: لم يتم العثور على معلومات المستخدم")
+              );
+            const t = e.id;
+            console.log("🔑 معرف المالك:", t);
+            const n =
+                document.getElementById("customerName")?.value ||
+                generateCustomerName(),
+              o = document.getElementById("customerEmail")?.value,
+              a =
+                document.getElementById("countryCode")?.value +
+                document.getElementById("customerWhatsapp")?.value,
+              s = document.getElementById("subscriptionType")?.value,
+              r = document.getElementById("currency")?.value;
+            if (!(o && a && s && r))
+              return void alert("يرجى ملء جميع الحقول المطلوبة");
+            const i =
+                document.getElementById("expiryDate")?.value ||
+                calculateExpiryDate(),
+              l = {
+                customer_name: n,
+                email: o,
+                whatsapp: a,
+                subscription_type: s,
+                currency: r,
+                start_date: new Date().toISOString(),
+                expiry_date: i,
+                custom_subscription_name:
+                  "other" === s
+                    ? document.getElementById("customSubscriptionName")?.value
+                    : null,
+              };
+            if (
+              (document.getElementById("addPassword")?.checked &&
+                (l.subscription_password = document.getElementById(
+                  "subscriptionPassword",
+                )?.value),
+              document.getElementById("addGooglePlay")?.checked &&
+                ((l.google_play_email =
+                  document.getElementById("googlePlayEmail")?.value),
+                (l.google_play_password =
+                  document.getElementById("googlePlayPassword")?.value),
+                document.getElementById("addGpaCode")?.checked &&
+                  (l.gpa_code = document.getElementById("gpaCode")?.value)),
+              document.getElementById("addNotes")?.checked)
+            ) {
+              const e = document.querySelector('textarea[name="notes"]');
+              e && e.value.trim() && (l.notes = e.value.trim());
+            }
+            if (((l.created_by = t), !dbManager))
+              return (
+                console.error("❌ dbManager غير متاح!"),
+                void alert(
+                  "خطأ: قاعدة البيانات غير متاحة. يرجى إعادة تحميل الصفحة.",
+                )
+              );
+            (console.log("🔄 محاولة حفظ الاشتراك..."),
+              console.log("📊 بيانات الاشتراك:", l),
+              console.log("🔧 dbManager متاح:", !!dbManager));
+            try {
+              let e;
+              (currentSubscriptionId
+                ? (e = await dbManager.updateSubscription(
+                    currentSubscriptionId,
+                    l,
+                  ))
+                : (console.log("➕ إضافة اشتراك جديد"),
+                  (e = await dbManager.createSubscription(l))),
+                e.success
+                  ? (console.log("✅ تم حفظ الاشتراك بنجاح"),
+                    closeSubscriptionModal(),
+                    await loadSubscriptions(),
+                    await updateStatistics(),
+                    alert("تم حفظ الاشتراك بنجاح!"))
+                  : (console.error("❌ فشل حفظ الاشتراك:", e.error),
+                    alert(
+                      "حدث خطأ أثناء حفظ الاشتراك. يرجى المحاولة مرة أخرى.",
+                    )));
+            } catch (e) {
+              (console.error("❌ خطأ غير متوقع:", e),
+                alert("حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى."));
+            }
+            let c;
+            (currentSubscriptionId
+              ? (console.log("✏️ تحديث اشتراك موجود:", currentSubscriptionId),
+                (c = await dbManager.updateSubscription(
+                  currentSubscriptionId,
+                  l,
+                )))
+              : (console.log("➕ إضافة اشتراك جديد"),
+                (c = await dbManager.createSubscription(l)),
+                await loadSubscriptions()),
+              console.log("📋 نتيجة الحفظ:", c),
+              c.success
+                ? (console.log("✅ تم حفظ الاشتراك بنجاح!"),
+                  console.log("🔄 تحديث الجداول..."),
+                  await updateSubscriptionsTable(),
+                  await updateStatistics(),
+                  closeSubscriptionModal(),
+                  alert(
+                    currentSubscriptionId
+                      ? "تم تحديث الاشتراك بنجاح"
+                      : "تم إضافة الاشتراك بنجاح",
+                  ),
+                  (currentSubscriptionId = null))
+                : (console.error("❌ فشل حفظ الاشتراك:", c.error),
+                  alert(c.error || "حدث خطأ أثناء حفظ الاشتراك")));
+          } catch (e) {
+            (console.error("Error saving subscription:", e),
+              alert("حدث خطأ أثناء حفظ الاشتراك"));
+          }
+        }
+        function calculateExpiryDate() {
+          const e = document.getElementById("subscriptionDuration").value,
+            t = new Date();
+          switch (e) {
+            case "1":
+              t.setMonth(t.getMonth() + 1);
+              break;
+            case "3":
+              t.setMonth(t.getMonth() + 3);
+              break;
+            case "6":
+              t.setMonth(t.getMonth() + 6);
+              break;
+            case "12":
+              t.setFullYear(t.getFullYear() + 1);
+              break;
+            default:
+              return document.getElementById("expiryDate").value;
+          }
+          return t.toISOString().split("T")[0];
+        }
+        function generateCustomerNameOld() {
+          return `${{ netflix: "نتفلكس", shahid_vip: "شاهد", shahid_sport: "شاهد رياضي", shahid_year: "شاهد سنوي", shahid_full: "شاهد شامل", use_pro: "يوز برو", canva_pro: "كانفا برو", canva_500: "كانفا", digital_sim: "شريحة رقمية", youtube_premium: "يوتيوب", amazon_prime: "امازون", bein_sports: "بي ان", osn_plus: "OSN", disney_plus: "ديزني", other: "اشتراك" }[document.getElementById("subscriptionType").value] || "اشتراك"} ${new Date().getTime().toString().slice(-4)}`;
+        }
+        async function confirmDelete() {
+          try {
+            if (currentSubscriptionId) {
+              let e;
+              ((e =
+                "file" === currentSubscriptionType
+                  ? await dbManager.deleteFileSubscription(
+                      currentSubscriptionId,
+                    )
+                  : await dbManager.deleteSubscription(currentSubscriptionId)),
+                e.success
+                  ? (await updateStatistics(),
+                    await updateSubscriptionsTable(),
+                    document
+                      .getElementById("deleteModal")
+                      .classList.add("hidden"),
+                    alert("تم حذف الاشتراك بنجاح"),
+                    (currentSubscriptionId = null),
+                    (currentSubscriptionType = null))
+                  : alert(e.error || "حدث خطأ أثناء حذف الاشتراك"));
+            }
+          } catch (e) {
+            (console.error("Error deleting subscription:", e),
+              alert("حدث خطأ أثناء حذف الاشتراك"));
+          }
+        }
+        function closeSubscriptionModal() {
+          const e = document.getElementById("subscriptionModal");
+          e &&
+            (e.classList.add("hidden"),
+            document.getElementById("subscriptionForm").reset(),
+            (currentSubscriptionId = null));
+        }
+        async function loadDashboardData() {
+          try {
+            (await updateStatistics(), await updateSubscriptionsTable());
+            JSON.parse(localStorage.getItem("userData") || "{}").isAdmin &&
+              (await checkExpiredUsers());
+          } catch (e) {
+            console.error("Error loading dashboard data:", e);
+          }
+        }
+        async function checkExpiredUsers() {
+          try {
+            const e = await dbManager.checkAndDeactivateExpiredUsers();
+            e.success &&
+              e.deactivatedCount > 0 &&
+              console.log(
+                `تم إلغاء تفعيل ${e.deactivatedCount} مستخدم منتهي الاشتراك`,
+              );
+          } catch (e) {
+            console.error("Error checking expired users:", e);
+          }
+        }
+        function togglePasswordVisibility(e) {
+          const t = e.parentElement.querySelector("input"),
+            n = e.querySelector("i");
+          "password" === t.type
+            ? ((t.type = "text"),
+              n.classList.remove("fa-eye"),
+              n.classList.add("fa-eye-slash"))
+            : ((t.type = "password"),
+              n.classList.remove("fa-eye-slash"),
+              n.classList.add("fa-eye"));
+        }
+        function toggleOtherCurrency() {
+          const e = document.getElementById("currency"),
+            t = document.getElementById("otherCurrencyDiv");
+          "other" === e.value
+            ? t.classList.remove("hidden")
+            : t.classList.add("hidden");
+        }
+        function toggleOtherSubscription() {
+          const e = document.getElementById("subscriptionType"),
+            t = document.getElementById("otherSubscriptionDiv");
+          "other" === e.value
+            ? t.classList.remove("hidden")
+            : t.classList.add("hidden");
+        }
+        function handleDurationChange() {
+          const e = document.getElementById("subscriptionDuration"),
+            t = document.getElementById("customDateDiv"),
+            n = document.getElementById("expiryDate");
+          if ("custom" === e.value)
+            (t.classList.remove("hidden"), (n.required = !0));
+          else if ((t.classList.add("hidden"), (n.required = !1), e.value)) {
+            const t = parseInt(e.value),
+              o = new Date();
+            (o.setMonth(o.getMonth() + t),
+              (n.value = o.toISOString().split("T")[0]));
+          }
+        }
+        function togglePasswordField() {
+          const e = document.getElementById("passwordField");
+          e.classList.contains("hidden")
+            ? e.classList.remove("hidden")
+            : e.classList.add("hidden");
+        }
+        function openModal(e = !1) {
+          const t = document.getElementById("subscriptionModal");
+          ((document.getElementById("modalTitle").textContent = e
+            ? "تعديل الاشتراك"
+            : "إضافة اشتراك جديد"),
+            t.classList.remove("hidden"));
+        }
+        function closeSubscriptionModal() {
+          (document.getElementById("subscriptionModal").classList.add("hidden"),
+            document.getElementById("subscriptionForm").reset(),
+            document.getElementById("passwordFields").classList.add("hidden"),
+            document
+              .getElementById("googlePlaySection")
+              .classList.add("hidden"),
+            document.getElementById("gpaSection").classList.add("hidden"),
+            document.getElementById("notesSection").classList.add("hidden"),
+            (document.getElementById("addPassword").checked = !1),
+            (document.getElementById("addGooglePlay").checked = !1),
+            (document.getElementById("addGpaCode").checked = !1),
+            (document.getElementById("addNotes").checked = !1),
+            (currentSubscriptionId = null));
+        }
+        async function editSubscription(e) {
+          try {
+            const t = await dbManager.getAllSubscriptions();
+            if (!t.success) return void alert("خطأ في تحميل بيانات الاشتراك");
+            const n = t.subscriptions.find((t) => t.id === e);
+            if (!n) return void alert("لم يتم العثور على الاشتراك");
+            ((currentSubscriptionId = e),
+              (document.getElementById("customerName").value =
+                n.customer_name || n.customerName || ""),
+              (document.getElementById("customerEmail").value = n.email || ""),
+              (document.getElementById("subscriptionType").value =
+                n.subscription_type || n.type || ""));
+            const o = n.whatsapp,
+              a = ["+966", "+971", "+974", "+973", "+968", "+965", "+20"];
+            let s = "",
+              r = "";
+            for (let e of a)
+              if (o.startsWith(e)) {
+                ((s = e), (r = o.substring(e.length)));
+                break;
+              }
+            ((document.getElementById("countryCode").value = s),
+              (document.getElementById("customerWhatsapp").value = r),
+              (document.getElementById("currency").value =
+                n.currency || "SAR"));
+            const i = n.expiry_date || n.expiryDate;
+            i &&
+              (document.getElementById("expiryDate").value = i.split("T")[0]);
+            if (
+              ("other" === (n.subscription_type || n.type) &&
+                (document
+                  .getElementById("otherSubscriptionDiv")
+                  .classList.remove("hidden"),
+                (document.getElementById("customSubscriptionName").value =
+                  n.type_name || n.typeName || "")),
+              n.google_play_email || n.googlePlay)
+            ) {
+              ((document.getElementById("addGooglePlay").checked = !0),
+                toggleGooglePlaySection(
+                  document.getElementById("addGooglePlay"),
+                ));
+              const e =
+                  n.google_play_email ||
+                  (n.googlePlay && n.googlePlay.email) ||
+                  "",
+                t =
+                  n.google_play_password ||
+                  (n.googlePlay && n.googlePlay.password) ||
+                  "";
+              ((document.querySelector('[name="googlePlayEmail"]').value = e),
+                (document.querySelector('[name="googlePlayPassword"]').value =
+                  t));
+              const o =
+                n.gpa_code || (n.googlePlay && n.googlePlay.gpaCode) || "";
+              o &&
+                ((document.getElementById("addGpaCode").checked = !0),
+                toggleGpaSection(document.getElementById("addGpaCode")),
+                (document.querySelector('[name="gpaCode"]').value = o));
+            }
+            (n.notes &&
+              ((document.getElementById("addNotes").checked = !0),
+              toggleNotesSection(document.getElementById("addNotes")),
+              (document.querySelector('[name="notes"]').value = n.notes)),
+              (n.subscription_password || n.password) &&
+                ((document.getElementById("addPassword").checked = !0),
+                document
+                  .getElementById("passwordFields")
+                  .classList.remove("hidden"),
+                (document.getElementById("subscriptionPassword").value =
+                  n.subscription_password || n.password)),
+              openModal(!0));
+          } catch (e) {
+            (console.error("Error editing subscription:", e),
+              alert("حدث خطأ أثناء تحميل بيانات الاشتراك"));
+          }
+        }
+        function editFileSubscription(e) {
+          const t = JSON.parse(
+            localStorage.getItem("fileSubscriptions") || "[]",
+          ).find((t) => t.id === e);
+          if (t) {
+            currentSubscriptionId = e;
+            const n = document.getElementById("newFileSubscriptionForm");
+            ((n.querySelector('[name="email"]').value = t.email),
+              (n.querySelector('[name="type"]').value = t.type),
+              (n.querySelector('[name="fileName"]').value = t.fileName),
+              (n.querySelector(
+                `[name="accountType"][value="${t.accountType}"]`,
+              ).checked = !0),
+              (n.querySelector('[name="currency"]').value = t.currency));
+            const o = t.whatsapp,
+              a = ["+966", "+971", "+974", "+973", "+968", "+965", "+20"];
+            let s = "+966",
+              r = o;
+            for (let e of a)
+              if (o.startsWith(e)) {
+                ((s = e), (r = o.substring(e.length)));
+                break;
+              }
+            ((n.querySelector('[name="countryCode"]').value = s),
+              (n.querySelector('[name="whatsapp"]').value = r),
+              t.googlePlay &&
+                ((document.getElementById("showGooglePlayFields").checked = !0),
+                document
+                  .getElementById("googlePlayFields")
+                  .classList.remove("hidden"),
+                (n.querySelector('[name="googlePlayEmail"]').value =
+                  t.googlePlay.email),
+                (n.querySelector('[name="googlePlayPassword"]').value =
+                  t.googlePlay.password),
+                t.googlePlay.gpaCode &&
+                  ((document.getElementById("addGpaCode").checked = !0),
+                  document
+                    .getElementById("gpaCodeField")
+                    .classList.remove("hidden"),
+                  (n.querySelector('[name="gpaCode"]').value =
+                    t.googlePlay.gpaCode))),
+              t.categoryId &&
+                (n.querySelector('[name="category"]').value = t.categoryId));
+            (n.querySelector('[name="durationType"]'),
+              document.getElementById("customDateContainer"));
+            ((document.getElementById("customSubscriptionDate").value =
+              t.expiryDate.split("T")[0]),
+              openNewFileSubscriptionModal());
+          }
+        }
+        function deleteSubscription(e, t = "regular") {
+          ((currentSubscriptionId = e),
+            (currentSubscriptionType = t),
+            document.getElementById("deleteModal").classList.remove("hidden"));
+        }
+        function filterSubscriptions(e) {
+          ((document.getElementById("filterStatus").value = e),
+            updateSubscriptionsTable());
+        }
+        function toggleSubscriptionPasswordVisibility() {
+          const e = document.getElementById("subscriptionPassword"),
+            t = document.getElementById("subscriptionPasswordToggleIcon");
+          togglePasswordVisibility(e, t);
+        }
+        function toggleGooglePlayPasswordVisibility() {
+          const e = document.getElementById("googlePlayPassword"),
+            t = document.getElementById("googlePlayPasswordToggleIcon");
+          togglePasswordVisibility(e, t);
+        }
+        function togglePasswordVisibility(e, t) {
+          "password" === e.type
+            ? ((e.type = "text"),
+              t.classList.remove("fa-eye"),
+              t.classList.add("fa-eye-slash"))
+            : ((e.type = "password"),
+              t.classList.remove("fa-eye-slash"),
+              t.classList.add("fa-eye"));
+        }
+        function closeNewFileSubscriptionModal() {
+          (document
+            .getElementById("newFileSubscriptionModal")
+            .classList.remove("flex"),
+            document
+              .getElementById("newFileSubscriptionModal")
+              .classList.add("hidden"));
+        }
+        async function updateFilesTable(e = null) {
+          try {
+            console.log("🔄 تحديث جدول اشتراكات الملفات...");
+            let t = e;
+            if (t) console.log("📝 استخدام اشتراكات مخصصة:", t.length);
+            else {
+              console.log("📡 جلب اشتراكات الملفات من قاعدة البيانات...");
+              const e = await dbManager.getAllFileSubscriptions();
+              (console.log("📋 نتيجة جلب اشتراكات الملفات:", e),
+                e.success
+                  ? ((t = e.subscriptions),
+                    console.log(
+                      "✅ تم جلب",
+                      t.length,
+                      "اشتراك ملف من قاعدة البيانات",
+                    ))
+                  : (console.error("❌ فشل جلب اشتراكات الملفات:", e.error),
+                    (t = JSON.parse(
+                      localStorage.getItem("fileSubscriptions") || "[]",
+                    )),
+                    console.log(
+                      "📦 تم جلب",
+                      t.length,
+                      "اشتراك ملف من localStorage",
+                    )));
+            }
+            const n = JSON.parse(
+                localStorage.getItem("fileCategories") || "[]",
+              ),
+              o = document.getElementById("filesTableBody");
+            ((o.innerHTML = ""),
+              t.forEach((e) => {
+                const t = new Date(),
+                  a = new Date(e.expiry_date || e.expiryDate),
+                  s = a < t,
+                  r = Math.ceil((a - t) / 864e5),
+                  i = n.find((t) => t.id === (e.categoryId || e.category)),
+                  l = i
+                    ? `<span class="px-2 py-1 rounded text-xs" style="background-color: ${i.color}20; color: ${i.color}">\n                    ${i.name}\n                </span>`
+                    : "",
+                  c = document.createElement("tr");
+                ((c.innerHTML = `\n              <td class="px-6 py-4">${e.email}</td>\n              <td class="px-6 py-4">${getFileTypeName(e.subscription_type || e.type, e.custom_subscription_name || e.customSubscriptionName)}</td>\n              <td class="px-6 py-4">${e.file_name || e.fileName}</td>\n              <td class="px-6 py-4">${"subscriber" === (e.account_type || e.accountType) ? "مشترك" : "خاص"}</td>\n              <td class="px-6 py-4">\n                <a href="https://wa.me/${e.whatsapp}" target="_blank" class="text-green-500 hover:text-green-400">\n                  <i class="fab fa-whatsapp ml-1"></i>${e.whatsapp}\n                </a>\n              </td>\n              <td class="px-6 py-4">\n                <div class="space-y-1">\n                  <div>${formatDate(e.expiry_date || e.expiryDate)}</div>\n                  <div class="text-sm ${r <= 7 ? "text-yellow-500" : "text-green-500"}">\n                    متبقي ${r} يوم\n                  </div>\n                </div>\n              </td>\n              <td class="px-6 py-4">\n                <span class="px-2 py-1 rounded text-sm ${getStatusClass(s, r <= 7)}">\n                  ${getStatusText(s, r <= 7)}\n                </span>\n              </td>\n              <td class="px-6 py-4">\n                ${l}\n              </td>\n              <td class="px-6 py-4">\n                ${updateTableActionButtons(e, "file")}\n              </td>\n            `),
+                  o.appendChild(c));
+              }));
+          } catch (e) {
+            console.error("Error updating files table:", e);
+          }
+        }
+        function getFileTypeName(e, t = null) {
+          return (
+            {
+              shahid_sports: "شاهد رياضي",
+              netflix: "نتفلكس",
+              osn_plus: "OSN+",
+              amazon_prime: "امازون برايم",
+              shahid_series: "شاهد مسلسلات",
+              shahid_full: "شاهد شامل",
+              disney_plus: "ديزني بلس",
+              other: t || "اشتراك آخر",
+            }[e] || e
+          );
+        }
+        function updateStatistics() {
+          const e = JSON.parse(
+              localStorage.getItem("regularSubscriptions") || "[]",
+            ),
+            t = JSON.parse(localStorage.getItem("fileSubscriptions") || "[]"),
+            n = new Date(),
+            o = calculateStats(e.concat(t), n);
+          ((document.getElementById("totalSubscriptions").textContent =
+            o.total),
+            (document.getElementById("activeSubscriptions").textContent =
+              o.active),
+            (document.getElementById("expiringSubscriptions").textContent =
+              o.expiring),
+            (document.getElementById("expiredSubscriptions").textContent =
+              o.expired));
+        }
+        function openCreateUserModal() {
+          document.getElementById("createUserModal").classList.remove("hidden");
+        }
+        function closeCreateUserModal() {
+          (document.getElementById("createUserModal").classList.add("hidden"),
+            document.getElementById("createUserForm").reset());
+        }
+        function handleCreateUser(e) {
+          e.preventDefault();
+          const t = e.target,
+            n = t.querySelector('input[type="email"]').value,
+            o = t.querySelector('input[type="password"]').value,
+            a = t.querySelector("select").value,
+            s = JSON.parse(localStorage.getItem("users") || "[]"),
+            r = new Date(),
+            i = new Date();
+          (i.setMonth(r.getMonth() + parseInt(a)),
+            s.push({
+              email: n,
+              password: o,
+              createdAt: r.toISOString(),
+              expiryDate: i.toISOString(),
+            }),
+            localStorage.setItem("users", JSON.stringify(s)),
+            closeCreateUserModal(),
+            alert("تم إنشاء الحساب بنجاح"));
+        }
+        if (
+          (document.addEventListener("DOMContentLoaded", function () {
+            if (dbManager) console.log("✅ DatabaseManager محمّل مسبقاً");
+            else
+              try {
+                (console.log("🔧 محاولة تحميل DatabaseManager..."),
+                  (dbManager = new DatabaseManager()),
+                  console.log("✅ تم تحميل DatabaseManager بنجاح"),
+                  console.log("🔗 dbManager:", dbManager));
+              } catch (e) {
+                console.error("❌ خطأ في تحميل DatabaseManager:", e);
+              }
+            if (!checkAuth()) return;
+            const e = JSON.parse(localStorage.getItem("userData") || "{}");
+            (showAdminOnlyElements(),
+              e.isAdmin ||
+                document
+                  .querySelectorAll('button[onclick*="openCreateUserModal"]')
+                  .forEach((e) => e.remove()),
+              loadDashboardData());
+          }),
+          setInterval(async () => {
+            JSON.parse(localStorage.getItem("userData") || "{}").isAdmin &&
+              (await checkExpiredUsers());
+          }, 18e5),
+          document.addEventListener("DOMContentLoaded", function () {
+            const e = document.getElementById("menuButton"),
+              t = document.getElementById("sidebar"),
+              n = document.getElementById("sidebarOverlay"),
+              o = document.getElementById("closeSidebar");
+            function a() {
+              (t.classList.remove("active"),
+                n.classList.remove("active"),
+                (document.body.style.overflow = ""));
+            }
+            (e.addEventListener("click", function () {
+              (t.classList.add("active"),
+                n.classList.add("active"),
+                (document.body.style.overflow = "hidden"));
+            }),
+              o.addEventListener("click", a),
+              n.addEventListener("click", a));
+          }),
+          document.addEventListener("DOMContentLoaded", function () {
+            const e = document.getElementById("addPassword");
+            e &&
+              e.addEventListener("change", function () {
+                const e = document.getElementById("passwordFields");
+                e && e.classList.toggle("hidden", !this.checked);
+              });
+          }),
+          document
+            .getElementById("showPasswordField")
+            .addEventListener("change", function () {
+              document
+                .getElementById("passwordField")
+                .classList.toggle("hidden");
+            }),
+          document
+            .getElementById("showGooglePlayFields")
+            .addEventListener("change", function () {
+              document
+                .getElementById("googlePlayFields")
+                .classList.toggle("hidden", !this.checked);
+            }),
+          document
+            .getElementById("newFileSubscriptionForm")
+            .addEventListener("submit", handleFileSubscriptionSubmit),
+          document.addEventListener("DOMContentLoaded", function () {
+            (switchTab("subscriptions"),
+              window.dbManager
+                ? (loadSubscriptions(), loadFileSubscriptions())
+                : (console.log("في انتظار تهيئة dbManager..."),
+                  setTimeout(() => {
+                    (loadSubscriptions(), loadFileSubscriptions());
+                  }, 1e3)),
+              updateStatistics());
+          }),
+          document.addEventListener("DOMContentLoaded", function () {
+            function e() {
+              const e = new Date(),
+                t = JSON.parse(localStorage.getItem("subscriptions") || "[]"),
+                n = t.length;
+              let o = 0,
+                a = 0,
+                s = 0;
+              (t.forEach((t) => {
+                const n = new Date(t.endDate),
+                  r = Math.ceil((n - e) / 864e5);
+                r > 0 ? (o++, r <= 7 && a++) : s++;
+              }),
+                (document.getElementById("totalSubscriptions").textContent = n),
+                (document.getElementById("activeSubscriptions").textContent =
+                  o),
+                (document.getElementById("expiringSubscriptions").textContent =
+                  a),
+                (document.getElementById("expiredSubscriptions").textContent =
+                  s));
+            }
+            const t = document.getElementById("subscriptionDurationType"),
+              n = document.getElementById("customDateContainer"),
+              o = document.getElementById("customSubscriptionDate");
+            (t &&
+              t.addEventListener("change", function () {
+                "custom" === this.value
+                  ? (n.classList.remove("hidden"), (o.required = !0))
+                  : (n.classList.add("hidden"), (o.required = !1));
+              }),
+              e());
+            const a = document.getElementById("newFileSubscriptionForm");
+            a &&
+              a.addEventListener("submit", function (t) {
+                t.preventDefault();
+                const n = new FormData(this),
+                  o = {
+                    email: n.get("email"),
+                    type: n.get("type"),
+                    accountType: n.get("accountType"),
+                    fileName: n.get("fileName"),
+                    whatsapp: n.get("countryCode") + n.get("whatsapp"),
+                    currency: n.get("currency"),
+                    startDate: new Date().toISOString(),
+                    endDate: calculateEndDate(
+                      n.get("durationType"),
+                      n.get("customDate"),
+                    ),
+                  },
+                  a = JSON.parse(localStorage.getItem("subscriptions") || "[]");
+                (a.push(o),
+                  localStorage.setItem("subscriptions", JSON.stringify(a)),
+                  e(),
+                  closeNewFileSubscriptionModal(),
+                  this.reset());
+              });
+          }),
+          !userData.isAdmin)
+        ) {
+          const e = new Date(userData.expiryDate),
+            t = new Date(),
+            n = Math.ceil((e - t) / 864e5),
+            o = document.createElement("div");
+          ((o.className = "bg-[#3a3a3a] p-4 rounded-lg mt-4"),
+            (o.innerHTML = `\n            <h3 class="text-lg font-bold mb-2">معلومات اشتراكك</h3>\n            <div class="space-y-2 text-sm">\n              <p>\n                <i class="fas fa-calendar-alt ml-2"></i>\n                تاريخ الانتهاء: ${e.toLocaleDateString()}\n              </p>\n              <p class="${n <= 7 ? "text-yellow-500" : "text-green-500"}">\n                <i class="fas fa-clock ml-2"></i>\n                متبقي: ${n} يوم\n              </p>\n            </div>\n          `),
+            document.querySelector(".sidebar nav").appendChild(o));
+        }
+        async function filterSubscriptions() {
+          const e = document.getElementById("searchInput").value.toLowerCase(),
+            t = document.getElementById("filterStatus").value,
+            n = document.querySelector(".tab-button.active").id;
+          try {
+            if ("subscriptionsTab" === n) {
+              const n = await window.dbManager.getAllSubscriptions();
+              if (n.success) {
+                const o = filterSubscriptionsByType(n.subscriptions, e, t);
+                window.dashboardManager &&
+                  (await window.dashboardManager.updateSubscriptionsTable(o));
+              }
+            } else if ("filesTab" === n) {
+              const n = await window.dbManager.getAllFileSubscriptions();
+              if (n.success) {
+                const o = filterSubscriptionsByType(n.subscriptions, e, t);
+                window.dashboardManager &&
+                  (await window.dashboardManager.updateFilesTable(o));
+              }
+            }
+          } catch (e) {
+            console.error("❌ خطأ في البحث:", e);
+          }
+        }
+        function filterSubscriptionsByType(e, t, n) {
+          return e && Array.isArray(e)
+            ? e.filter((e) => {
+                if (
+                  !(
+                    "" === t ||
+                    (e.email || "").toLowerCase().includes(t) ||
+                    (e.whatsapp || "").toLowerCase().includes(t) ||
+                    (e.customer_name || "").toLowerCase().includes(t) ||
+                    (e.file_name || "").toLowerCase().includes(t) ||
+                    (e.subscription_type || "").toLowerCase().includes(t) ||
+                    (e.custom_subscription_name || "")
+                      .toLowerCase()
+                      .includes(t) ||
+                    (e.currency || "").toLowerCase().includes(t) ||
+                    (e.notes || "").toLowerCase().includes(t) ||
+                    (e.account_type || "").toLowerCase().includes(t) ||
+                    (e.category || "").toLowerCase().includes(t)
+                  )
+                )
+                  return !1;
+                if ("all" === n) return !0;
+                const o = new Date(e.expiry_date),
+                  a = new Date(),
+                  s = new Date();
+                switch ((s.setDate(a.getDate() + 3), n)) {
+                  case "active":
+                    return o > a;
+                  case "expiring":
+                    return o > a && o <= s;
+                  case "expired":
+                    return o <= a;
+                  default:
+                    return !0;
+                }
+              })
+            : [];
+        }
+        let currentCustomerId = null,
+          currentCustomerEmail = null;
+        async function loadCustomersList() {
+          try {
+            const e = await dbManager.getCustomersList();
+            e.success
+              ? displayCustomersList(e.customers)
+              : (console.error("Error loading customers:", e.error),
+                alert(e.error));
+          } catch (e) {
+            (console.error("Error loading customers:", e),
+              alert("حدث خطأ أثناء تحميل قائمة العملاء"));
+          }
+        }
+        function displayCustomersList(e) {
+          const t = document.getElementById("customersList");
+          ((t.innerHTML = ""),
+            0 !== e.length
+              ? e.forEach((e) => {
+                  const n = e.is_active,
+                    o = e.expiry_date ? new Date(e.expiry_date) : null,
+                    a = o && o < new Date(),
+                    s = document.createElement("div");
+                  ((s.className =
+                    "bg-[#3a3a3a] rounded-lg p-4 cursor-pointer hover:bg-[#4a4a4a] transition-colors " +
+                    (!n || a ? "opacity-60" : "")),
+                    (s.onclick = () => showCustomerDetails(e.id, e.email)),
+                    (s.innerHTML = `\n            <div class="flex items-center justify-between mb-2">\n                <div class="flex items-center">\n                    <i class="fas fa-user text-blue-400 ml-2"></i>\n                    <span class="font-medium">${e.email}</span>\n                </div>\n                <div class="flex items-center gap-2">\n                    ${n ? '<span class="w-2 h-2 bg-green-500 rounded-full"></span>' : '<span class="w-2 h-2 bg-red-500 rounded-full"></span>'}\n                    <span class="text-xs ${n ? "text-green-400" : "text-red-400"}">\n                        ${n ? "نشط" : "معطل"}\n                    </span>\n                </div>\n            </div>\n            <div class="text-sm text-gray-400">\n                <div class="flex justify-between">\n                    <span>تاريخ التسجيل:</span>\n                    <span>${formatDate(e.created_at)}</span>\n                </div>\n                ${o ? `\n                    <div class="flex justify-between mt-1">\n                        <span>تاريخ الانتهاء:</span>\n                        <span class="${a ? "text-red-400" : "text-green-400"}">\n                            ${formatDate(e.expiry_date)}\n                        </span>\n                    </div>\n                ` : ""}\n            </div>\n            <div class="mt-3 text-center">\n                <span class="text-xs bg-blue-600 text-white px-2 py-1 rounded">\n                    <i class="fas fa-eye ml-1"></i>اضغط لعرض التفاصيل\n                </span>\n            </div>\n        `),
+                    t.appendChild(s));
+                })
+              : (t.innerHTML =
+                  '\n            <div class="col-span-full text-center py-8 text-gray-400">\n                <i class="fas fa-users text-4xl mb-4"></i>\n                <p>لا توجد عملاء مسجلين</p>\n            </div>\n        '));
+        }
+        async function showCustomerDetails(e, t) {
+          ((currentCustomerId = e), (currentCustomerEmail = t));
+          try {
+            const n = await dbManager.getCustomerStats(e);
+            n.success
+              ? ((document.getElementById("customerDetailsTitle").textContent =
+                  `تفاصيل العميل: ${t}`),
+                displayCustomerStats(n.stats),
+                displayCustomerSubscriptions(
+                  n.regularSubscriptions,
+                  n.fileSubscriptions,
+                ),
+                document
+                  .getElementById("customerDetails")
+                  .classList.remove("hidden"),
+                document
+                  .getElementById("customerDetails")
+                  .scrollIntoView({ behavior: "smooth" }))
+              : alert(n.error);
+          } catch (e) {
+            (console.error("Error loading customer details:", e),
+              alert("حدث خطأ أثناء تحميل تفاصيل العميل"));
+          }
+        }
+        function displayCustomerStats(e) {
+          document.getElementById("customerStats").innerHTML =
+            `\n        <div class="bg-[#4a4a4a] rounded-lg p-3 text-center">\n            <div class="text-2xl font-bold text-blue-400">${e.totalSubscriptions}</div>\n            <div class="text-xs text-gray-400">إجمالي الاشتراكات</div>\n        </div>\n        <div class="bg-[#4a4a4a] rounded-lg p-3 text-center">\n            <div class="text-2xl font-bold text-green-400">${e.activeSubscriptions}</div>\n            <div class="text-xs text-gray-400">اشتراكات نشطة</div>\n        </div>\n        <div class="bg-[#4a4a4a] rounded-lg p-3 text-center">\n            <div class="text-2xl font-bold text-red-400">${e.expiredSubscriptions}</div>\n            <div class="text-xs text-gray-400">اشتراكات منتهية</div>\n        </div>\n        <div class="bg-[#4a4a4a] rounded-lg p-3 text-center">\n            <div class="text-2xl font-bold text-purple-400">${e.fileSubscriptions}</div>\n            <div class="text-xs text-gray-400">اشتراكات ملفات</div>\n        </div>\n    `;
+        }
+        function displayCustomerSubscriptions(e, t) {
+          const n = document.getElementById("customerRegularTableBody");
+          ((n.innerHTML = ""),
+            e.forEach((e) => {
+              const t = new Date(),
+                o = new Date(e.expiry_date),
+                a = o < t,
+                s = Math.ceil((o - t) / 864e5),
+                r = document.createElement("tr");
+              ((r.innerHTML = `\n            <td class="px-4 py-2 text-sm">${e.email}</td>\n            <td class="px-4 py-2 text-sm">${getSubscriptionTypeName(e.subscription_type)}</td>\n            <td class="px-4 py-2 text-sm">\n                <a href="https://wa.me/${e.whatsapp}" target="_blank" class="text-green-400 hover:text-green-300">\n                    <i class="fab fa-whatsapp ml-1"></i>${e.whatsapp}\n                </a>\n            </td>\n            <td class="px-4 py-2 text-sm">\n                <div>${formatDate(e.expiry_date)}</div>\n                <div class="text-xs ${s <= 7 ? "text-yellow-400" : "text-green-400"}">\n                    متبقي ${s} يوم\n                </div>\n            </td>\n            <td class="px-4 py-2 text-sm">\n                <span class="px-2 py-1 rounded text-xs ${getStatusClass(a, s <= 7)}">\n                    ${getStatusText(a, s <= 7)}\n                </span>\n            </td>\n            <td class="px-4 py-2 text-sm">\n                <div class="flex gap-1">\n                    <button onclick="editCustomerSubscription('${e.id}', 'regular')" class="text-blue-400 hover:text-blue-300" title="تعديل">\n                        <i class="fas fa-edit"></i>\n                    </button>\n                    <button onclick="deleteCustomerSubscription('${e.id}', 'regular')" class="text-red-400 hover:text-red-300" title="حذف">\n                        <i class="fas fa-trash"></i>\n                    </button>\n                    <button onclick="renewCustomerSubscription('${e.id}', 'regular')" class="text-green-400 hover:text-green-300" title="تجديد">\n                        <i class="fas fa-sync-alt"></i>\n                    </button>\n                </div>\n            </td>\n        `),
+                n.appendChild(r));
+            }));
+          const o = document.getElementById("customerFileTableBody");
+          ((o.innerHTML = ""),
+            t.forEach((e) => {
+              const t = new Date(),
+                n = new Date(e.expiry_date),
+                a = n < t,
+                s = Math.ceil((n - t) / 864e5),
+                r = document.createElement("tr");
+              ((r.innerHTML = `\n            <td class="px-4 py-2 text-sm">${e.email}</td>\n            <td class="px-4 py-2 text-sm">${getFileTypeName(e.subscription_type)}</td>\n            <td class="px-4 py-2 text-sm">${e.file_name}</td>\n            <td class="px-4 py-2 text-sm">${"subscriber" === e.account_type ? "مشترك" : "خاص"}</td>\n            <td class="px-4 py-2 text-sm">\n                <div>${formatDate(e.expiry_date)}</div>\n                <div class="text-xs ${s <= 7 ? "text-yellow-400" : "text-green-400"}">\n                    متبقي ${s} يوم\n                </div>\n            </td>\n            <td class="px-4 py-2 text-sm">\n                <span class="px-2 py-1 rounded text-xs ${getStatusClass(a, s <= 7)}">\n                    ${getStatusText(a, s <= 7)}\n                </span>\n            </td>\n            <td class="px-4 py-2 text-sm">\n                <div class="flex gap-1">\n                    <button onclick="editCustomerSubscription('${e.id}', 'file')" class="text-blue-400 hover:text-blue-300" title="تعديل">\n                        <i class="fas fa-edit"></i>\n                    </button>\n                    <button onclick="deleteCustomerSubscription('${e.id}', 'file')" class="text-red-400 hover:text-red-300" title="حذف">\n                        <i class="fas fa-trash"></i>\n                    </button>\n                    <button onclick="renewCustomerSubscription('${e.id}', 'file')" class="text-green-400 hover:text-green-300" title="تجديد">\n                        <i class="fas fa-sync-alt"></i>\n                    </button>\n                </div>\n            </td>\n        `),
+                o.appendChild(r));
+            }));
+        }
+        function switchCustomerTab(e) {
+          (document
+            .querySelectorAll(".customer-tab-button")
+            .forEach((e) => e.classList.remove("active")),
+            document
+              .getElementById(
+                `customer${"regular" === e ? "Regular" : "File"}Tab`,
+              )
+              .classList.add("active"),
+            document
+              .getElementById("customerRegularSubscriptions")
+              .classList.toggle("hidden", "regular" !== e),
+            document
+              .getElementById("customerFileSubscriptions")
+              .classList.toggle("hidden", "file" !== e));
+        }
+        async function editCustomerSubscription(e, t) {
+          try {
+            if ("regular" === t) {
+              const t = await dbManager.getAllSubscriptionsForAdmin();
+              if (t.success) {
+                const n = t.subscriptions.find((t) => t.id === e);
+                n &&
+                  (fillSubscriptionForm(n),
+                  (currentSubscriptionId = e),
+                  (document.getElementById("modalTitle").textContent =
+                    "تعديل اشتراك العميل"),
+                  document
+                    .getElementById("subscriptionModal")
+                    .classList.remove("hidden"));
+              }
+            } else if ("file" === t) {
+              const t = await dbManager.getAllFileSubscriptionsForAdmin();
+              if (t.success) {
+                const n = t.subscriptions.find((t) => t.id === e);
+                n &&
+                  (fillFileSubscriptionForm(n),
+                  (currentSubscriptionId = e),
+                  document
+                    .getElementById("newFileSubscriptionModal")
+                    .classList.remove("hidden"),
+                  document
+                    .getElementById("newFileSubscriptionModal")
+                    .classList.add("flex"));
+              }
+            }
+          } catch (e) {
+            (console.error("Error editing customer subscription:", e),
+              alert("حدث خطأ أثناء تحميل بيانات الاشتراك"));
+          }
+        }
+        async function deleteCustomerSubscription(e, t) {
+          if (confirm("هل أنت متأكد من حذف هذا الاشتراك؟"))
+            try {
+              let n;
+              ("regular" === t
+                ? (n = await dbManager.deleteSubscription(e))
+                : "file" === t &&
+                  (n = await dbManager.deleteFileSubscription(e)),
+                n.success
+                  ? (alert("تم حذف الاشتراك بنجاح"),
+                    currentCustomerId &&
+                      showCustomerDetails(
+                        currentCustomerId,
+                        currentCustomerEmail,
+                      ))
+                  : alert(n.error || "حدث خطأ أثناء حذف الاشتراك"));
+            } catch (e) {
+              (console.error("Error deleting customer subscription:", e),
+                alert("حدث خطأ أثناء حذف الاشتراك"));
+            }
+        }
+        async function renewCustomerSubscription(e, t) {
+          const n = prompt("كم شهر تريد تجديد الاشتراك؟", "1");
+          if (!(!n || isNaN(n) || n <= 0))
+            try {
+              const o = new Date();
+              let a;
+              (o.setMonth(o.getMonth() + parseInt(n)),
+                "regular" === t
+                  ? (a = await dbManager.updateSubscription(e, {
+                      expiry_date: o.toISOString(),
+                    }))
+                  : "file" === t &&
+                    (a = await dbManager.updateFileSubscription(e, {
+                      expiry_date: o.toISOString(),
+                    })),
+                a.success
+                  ? (alert(`تم تجديد الاشتراك لمدة ${n} شهر`),
+                    currentCustomerId &&
+                      showCustomerDetails(
+                        currentCustomerId,
+                        currentCustomerEmail,
+                      ))
+                  : alert(a.error || "حدث خطأ أثناء تجديد الاشتراك"));
+            } catch (e) {
+              (console.error("Error renewing customer subscription:", e),
+                alert("حدث خطأ أثناء تجديد الاشتراك"));
+            }
+        }
+        function fillSubscriptionForm(e) {
+          if (
+            ((document.getElementById("customerEmail").value = e.email || ""),
+            (document.getElementById("subscriptionType").value =
+              e.subscription_type || ""),
+            e.whatsapp)
+          ) {
+            const t = e.whatsapp.toString();
+            t.startsWith("+966")
+              ? ((document.getElementById("countryCode").value = "+966"),
+                (document.getElementById("customerWhatsapp").value =
+                  t.substring(4)))
+              : (document.getElementById("customerWhatsapp").value = t);
+          }
+          document.getElementById("currency").value = e.currency || "SAR";
+          const t = e.subscription_type;
+          "netflix" === t || "disney" === t || "shahid" === t
+            ? (document
+                .getElementById("passwordFields")
+                .classList.remove("hidden"),
+              (document.getElementById("accountEmail").value =
+                e.account_email || ""),
+              (document.getElementById("accountPassword").value =
+                e.account_password || ""))
+            : "googleplay" === t &&
+              (document
+                .getElementById("googlePlayFields")
+                .classList.remove("hidden"),
+              (document.getElementById("googlePlayEmail").value =
+                e.google_play_email || ""),
+              (document.getElementById("googlePlayPassword").value =
+                e.google_play_password || ""));
+        }
+        function fillFileSubscriptionForm(e) {
+          const t = document.getElementById("newFileSubscriptionForm");
+          if (
+            ((t.querySelector('[name="email"]').value = e.email || ""),
+            (t.querySelector('[name="type"]').value =
+              e.subscription_type || ""),
+            (t.querySelector('[name="fileName"]').value = e.file_name || ""),
+            (t.querySelector('[name="accountType"]').value =
+              e.account_type || ""),
+            e.whatsapp)
+          ) {
+            const n = e.whatsapp.toString();
+            n.startsWith("+966")
+              ? ((t.querySelector('[name="countryCode"]').value = "+966"),
+                (t.querySelector('[name="whatsapp"]').value = n.substring(4)))
+              : (t.querySelector('[name="whatsapp"]').value = n);
+          }
+          ((t.querySelector('[name="currency"]').value = e.currency || "SAR"),
+            (t.querySelector('[name="category"]').value = e.category || ""),
+            e.password &&
+              ((t.querySelector("#showPasswordField").checked = !0),
+              t.querySelector("#passwordField").classList.remove("hidden"),
+              (t.querySelector('[name="password"]').value = e.password)));
+        }
+        function hideCustomerDetails() {
+          (document.getElementById("customerDetails").classList.add("hidden"),
+            (currentCustomerId = null),
+            (currentCustomerEmail = null));
+        }
+        function refreshCustomersList() {
+          loadCustomersList();
+        }
+        function showAdminOnlyElements() {
+          JSON.parse(localStorage.getItem("userData") || "{}").isAdmin &&
+            document.querySelectorAll(".admin-only").forEach((e) => {
+              e.style.display = "block";
+            });
+        }
+        async function deleteFileSubscription(e) {
+          if (confirm("هل أنت متأكد من حذف هذا الاشتراك؟"))
+            try {
+              console.log("🗑️ محاولة حذف اشتراك الملف:", e);
+              const t = await dbManager.deleteFileSubscription(e);
+              t.success
+                ? (console.log("✅ تم حذف اشتراك الملف بنجاح"),
+                  await updateFilesTable(),
+                  await updateStatistics(),
+                  alert("تم حذف الاشتراك بنجاح"))
+                : (console.error("❌ فشل حذف اشتراك الملف:", t.error),
+                  alert("حدث خطأ أثناء حذف الاشتراك: " + t.error));
+            } catch (e) {
+              (console.error("❌ خطأ في حذف اشتراك الملف:", e),
+                alert("حدث خطأ أثناء حذف الاشتراك"));
+            }
+        }
+        function openCategoriesModal() {
+          (document
+            .getElementById("categoriesModal")
+            .classList.remove("hidden"),
+            document.getElementById("categoriesModal").classList.add("flex"),
+            updateCategoriesList());
+        }
+        function closeCategoriesModal() {
+          (document.getElementById("categoriesModal").classList.remove("flex"),
+            document.getElementById("categoriesModal").classList.add("hidden"));
+        }
+        function updateColorPicker() {
+          const e = document.getElementById("predefinedColors").value;
+          e && (document.getElementById("categoryColor").value = e);
+        }
+        function handleCategorySubmit(e) {
+          e.preventDefault();
+          const t = document.getElementById("categoryName").value,
+            n = document.getElementById("categoryColor").value,
+            o = JSON.parse(localStorage.getItem("fileCategories") || "[]");
+          (o.push({ id: Date.now(), name: t, color: n }),
+            localStorage.setItem("fileCategories", JSON.stringify(o)),
+            updateCategoriesList(),
+            updateCategorySelects(),
+            document.getElementById("categoryForm").reset());
+        }
+        function updateCategoriesList() {
+          const e = JSON.parse(localStorage.getItem("fileCategories") || "[]"),
+            t = JSON.parse(localStorage.getItem("fileSubscriptions") || "[]"),
+            n = document.getElementById("categoriesList");
+          ((n.innerHTML = ""),
+            e.forEach((e) => {
+              const o = t.filter(
+                  (t) =>
+                    t.categoryId && parseInt(t.categoryId) === parseInt(e.id),
+                ).length,
+                a = document.createElement("div");
+              ((a.className =
+                "flex items-center justify-between p-2 rounded bg-[#1a1a1a] mb-2"),
+                (a.innerHTML = `\n            <div class="flex items-center gap-2">\n                <span class="w-4 h-4 rounded-full" style="background-color: ${e.color}"></span>\n                <span class="text-sm">${e.name}</span>\n                <span class="text-xs text-gray-400">(${o} اشتراك)</span>\n            </div>\n            <div class="flex gap-2">\n                <button onclick="showCategorySubscriptions(${e.id})" class="text-purple-500 hover:text-purple-400">\n                    <i class="fas fa-eye"></i>\n                </button>\n                <button onclick="editCategory(${e.id})" class="text-blue-500 hover:text-blue-400">\n                    <i class="fas fa-edit"></i>\n                </button>\n                <button onclick="deleteCategory(${e.id})" class="text-red-500 hover:text-red-400">\n                    <i class="fas fa-trash"></i>\n                </button>\n            </div>\n        `),
+                n.appendChild(a));
+            }));
+        }
+        function editCategory(e) {
+          const t = JSON.parse(
+            localStorage.getItem("fileCategories") || "[]",
+          ).find((t) => t.id === e);
+          if (t) {
+            ((document.getElementById("categoryName").value = t.name),
+              (document.getElementById("categoryColor").value = t.color));
+            const n = document.getElementById("categoryForm");
+            ((n.dataset.editId = e),
+              (n.querySelector('button[type="submit"]').innerHTML =
+                '<i class="fas fa-save ml-1"></i>حفظ التغييرات'));
+          }
+        }
+        function deleteCategory(e) {
+          if (!confirm("هل أنت متأكد من حذف هذا التصنيف؟")) return;
+          let t = JSON.parse(localStorage.getItem("fileCategories") || "[]");
+          ((t = t.filter((t) => t.id !== e)),
+            localStorage.setItem("fileCategories", JSON.stringify(t)));
+          let n = JSON.parse(localStorage.getItem("fileSubscriptions") || "[]");
+          ((n = n.map((t) => (t.categoryId === e && delete t.categoryId, t))),
+            localStorage.setItem("fileSubscriptions", JSON.stringify(n)),
+            updateCategoriesList(),
+            updateCategorySelects());
+        }
+        function updateCategorySelects() {
+          const e = JSON.parse(localStorage.getItem("fileCategories") || "[]");
+          document.querySelectorAll('select[name="category"]').forEach((t) => {
+            const n = t.value;
+            ((t.innerHTML = '<option value="">بدون تصنيف</option>'),
+              e.forEach((e) => {
+                const n = document.createElement("option");
+                ((n.value = e.id),
+                  (n.textContent = e.name),
+                  (n.style.backgroundColor = e.color),
+                  t.appendChild(n));
+              }),
+              (t.value = n));
+          });
+        }
+        async function handleFileSubscriptionSubmit(e) {
+          e.preventDefault();
+          try {
+            const t = JSON.parse(localStorage.getItem("userData") || "{}");
+            if (!t.id)
+              return void alert("خطأ: لم يتم العثور على معلومات المستخدم");
+            const n = t.id,
+              o = new FormData(e.target),
+              a = new Date();
+            a.setMonth(a.getMonth() + 1);
+            let s = o.get("type") || "netflix",
+              r = null;
+            if (
+              "other" === s &&
+              ((r = o.get("customSubscriptionName")), !r || "" === r.trim())
+            )
+              return void alert("يرجى إدخال اسم الاشتراك المخصص");
+            const i = {
+              email: o.get("email") || "test@example.com",
+              password: o.get("password") || "123456",
+              subscription_type: s,
+              account_type: o.get("accountType") || "premium",
+              file_name: o.get("fileName") || "test_file",
+              whatsapp:
+                (o.get("countryCode") || "+966") +
+                (o.get("whatsapp") || "123456789"),
+              currency: o.get("currency") || "SAR",
+              start_date: new Date().toISOString(),
+              expiry_date: a.toISOString(),
+              created_by: n,
+            };
+            (r && (i.custom_subscription_name = r.trim()),
+              o.get("password") && (i.password = o.get("password")));
+            const l = document.getElementById("addFileNotes");
+            if (l && l.checked) {
+              const e = document.querySelector(
+                '#newFileSubscriptionForm textarea[name="notes"]',
+              );
+              e && e.value.trim() && (i.notes = e.value.trim());
+            }
+            let c;
+            (console.log("🔄 محاولة حفظ اشتراك الملف..."),
+              console.log("📊 البيانات المُرسلة:", i),
+              currentSubscriptionId
+                ? (console.log("📝 تحديث اشتراك موجود:", currentSubscriptionId),
+                  (c = await dbManager.updateFileSubscription(
+                    currentSubscriptionId,
+                    i,
+                  )))
+                : (console.log("➕ إضافة اشتراك جديد"),
+                  (c = await dbManager.createFileSubscription(i))),
+              console.log("📋 نتيجة العملية:", c),
+              c.success
+                ? (closeNewFileSubscriptionModal(),
+                  switchTab("files"),
+                  await updateFilesTable(),
+                  await updateStatistics(),
+                  alert(
+                    currentSubscriptionId
+                      ? "تم تحديث اشتراك الملف بنجاح"
+                      : "تم إضافة اشتراك الملف بنجاح",
+                  ),
+                  (currentSubscriptionId = null))
+                : alert(c.error || "حدث خطأ أثناء حفظ اشتراك الملف"));
+          } catch (e) {
+            (console.error("Error saving file subscription:", e),
+              alert("حدث خطأ أثناء حفظ اشتراك الملف"));
+          }
+        }
+        async function editFileSubscription(e) {
+          try {
+            const t = await dbManager.getAllFileSubscriptions();
+            if (!t.success) return void alert("خطأ في جلب بيانات الاشتراك");
+            const n = t.subscriptions.find((t) => t.id === e);
+            if (!n) return void alert("لم يتم العثور على الاشتراك");
+            currentSubscriptionId = e;
+            const o = document.getElementById("newFileSubscriptionForm");
+            if (
+              ((o.querySelector('[name="email"]').value = n.email || ""),
+              (o.querySelector('[name="type"]').value =
+                n.subscription_type || ""),
+              (o.querySelector('[name="fileName"]').value = n.fileName),
+              "other" === n.subscription_type && n.custom_subscription_name)
+            ) {
+              const e = document.getElementById("customFileSubscriptionDiv"),
+                t = document.querySelector('[name="customSubscriptionName"]');
+              e &&
+                t &&
+                (e.classList.remove("hidden"),
+                (t.value = n.custom_subscription_name),
+                (t.required = !0));
+            }
+            o.querySelector(
+              `[name="accountType"][value="${n.accountType}"]`,
+            ).checked = !0;
+            const a = n.whatsapp || "";
+            let s = "+966",
+              r = "";
+            const i = ["+966", "+971", "+974", "+973", "+968", "+965", "+20"];
+            for (let e of i)
+              if (a.startsWith(e)) {
+                ((s = e), (r = a.substring(e.length)));
+                break;
+              }
+            ((o.querySelector('[name="countryCode"]').value = s),
+              (o.querySelector('[name="whatsapp"]').value = r),
+              (o.querySelector('[name="currency"]').value = n.currency),
+              (o.querySelector('[name="category"]').value = n.categoryId || ""),
+              n.googlePlay &&
+                ((document.getElementById("showGooglePlayFields").checked = !0),
+                document
+                  .getElementById("googlePlayFields")
+                  .classList.remove("hidden"),
+                (o.querySelector('[name="googlePlayEmail"]').value =
+                  n.googlePlay.email),
+                (o.querySelector('[name="googlePlayPassword"]').value =
+                  n.googlePlay.password)),
+              openNewFileSubscriptionModal());
+          } catch (e) {
+            (console.error("خطأ في تعديل اشتراك الملف:", e),
+              alert("حدث خطأ أثناء تحميل بيانات الاشتراك"));
+          }
+        }
+        function showCategorySubscriptions(e) {
+          const t = JSON.parse(
+              localStorage.getItem("fileSubscriptions") || "[]",
+            ),
+            n = JSON.parse(localStorage.getItem("fileCategories") || "[]").find(
+              (t) => t.id === e,
+            );
+          if (!n) return;
+          document.querySelector("#filesTable h2").innerHTML =
+            `\n        قائمة اشتراكات الملفات - تصنيف:\n        <span style="color: ${n.color}">${n.name}</span>\n    `;
+          (updateFilesTable(t.filter((t) => t.categoryId === e)),
+            closeCategoriesModal(),
+            switchTab("files"));
+        }
+        function updateCategoriesList() {
+          const e = JSON.parse(localStorage.getItem("fileCategories") || "[]"),
+            t = JSON.parse(localStorage.getItem("fileSubscriptions") || "[]"),
+            n = document.getElementById("categoriesList");
+          ((n.innerHTML = ""),
+            e.forEach((e) => {
+              const o = t.filter(
+                  (t) =>
+                    t.categoryId && parseInt(t.categoryId) === parseInt(e.id),
+                ).length,
+                a = document.createElement("div");
+              ((a.className =
+                "flex items-center justify-between p-2 rounded bg-[#1a1a1a] mb-2"),
+                (a.innerHTML = `\n            <div class="flex items-center gap-2">\n                <span class="w-4 h-4 rounded-full" style="background-color: ${e.color}"></span>\n                <span class="text-sm">${e.name}</span>\n                <span class="text-xs text-gray-400">(${o} اشتراك)</span>\n            </div>\n            <div class="flex gap-2">\n                <button onclick="showCategorySubscriptions(${e.id})" class="text-purple-500 hover:text-purple-400">\n                    <i class="fas fa-eye"></i>\n                </button>\n                <button onclick="editCategory(${e.id})" class="text-blue-500 hover:text-blue-400">\n                    <i class="fas fa-edit"></i>\n                </button>\n                <button onclick="deleteCategory(${e.id})" class="text-red-500 hover:text-red-400">\n                    <i class="fas fa-trash"></i>\n                </button>\n            </div>\n        `),
+                n.appendChild(a));
+            }));
+        }
+        function showCategorySubscriptions(e) {
+          const t = JSON.parse(
+              localStorage.getItem("fileSubscriptions") || "[]",
+            ),
+            n = JSON.parse(localStorage.getItem("fileCategories") || "[]").find(
+              (t) => t.id === e,
+            );
+          if (!n) return;
+          document.querySelector("#filesTable h2").innerHTML =
+            `\n        <div class="flex justify-between items-center">\n            <div>\n                قائمة اشتراكات الملفات - تصنيف:\n                <span style="color: ${n.color}">${n.name}</span>\n            </div>\n            <button onclick="resetFilesTable()" class="text-gray-400 hover:text-white px-3 py-1 rounded border border-gray-600 text-sm">\n                <i class="fas fa-arrow-right ml-1"></i>\n                العودة للقائمة الكاملة\n            </button>\n        </div>\n    `;
+          (updateFilesTable(
+            t.filter(
+              (t) => t.categoryId && parseInt(t.categoryId) === parseInt(e),
+            ),
+          ),
+            closeCategoriesModal(),
+            switchTab("files"));
+        }
+        function resetFilesTable() {
+          ((document.querySelector("#filesTable h2").textContent =
+            "قائمة اشتراكات الملفات"),
+            updateFilesTable());
+        }
+        async function showSubscriptionDetails(e, t = "regular") {
+          try {
+            let n;
+            if (
+              ((n =
+                "regular" === t
+                  ? await dbManager.getAllSubscriptions()
+                  : await dbManager.getAllFileSubscriptions()),
+              !n.success)
+            )
+              return void alert("خطأ في تحميل بيانات الاشتراك");
+            const o = n.subscriptions.find((t) => t.id === e);
+            if (!o) return void alert("لم يتم العثور على الاشتراك");
+            new Date(o.start_date);
+            const a = new Date(o.expiry_date),
+              s = new Date(),
+              r = Math.ceil((a - s) / 864e5),
+              i = `\n        <div class="space-y-4 text-right">\n            <div class="grid grid-cols-2 gap-4">\n                <div>\n                    <h4 class="text-gray-400 text-sm">البريد الإلكتروني</h4>\n                    <p>${o.email}</p>\n                </div>\n                <div>\n                    <h4 class="text-gray-400 text-sm">رقم الواتساب</h4>\n                    <p>${o.whatsapp}</p>\n                </div>\n                ${"regular" === t ? `\n                    <div>\n                        <h4 class="text-gray-400 text-sm">اسم العميل</h4>\n                        <p>${o.customer_name || o.customerName || "غير محدد"}</p>\n                    </div>\n                ` : `\n                    <div>\n                        <h4 class="text-gray-400 text-sm">اسم الملف</h4>\n                        <p>${o.file_name || o.fileName || "غير محدد"}</p>\n                    </div>\n                `}\n                <div>\n                    <h4 class="text-gray-400 text-sm">نوع الاشتراك</h4>\n                    <p>${getSubscriptionTypeName(o.subscription_type || o.type)}</p>\n                </div>\n                <div>\n                    <h4 class="text-gray-400 text-sm">تاريخ البداية</h4>\n                    <p>${formatDate(o.start_date || o.startDate)}</p>\n                </div>\n                <div>\n                    <h4 class="text-gray-400 text-sm">تاريخ الانتهاء</h4>\n                    <p>${formatDate(o.expiry_date || o.expiryDate)}</p>\n                </div>\n                <div>\n                    <h4 class="text-gray-400 text-sm">المدة المتبقية</h4>\n                    <p class="${r <= 7 ? "text-yellow-500" : "text-green-500"}">${r} يوم</p>\n                </div>\n                ${o.subscription_password || o.password ? `\n                    <div>\n                        <h4 class="text-gray-400 text-sm">كلمة المرور</h4>\n                        <p>${o.subscription_password || o.password}</p>\n                    </div>\n                ` : ""}\n                ${o.google_play_email ? `\n                    <div class="col-span-2">\n                        <h4 class="text-gray-400 text-sm mb-2">معلومات جوجل بلاي</h4>\n                        <p>البريد: ${o.google_play_email}</p>\n                        <p>كلمة المرور: ${o.google_play_password}</p>\n                        ${o.gpa_code ? `<p>كود GPA: ${o.gpa_code}</p>` : ""}\n                    </div>\n                ` : ""}\n                ${o.notes ? `\n                    <div class="col-span-2">\n                        <h4 class="text-gray-400 text-sm mb-2">الملاحظات</h4>\n                        <div class="bg-gray-700 p-3 rounded">\n                            <p class="text-yellow-300">${o.notes}</p>\n                        </div>\n                    </div>\n                ` : ""}\n            </div>\n\n            <div class="flex justify-end gap-2 mt-4 pt-4 border-t border-gray-700">\n                <button onclick="renewSubscription(${e}, '${t}')" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">\n                    <i class="fas fa-sync-alt ml-1"></i>تجديد الاشتراك\n                </button>\n                <button onclick="closeDetailsModal()" class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700">\n                    <i class="fas fa-times ml-1"></i>إغلاق\n                </button>\n            </div>\n        </div>\n    `,
+              l = document.createElement("div");
+            ((l.id = "detailsModal"),
+              (l.className =
+                "fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"),
+              (l.innerHTML = `\n        <div class="bg-[#2a2a2a] rounded-lg w-full max-w-2xl p-6">\n            <h3 class="text-xl font-bold mb-4">تفاصيل الاشتراك</h3>\n            ${i}\n        </div>\n    `),
+              document.body.appendChild(l));
+          } catch (e) {
+            (console.error("Error showing subscription details:", e),
+              alert("حدث خطأ أثناء عرض تفاصيل الاشتراك"));
+          }
+        }
+        function closeDetailsModal() {
+          const e = document.getElementById("detailsModal");
+          e && e.remove();
+        }
+        async function renewSubscription(e, t = "regular") {
+          try {
+            let n;
+            if (
+              ((n =
+                "regular" === t
+                  ? await dbManager.getAllSubscriptions()
+                  : await dbManager.getAllFileSubscriptions()),
+              !n.success)
+            )
+              return void alert("خطأ في تحميل بيانات الاشتراك");
+            const o = n.subscriptions.find((t) => t.id === e);
+            if (!o) return void alert("لم يتم العثور على الاشتراك");
+            const a = new Date(),
+              s = new Date(o.expiry_date),
+              r = document.createElement("div");
+            ((r.id = "renewModal"),
+              (r.className =
+                "fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"),
+              (r.innerHTML =
+                '\n        <div class="bg-[#2a2a2a] rounded-lg w-full max-w-md p-6">\n            <h3 class="text-xl font-bold mb-4">تجديد الاشتراك</h3>\n            <form id="renewForm" class="space-y-4">\n                <div>\n                    <label class="block text-gray-400 mb-2">مدة التجديد</label>\n                    <select id="renewDuration" class="w-full p-2 rounded bg-[#1a1a1a] border border-gray-700 focus:border-purple-500">\n                        <option value="1">شهر واحد</option>\n                        <option value="3">3 أشهر</option>\n                        <option value="6">6 أشهر</option>\n                        <option value="12">سنة</option>\n                    </select>\n                </div>\n                <div class="flex justify-end gap-2">\n                    <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">\n                        تجديد\n                    </button>\n                    <button type="button" onclick="closeRenewModal()" class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700">\n                        إلغاء\n                    </button>\n                </div>\n            </form>\n        </div>\n    '),
+              document.body.appendChild(r),
+              (document.getElementById("renewForm").onsubmit = async function (
+                n,
+              ) {
+                n.preventDefault();
+                const o = parseInt(
+                  document.getElementById("renewDuration").value,
+                );
+                try {
+                  const n = new Date(Math.max(s, a));
+                  let r;
+                  (n.setMonth(n.getMonth() + o),
+                    (r =
+                      "regular" === t
+                        ? await dbManager.updateSubscription(e, {
+                            expiry_date: n.toISOString(),
+                          })
+                        : await dbManager.updateFileSubscription(e, {
+                            expiry_date: n.toISOString(),
+                          })),
+                    r.success
+                      ? ("regular" === t
+                          ? updateSubscriptionsTable()
+                          : updateFilesTable(),
+                        closeRenewModal(),
+                        closeDetailsModal(),
+                        alert("تم تجديد الاشتراك بنجاح"))
+                      : alert(r.error || "حدث خطأ أثناء تجديد الاشتراك"));
+                } catch (e) {
+                  (console.error("Error renewing subscription:", e),
+                    alert("حدث خطأ أثناء تجديد الاشتراك"));
+                }
+              }));
+          } catch (e) {
+            (console.error("Error in renewSubscription:", e),
+              alert("حدث خطأ أثناء تحميل بيانات الاشتراك"));
+          }
+        }
+        function closeRenewModal() {
+          const e = document.getElementById("renewModal");
+          e && e.remove();
+        }
+        function updateTableActionButtons(e, t = "regular") {
+          const n =
+              "regular" === t ? "editSubscription" : "editFileSubscription",
+            o =
+              "regular" === t ? "deleteSubscription" : "deleteFileSubscription",
+            a = e.id;
+          return `\n        <div class="flex gap-1">\n            <button onclick="showSubscriptionDetails('${a}', '${t}')" class="text-purple-500 hover:text-purple-400 p-1" title="عرض التفاصيل">\n                <i class="fas fa-eye text-xs"></i>\n            </button>\n            <button onclick="${n}('${a}')" class="text-blue-500 hover:text-blue-600 p-1" title="تعديل">\n                <i class="fas fa-edit text-xs"></i>\n            </button>\n            <button onclick="printSubscription('${a}', '${t}')" class="text-orange-500 hover:text-orange-600 p-1" title="طباعة">\n                <i class="fas fa-print text-xs"></i>\n            </button>\n            <button onclick="renewSubscription('${a}', '${t}')" class="text-green-500 hover:text-green-600 p-1" title="تجديد">\n                <i class="fas fa-sync-alt text-xs"></i>\n            </button>\n            <button onclick="${o}('${a}', '${t}')" class="text-red-500 hover:text-red-600 p-1" title="حذف">\n                <i class="fas fa-trash text-xs"></i>\n            </button>\n        </div>\n    `;
+        }
+        function printTable(e) {
+          try {
+            console.log("🖨️ بدء عملية الطباعة للجدول:", e);
+            const t = document.getElementById(e);
+            if (!t)
+              return (
+                console.error("❌ لم يتم العثور على الحاوي:", e),
+                void alert("لم يتم العثور على الجدول للطباعة")
+              );
+            let n;
+            if (
+              ((n =
+                "subscriptionsTable" === e
+                  ? document.querySelector("#tableView table")
+                  : "filesTable" === e
+                    ? document.querySelector("#filesTableView table")
+                    : t.querySelector("table")),
+              !n)
+            )
+              return (
+                console.error("❌ لم يتم العثور على الجدول للطباعة"),
+                void alert("لم يتم العثور على بيانات للطباعة")
+              );
+            const o = n.cloneNode(!0),
+              a = o.querySelectorAll("th:last-child"),
+              s = o.querySelectorAll("td:last-child");
+            (a.forEach((e) => e.remove()), s.forEach((e) => e.remove()));
+            const r = window.open("", "_blank", "width=800,height=600");
+            if (!r)
+              return void alert(
+                "فشل في فتح نافذة الطباعة. يرجى السماح بالنوافذ المنبثقة.",
+              );
+            (r.document.write("<!DOCTYPE html>"),
+              r.document.write('<html dir="rtl">'),
+              r.document.write("<head>"),
+              r.document.write('<meta charset="UTF-8">'),
+              r.document.write("<title>طباعة الجدول</title>"),
+              r.document.write("<style>"),
+              r.document.write(
+                "body { font-family: Arial, sans-serif; direction: rtl; margin: 20px; }",
+              ),
+              r.document.write(
+                "table { width: 100%; border-collapse: collapse; margin: 20px 0; }",
+              ),
+              r.document.write(
+                "th, td { border: 1px solid #ddd; padding: 8px; text-align: right; font-size: 12px; }",
+              ),
+              r.document.write(
+                "th { background-color: #f2f2f2; font-weight: bold; }",
+              ),
+              r.document.write(
+                "h2 { text-align: center; margin-bottom: 20px; }",
+              ),
+              r.document.write("</style>"),
+              r.document.write("</head>"),
+              r.document.write("<body>"),
+              r.document.write("<h2>تقرير الاشتراكات</h2>"),
+              r.document.write(o.outerHTML),
+              r.document.write("</body>"),
+              r.document.write("</html>"),
+              r.document.close(),
+              setTimeout(() => {
+                (r.focus(),
+                  r.print(),
+                  setTimeout(() => {
+                    (r.close(), console.log("✅ تم إغلاق نافذة الطباعة"));
+                  }, 1e3));
+              }, 500),
+              console.log("✅ تم إنشاء نافذة الطباعة بنجاح"));
+          } catch (e) {
+            (console.error("❌ خطأ في عملية الطباعة:", e),
+              alert("حدث خطأ أثناء الطباعة. يرجى إعادة المحاولة."));
+          }
+        }
+        async function printSubscription(e, t = "regular") {
+          try {
+            if (
+              (console.log("🖨️ محاولة طباعة الاشتراك:", e, "النوع:", t),
+              !window.dbManager)
+            )
+              return (
+                console.error("❌ dbManager غير متوفر"),
+                void alert("خطأ: لا يمكن الوصول لقاعدة البيانات")
+              );
+            let n = null;
+            if ("regular" === t) {
+              console.log("📡 جلب الاشتراكات العادية...");
+              const t = await window.dbManager.getAllSubscriptions();
+              if (
+                (console.log("📋 نتيجة جلب الاشتراكات العادية:", t), t.success)
+              ) {
+                const o = t.data || t.subscriptions;
+                o && Array.isArray(o)
+                  ? (console.log(
+                      "🔍 البحث في الاشتراكات العادية:",
+                      o.length,
+                      "اشتراك",
+                    ),
+                    console.log(
+                      "📋 IDs الموجودة:",
+                      o.map((e) => e.id),
+                    ),
+                    (n = o.find((t) => t.id == e)))
+                  : console.error("❌ بيانات الاشتراكات العادية غير صحيحة:", t);
+              }
+            } else {
+              console.log("📡 جلب اشتراكات الملفات...");
+              const t = await window.dbManager.getAllFileSubscriptions();
+              (console.log("📋 نتيجة جلب اشتراكات الملفات:", t),
+                t.success && t.subscriptions && Array.isArray(t.subscriptions)
+                  ? (console.log(
+                      "🔍 البحث في اشتراكات الملفات:",
+                      t.subscriptions.length,
+                      "اشتراك",
+                    ),
+                    console.log(
+                      "📋 IDs الموجودة:",
+                      t.subscriptions.map((e) => e.id),
+                    ),
+                    (n = t.subscriptions.find((t) => t.id == e)))
+                  : console.error("❌ بيانات اشتراكات الملفات غير صحيحة:", t));
+            }
+            if (
+              (console.log("🔍 البحث عن الاشتراك بالـ ID:", e),
+              console.log("🔍 الاشتراك الموجود:", n),
+              !n)
+            )
+              if (
+                (console.log("🔄 محاولة البحث في localStorage..."),
+                "regular" === t)
+              ) {
+                const t = JSON.parse(
+                  localStorage.getItem("regularSubscriptions") || "[]",
+                );
+                (console.log("📦 الاشتراكات في localStorage:", t.length),
+                  (n = t.find((t) => t.id == e)),
+                  console.log("🔍 نتيجة البحث في localStorage:", n));
+              } else {
+                const t = JSON.parse(
+                  localStorage.getItem("fileSubscriptions") || "[]",
+                );
+                (console.log("📦 اشتراكات الملفات في localStorage:", t.length),
+                  (n = t.find((t) => t.id == e)),
+                  console.log("🔍 نتيجة البحث في localStorage:", n));
+              }
+            if (!n) return void alert("لم يتم العثور على الاشتراك");
+            showPrintOptionsModal(n, t);
+          } catch (e) {
+            (console.error("❌ خطأ في طباعة الاشتراك:", e),
+              console.error("❌ تفاصيل الخطأ:", e.stack),
+              alert("حدث خطأ أثناء تحضير الطباعة: " + e.message));
+          }
+        }
+        (document
+          .getElementById("subscriptionType")
+          .addEventListener("change", function () {
+            const e = document.getElementById("otherSubscriptionDiv"),
+              t = document.getElementById("customSubscriptionName");
+            "other" === this.value
+              ? (e.classList.remove("hidden"), (t.required = !0))
+              : (e.classList.add("hidden"), (t.required = !1));
+          }),
+          document.addEventListener("DOMContentLoaded", function () {
+            (JSON.parse(localStorage.getItem("regularSubscriptions") || "[]"),
+              JSON.parse(localStorage.getItem("fileSubscriptions") || "[]"));
+            (updateStatistics(),
+              updateSubscriptionsTable(),
+              updateFilesTable());
+          }),
+          document.addEventListener("DOMContentLoaded", function () {
+            (updateCategorySelects(), updateFilesTable());
+          }),
+          (document.getElementById("predefinedColors").innerHTML =
+            '\n    <option value="">اختر لون</option>\n    <option value="#ef4444">أحمر</option>\n    <option value="#dc2626">أحمر داكن</option>\n    <option value="#f87171">أحمر فاتح</option>\n    <option value="#3b82f6">أزرق</option>\n    <option value="#1d4ed8">أزرق داكن</option>\n    <option value="#60a5fa">أزرق فاتح</option>\n    <option value="#22c55e">أخضر</option>\n    <option value="#15803d">أخضر داكن</option>\n    <option value="#4ade80">أخضر فاتح</option>\n    <option value="#eab308">أصفر</option>\n    <option value="#ca8a04">أصفر داكن</option>\n    <option value="#facc15">أصفر فاتح</option>\n    <option value="#8b5cf6">بنفسجي</option>\n    <option value="#6d28d9">بنفسجي داكن</option>\n    <option value="#a78bfa">بنفسجي فاتح</option>\n    <option value="#ec4899">وردي</option>\n    <option value="#be185d">وردي داكن</option>\n    <option value="#f472b6">وردي فاتح</option>\n    <option value="#f97316">برتقالي</option>\n    <option value="#c2410c">برتقالي داكن</option>\n    <option value="#fb923c">برتقالي فاتح</option>\n    <option value="#06b6d4">تركواز</option>\n    <option value="#0e7490">تركواز داكن</option>\n    <option value="#22d3ee">تركواز فاتح</option>\n    <option value="#14b8a6">نعناعي</option>\n    <option value="#0f766e">نعناعي داكن</option>\n    <option value="#2dd4bf">نعناعي فاتح</option>\n    <option value="#64748b">رمادي</option>\n    <option value="#334155">رمادي داكن</option>\n    <option value="#94a3b8">رمادي فاتح</option>\n    <option value="#c026d3">فوشيا</option>\n    <option value="#86198f">فوشيا داكن</option>\n    <option value="#e879f9">فوشيا فاتح</option>\n    <option value="#10b981">زمردي</option>\n    <option value="#047857">زمردي داكن</option>\n    <option value="#34d399">زمردي فاتح</option>\n    <option value="#6366f1">نيلي</option>\n    <option value="#4338ca">نيلي داكن</option>\n    <option value="#818cf8">نيلي فاتح</option>\n    <option value="#d946ef">أرجواني</option>\n    <option value="#a21caf">أرجواني داكن</option>\n    <option value="#e879f9">أرجواني فاتح</option>\n'));
+      </script>
+      <div id="categories-modal-placeholder"></div>
+      <script src="dashboard_assets/js/page-logic.part1.js"></script>
+      <script src="dashboard_assets/js/page-logic.part2.js"></script>
+      <script src="dashboard_assets/js/page-logic.part3.js"></script>
+      <script src="dashboard_assets/js/page-logic.part4.js"></script>
+      <script src="dashboard_assets/js/page-logic.part5.js"></script>
+      <script src="dashboard_assets/js/page-logic.part6.js"></script>
+    </div>
+  </body>
+</html>

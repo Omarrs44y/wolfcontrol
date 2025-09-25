@@ -1,0 +1,123 @@
+# Wolf Control - Git Ignore File
+# ================================
+
+# Environment Variables (CRITICAL - Never commit these!)
+.env
+.env.local
+.env.production
+.env.staging
+.env.development
+
+# Configuration Files (CRITICAL - Never commit these!)
+js/config.js
+
+# Sensitive Configuration Files
+config/database.php
+config/secrets.json
+config/private-keys/
+*.key
+*.pem
+*.p12
+*.pfx
+
+# Logs and Debug Files
+logs/
+*.log
+debug.log
+error.log
+access.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime and Cache Files
+cache/
+tmp/
+temp/
+.cache/
+*.tmp
+*.temp
+.DS_Store
+Thumbs.db
+
+# IDE and Editor Files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.sublime-project
+.sublime-workspace
+
+# Node.js (if using Node.js tools)
+node_modules/
+npm-debug.log
+yarn.lock
+package-lock.json
+
+# PHP (if using PHP backend)
+vendor/
+composer.lock
+.phpunit.result.cache
+
+# Database Files
+*.sqlite
+*.db
+database.sql
+backup.sql
+*.dump
+
+# Backup Files
+backups/
+*.backup
+*.bak
+*.old
+
+# OS Generated Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# Archive Files
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# Development Tools
+.sass-cache/
+.grunt/
+.bower_components/
+
+# Security Scan Results
+security-scan-results/
+vulnerability-reports/
+
+# User Uploaded Files (if any)
+uploads/private/
+user-data/
+sensitive-uploads/
+
+# SSL Certificates
+ssl/
+certificates/
+*.crt
+*.csr
+
+# Temporary HTML Files
+temp.html
+test.html
+debug.html
+
+# Local Configuration Overrides
+local-config.js
+local-settings.json
+
+# Error Pages with Sensitive Info
+error-details.html
+debug-info.html

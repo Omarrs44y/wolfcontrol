@@ -1,0 +1,80 @@
+<div
+  id="profileModal"
+  class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4"
+>
+  <div class="bg-[#2a2a2a] rounded-lg w-full max-w-md p-6">
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="text-xl font-bold">تعديل المعلومات الشخصية</h3>
+      <button onclick="closeProfileModal()" class="text-gray-400 hover:text-white">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <form id="profileForm" class="space-y-4">
+      <div>
+        <label class="block text-gray-400 mb-2 text-sm">
+          <i class="fas fa-desktop ml-1"></i>اسم اللوحة
+        </label>
+        <input type="text" id="dashboardName" class="w-full p-2 rounded bg-[#1a1a1a] border border-gray-700 focus:border-purple-500 text-sm" placeholder="أدخل اسم اللوحة" />
+      </div>
+      <div>
+        <label class="block text-gray-400 mb-2 text-sm">
+          <i class="fab fa-whatsapp ml-1"></i>رقم الواتساب
+        </label>
+        <div class="flex gap-2">
+          <select id="profileCountryCode" class="w-24 p-2 rounded bg-[#1a1a1a] border border-gray-700 focus:border-purple-500 text-sm">
+            <option value="+966">🇸🇦 +966</option>
+            <option value="+971">🇦🇪 +971</option>
+            <option value="+974">🇶🇦 +974</option>
+            <option value="+973">🇧🇭 +973</option>
+            <option value="+968">🇴🇲 +968</option>
+            <option value="+965">🇰🇼 +965</option>
+            <option value="+20">🇪🇬 +20</option>
+          </select>
+          <input type="tel" id="profileWhatsapp" class="flex-1 p-2 rounded bg-[#1a1a1a] border border-gray-700 focus:border-purple-500 text-sm" placeholder="رقم الواتساب" />
+        </div>
+      </div>
+      <div>
+        <label class="block text-gray-400 mb-2 text-sm">
+          <i class="fas fa-store ml-1"></i>اسم المتجر (اختياري)
+        </label>
+        <input type="text" id="storeName" class="w-full p-2 rounded bg-[#1a1a1a] border border-gray-700 focus:border-purple-500 text-sm" placeholder="أدخل اسم المتجر" />
+      </div>
+      <div>
+        <label class="block text-gray-400 mb-2 text-sm">
+          <i class="fas fa-link ml-1"></i>رابط المتجر (اختياري)
+        </label>
+        <input type="url" id="storeLink" class="w-full p-2 rounded bg-[#1a1a1a] border border-gray-700 focus:border-purple-500 text-sm" placeholder="https://example.com" />
+      </div>
+      <div class="border-t border-gray-700 pt-4">
+        <div class="flex items-center mb-2">
+          <input type="checkbox" id="changePassword" class="ml-2 w-4 h-4" />
+          <label for="changePassword" class="text-gray-400 cursor-pointer text-sm">
+            <i class="fas fa-lock ml-1"></i>تغيير كلمة المرور
+          </label>
+        </div>
+        <div id="passwordSection" class="hidden space-y-3">
+          <div>
+            <label class="block text-gray-400 mb-1 text-sm">كلمة المرور الحالية</label>
+            <input type="password" id="currentPassword" class="w-full p-2 rounded bg-[#1a1a1a] border border-gray-700 focus:border-purple-500 text-sm" />
+          </div>
+          <div>
+            <label class="block text-gray-400 mb-1 text-sm">كلمة المرور الجديدة</label>
+            <input type="password" id="newPassword" class="w-full p-2 rounded bg-[#1a1a1a] border border-gray-700 focus:border-purple-500 text-sm" />
+          </div>
+          <div>
+            <label class="block text-gray-400 mb-1 text-sm">تأكيد كلمة المرور الجديدة</label>
+            <input type="password" id="confirmPassword" class="w-full p-2 rounded bg-[#1a1a1a] border border-gray-700 focus:border-purple-500 textsm" />
+          </div>
+          <div id="passwordChangeInfo" class="text-yellow-500 text-xs hidden">
+            <i class="fas fa-info-circle ml-1"></i>يمكن تغيير كلمة المرور مرة واحدة كل 15 يوم
+          </div>
+        </div>
+      </div>
+      <div class="flex justify-end gap-2 pt-4 border-t border-gray-700">
+        <button type="button" onclick="closeProfileModal()" class="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700">إلغاء</button>
+        <button type="submit" class="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700">حفظ التغييرات</button>
+      </div>
+    </form>
+  </div>
+</div>
+

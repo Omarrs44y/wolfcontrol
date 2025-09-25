@@ -1,0 +1,77 @@
+<div id="customersTable" class="bg-[#2a2a2a] rounded-lg shadow-lg overflow-hidden hidden">
+  <div class="p-4 bg-[#3a3a3a]">
+    <div class="flex justify-between items-center">
+      <h2 class="text-xl font-bold">إدارة العملاء</h2>
+      <div class="flex gap-2">
+        <button onclick="refreshCustomersList()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm">
+          <i class="fas fa-sync-alt ml-1"></i>تحديث
+        </button>
+      </div>
+    </div>
+  </div>
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4" id="customersList"></div>
+  <div id="customerDetails" class="hidden">
+    <div class="p-4 bg-[#3a3a3a] border-t border-gray-700">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-bold" id="customerDetailsTitle">تفاصيل العميل</h3>
+        <div class="flex gap-2">
+          <button onclick="hideCustomerDetails()" class="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1 rounded text-sm">
+            <i class="fas fa-times ml-1"></i>إغلاق
+          </button>
+        </div>
+      </div>
+      <div class="bg-blue-900/30 border border-blue-500/50 rounded-lg p-3 mb-4">
+        <div class="flex items-center">
+          <i class="fas fa-info-circle text-blue-400 ml-2"></i>
+          <span class="text-blue-300 text-sm">العميل يضيف اشتراكاته بنفسه عند تسجيل الدخول. يمكنك هنا مراقبة وإدارة اشتراكاته.</span>
+        </div>
+      </div>
+      <div class="border-b border-gray-700 mb-4">
+        <div class="flex gap-4">
+          <button onclick='switchCustomerTab("regular")' id="customerRegularTab" class="px-4 py-2 font-medium text-sm focus:outline-none customer-tab-button active">
+            <i class="fas fa-list ml-2"></i>الاشتراكات العادية
+          </button>
+          <button onclick='switchCustomerTab("file")' id="customerFileTab" class="px-4 py-2 font-medium text-sm focus:outline-none customer-tab-button">
+            <i class="fas fa-folder ml-2"></i>اشتراكات الملفات
+          </button>
+        </div>
+      </div>
+      <div id="customerRegularSubscriptions" class="customer-subscriptions-table">
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead class="bg-[#4a4a4a]">
+              <tr>
+                <th class="px-4 py-2 text-right text-sm">البريد الإلكتروني</th>
+                <th class="px-4 py-2 text-right text-sm">نوع الاشتراك</th>
+                <th class="px-4 py-2 text-right text-sm">رقم الواتساب</th>
+                <th class="px-4 py-2 text-right text-sm">تاريخ الانتهاء</th>
+                <th class="px-4 py-2 text-right text-sm">الحالة</th>
+                <th class="px-4 py-2 text-right text-sm">الإجراءات</th>
+              </tr>
+            </thead>
+            <tbody id="customerRegularTableBody" class="divide-y divide-gray-700"></tbody>
+          </table>
+        </div>
+      </div>
+      <div id="customerFileSubscriptions" class="customer-subscriptions-table hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead class="bg-[#4a4a4a]">
+              <tr>
+                <th class="px-4 py-2 text-right text-sm">البريد الإلكتروني</th>
+                <th class="px-4 py-2 text-right text-sm">نوع الملف</th>
+                <th class="px-4 py-2 text-right text-sm">اسم الملف</th>
+                <th class="px-4 py-2 text-right text-sm">نوع الحساب</th>
+                <th class="px-4 py-2 text-right text-sm">تاريخ الانتهاء</th>
+                <th class="px-4 py-2 text-right text-sm">الحالة</th>
+                <th class="px-4 py-2 text-right text-sm">الإجراءات</th>
+              </tr>
+            </thead>
+            <tbody id="customerFileTableBody" class="divide-y divide-gray-700"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+

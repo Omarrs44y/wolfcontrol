@@ -1,0 +1,40 @@
+<div id="subscriptionsTable" class="bg-[#2a2a2a] rounded-lg shadow-lg overflow-hidden">
+  <div class="p-3 md:p-4 bg-[#3a3a3a] flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+    <h2 class="text-lg md:text-xl font-bold">قائمة الاشتراكات</h2>
+    <div class="flex gap-2">
+      <!-- داخل قسم الاشتراكات -->
+      <!-- زر التبديل موجود كما هو -->
+      <button id="toggleViewBtn" onclick="toggleTableView()" class="block sm:hidden bg-gray-600 hover:bg-gray-700 px-3 py-2 rounded-lg items-center gap-2 text-sm" style="display: none">
+        <i class="fas fa-th-list" id="toggleViewIcon"></i>
+        <span id="toggleViewText">عرض بطاقات</span>
+      </button>
+      <button onclick='printTable("subscriptionsTable")' class="bg-blue-600 hover:bg-blue-700 px-3 md:px-4 py-2 rounded-lg flex items-center gap-2 text-sm">
+        <i class="fas fa-print"></i>
+        <span class="hidden sm:inline">طباعة</span>
+      </button>
+    </div>
+  </div>
+  <!-- استبدال الكلاسات لتجنب الـ md:block/md:hidden -->
+  <div id="tableView" class="hidden overflow-x-auto">
+    <table class="w-full">
+      <thead class="bg-[#3a3a3a]">
+        <tr>
+          <th class="px-4 py-3 text-right text-sm">العميل</th>
+          <th class="px-4 py-3 text-right text-sm">البريد الإلكتروني</th>
+          <th class="px-4 py-3 text-right text-sm">رقم الواتساب</th>
+          <th class="px-4 py-3 text-right text-sm">نوع الاشتراك</th>
+          <th class="px-4 py-3 text-right text-sm">العملة</th>
+          <th class="px-4 py-3 text-right text-sm">تاريخ الانتهاء</th>
+          <th class="px-4 py-3 text-right text-sm">الحالة</th>
+          <th class="px-4 py-3 text-right text-sm">ملاحظات</th>
+          <th class="px-4 py-3 text-right text-sm">إجراءات</th>
+        </tr>
+      </thead>
+      <tbody id="subscriptionsTableBody" class="divide-y divide-gray-700"></tbody>
+    </table>
+  </div>
+  <div id="cardsView" class="hidden">
+    <div id="subscriptionsCardsContainer" class="p-3 space-y-3"></div>
+  </div>
+</div>
+

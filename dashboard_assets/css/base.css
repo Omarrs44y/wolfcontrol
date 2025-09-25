@@ -1,0 +1,87 @@
+/* Extracted base styles from dashboard.html */
+body { font-family: 'Tajawal', sans-serif; background-color: #1a1a1a; }
+
+@media (max-width: 768px) {
+  .mobile-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #2a2a2a; padding: 1rem; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); }
+}
+
+/* Sidebar */
+.sidebar { position: fixed; top: 0; right: -100%; width: 280px; max-width: 85vw; height: 100vh; background-color: #2a2a2a; transition: right 0.3s ease-in-out; z-index: 1000; padding: 1rem; box-shadow: -4px 0 20px rgba(0, 0, 0, 0.3); overflow-y: auto; }
+.sidebar.active { right: 0; }
+@media (max-width: 640px) { .sidebar { width: 100vw; max-width: 100vw; right: -100vw; } }
+
+.sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); opacity: 0; visibility: hidden; transition: all 0.3s ease-in-out; z-index: 999; }
+.sidebar-overlay.active { opacity: 1; visibility: visible; }
+
+.sidebar-item { display: flex; align-items: center; padding: 0.75rem 1rem; color: white; text-decoration: none; border-radius: 0.5rem; transition: all 0.2s ease; margin-bottom: 0.5rem; }
+.sidebar-item:hover { background-color: #3a3a3a; }
+.sidebar-item i { margin-left: 0.75rem; width: 1.5rem; text-align: center; }
+
+/* Cards (mobile) */
+.subscription-card { background: #1a1a1a; border: 1px solid #374151; border-radius: 0.5rem; padding: 1rem; transition: all 0.2s ease; }
+.subscription-card:hover { background: #2a2a2a; border-color: #4b5563; }
+.subscription-card .card-header { display: flex; justify-content: between; align-items: flex-start; margin-bottom: 0.75rem; }
+.subscription-card .card-title { font-weight: 600; font-size: 1rem; color: white; }
+.subscription-card .card-subtitle { font-size: 0.875rem; color: #9ca3af; margin-top: 0.25rem; }
+.subscription-card .card-body { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1rem; }
+.subscription-card .card-field { display: flex; flex-direction: column; }
+.subscription-card .card-field-label { font-size: 0.75rem; color: #6b7280; margin-bottom: 0.25rem; }
+.subscription-card .card-field-value { font-size: 0.875rem; color: white; word-break: break-all; }
+.subscription-card .card-actions { display: flex; justify-content: space-between; align-items: center; padding-top: 0.75rem; border-top: 1px solid #374151; }
+
+@media (max-width: 640px) {
+  .container { padding-left: 1rem; padding-right: 1rem; }
+  .subscription-card .card-body { grid-template-columns: 1fr; gap: 0.5rem; }
+  .subscription-card .card-field-value { font-size: 0.8rem; }
+}
+
+/* Status badge */
+.status-badge { display: inline-flex; align-items: center; padding: 0.25rem 0.5rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 500; color: white; }
+.status-active { background-color: #10b981; }
+.status-expiring { background-color: #f59e0b; }
+.status-expired { background-color: #ef4444; }
+
+/* Tabs hover style (base) */
+.tab-button { color: #9ca3af; transition: all 0.2s ease; }
+.tab-button:hover { color: white; }
+.tab-button.active { color: white; border-bottom-color: #ef4444 !important; }
+
+/* Small screens */
+@media (max-width: 640px) {
+  .navbar-logo { height: 2rem; }
+  .sidebar { padding: 0.75rem; }
+  .sidebar-item { padding: 0.5rem 0.75rem; font-size: 0.875rem; }
+  .subscription-card { padding: 0.75rem; }
+  h1 { font-size: 0.875rem !important; }
+  h2 { font-size: 1rem !important; }
+  button { min-height: 44px; }
+  input, select, textarea { min-height: 44px; font-size: 16px; }
+  table { font-size: 0.75rem; }
+  .modal { margin: 0.5rem; }
+}
+
+/* Very small screens */
+@media (max-width: 480px) {
+  .container { padding-left: 0.5rem; padding-right: 0.5rem; }
+  .subscription-card .card-body { grid-template-columns: 1fr; }
+  .grid { gap: 0.5rem; }
+}
+
+/* Scrollbars */
+.overflow-x-auto { scrollbar-width: thin; scrollbar-color: #4b5563 #1f2937; }
+.overflow-x-auto::-webkit-scrollbar { height: 6px; }
+.overflow-x-auto::-webkit-scrollbar-track { background: #1f2937; }
+.overflow-x-auto::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 3px; }
+.overflow-x-auto::-webkit-scrollbar-thumb:hover { background: #6b7280; }
+
+/* Animations */
+@keyframes spin { to { transform: rotate(360deg); } }
+.animate-spin { animation: spin 1s linear infinite; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.fade-in { animation: fadeIn 0.3s ease-out; }
+.subscription-card { animation: fadeIn 0.3s ease-out; }
+.tab-button { transition: all 0.2s ease; }
+.status-badge { transition: all 0.2s ease; }
+.hover-scale:hover { transform: scale(1.02); }
+.active-scale:active { transform: scale(0.98); }
+

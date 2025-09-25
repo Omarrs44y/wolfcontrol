@@ -1,0 +1,22 @@
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-wrap gap-3 mb-6">
+  <button onclick='document.getElementById("subscriptionModal").classList.remove("hidden")' class="bg-red-500 px-4 py-3 rounded-lg hover:bg-red-600 flex items-center justify-center gap-2 text-sm font-medium transition-colors">
+    <i class="fas fa-plus"></i>
+    <span class="hidden sm:inline">إضافة اشتراك جديد</span>
+    <span class="sm:hidden">اشتراك جديد</span>
+  </button>
+  <button onclick="openNewFileSubscriptionModal()" class="bg-purple-600 text-white px-4 py-3 rounded-lg hover:bg-purple-700 flex items-center justify-center gap-2 text-sm font-medium transition-colors">
+    <i class="fas fa-file-plus"></i>
+    <span class="hidden sm:inline">إضافة اشتراك ملفات</span>
+    <span class="sm:hidden">اشتراك ملفات</span>
+  </button>
+  <button onclick="loadSubscriptions()" class="bg-[#2a2a2a] px-4 py-3 rounded-lg hover:bg-[#3a3a3a] flex items-center justify-center gap-2 text-sm font-medium transition-colors">
+    <i class="fas fa-sync-alt"></i>
+    <span>تحديث</span>
+  </button>
+  <button onclick="openCategoriesModal()" class="bg-yellow-600 text-white px-4 py-3 rounded-lg hover:bg-yellow-700 flex items-center justify-center gap-2 text-sm font-medium transition-colors hidden">
+    <i class="fas fa-tags"></i>
+    <span class="hidden sm:inline">إدارة التصنيفات</span>
+    <span class="sm:hidden">التصنيفات</span>
+  </button>
+</div>
+

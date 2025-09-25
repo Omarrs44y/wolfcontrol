@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إعدادات المستخدم - نظام إدارة الاشتراكات</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <script src="js/theme.js"></script>
+    <script src="db-manager.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            right: -300px;
+            width: 300px;
+            height: 100vh;
+            background: #1a1a1a;
+            transition: right 0.3s ease;
+            z-index: 1000;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .sidebar.active {
+            right: 0;
+        }
+
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            color: #d1d5db;
+            text-decoration: none;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-item:hover {
+            background: #374151;
+            color: white;
+        }
+
+        .sidebar-item i {
+            margin-left: 12px;
+            width: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body class="bg-[#1a1a1a] text-white min-h-screen overflow-x-hidden">
+    <!-- Navbar -->
+    <nav class="bg-[#2a2a2a] py-2 md:py-4 px-4 md:px-6 shadow-lg">
+      <div class="container mx-auto flex justify-between items-center">
+        <!-- Logo Section - Responsive -->
+        <div class="flex items-center gap-2 md:gap-4">
+          <img src="./assets/logowolfco_dark.png" alt="Wolf Co Logo" class="logo navbar-logo">
+          <div class="text-center">
+            <h1 class="text-sm md:text-lg lg:text-xl font-bold">إعدادات المستخدم</h1>
+            <p class="text-xs md:text-sm text-gray-400 hidden sm:block">تخصيص الحساب والإعدادات</p>
+          </div>
+        </div>
+
+        <!-- Action Buttons - Responsive -->
+        <div class="flex items-center gap-2 md:gap-4">
+          <button id="menuButton" class="text-white hover:text-gray-300 transition-colors p-2">
+            <i class="fas fa-bars text-lg md:text-xl"></i>
+          </button>
+          <a href="logout.html" class="bg-red-600 hover:bg-red-700 text-white px-2 md:px-4 py-2 rounded-lg transition-colors flex items-center text-sm md:text-base">
+            <i class="fas fa-sign-out-alt ml-1 md:ml-2"></i>
+            <span class="hidden sm:inline">تسجيل الخروج</span>
+            <span class="sm:hidden">خروج</span>
+          </a>
+        </div>
+      </div>
+    </nav>
+
+    <!-- القائمة الجانبية -->
+    <div id="sidebar" class="sidebar">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-xl font-bold text-white">القائمة الرئيسية</h2>
+        <button id="closeSidebar" class="text-gray-400 hover:text-white transition-colors">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <nav>
+        <a href="dashboard.html" class="sidebar-item">
+          <i class="fas fa-arrow-right"></i>
+          <span>العودة للوحة التحكم</span>
+        </a>
+        <a href="linked-users.html" class="sidebar-item">
+          <i class="fas fa-users"></i>
+          <span>إدارة المستخدمين المرتبطين</span>
+        </a>
+        <a href="#statistics" class="sidebar-item">
+          <i class="fas fa-chart-line"></i>
+          <span>احصائيات الاشتراكات</span>
+        </a>
+        <a href="#telegram" class="sidebar-item">
+          <i class="fab fa-telegram"></i>
+          <span>ربط حسابك التليجرام</span>
+        </a>
+        <a href="#support" class="sidebar-item">
+          <i class="fas fa-headset"></i>
+          <span>الدعم الفني</span>
+        </a>
+      </nav>
+    </div>
+
+    <!-- Sidebar Overlay -->
+    <div id="sidebarOverlay" class="sidebar-overlay"></div>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 md:px-6 py-4 md:py-8">
+        <!-- Page Title -->
+        <div class="mb-6 md:mb-8">
+            <h2 class="text-xl md:text-2xl font-bold text-white">إعدادات المستخدم</h2>
+            <p class="text-gray-400 mt-2 text-sm md:text-base">يمكنك تعديل معلوماتك الشخصية وإدارة إعدادات حسابك</p>
+        </div>
+
+        <!-- Content -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-8">
+                <!-- Basic Information Card -->
+                <div class="bg-[#2a2a2a] rounded-lg p-4 md:p-6">
+                    <h3 class="text-lg md:text-xl font-bold mb-4 md:mb-6 flex items-center">
+                        <i class="fas fa-id-card ml-2 text-blue-500"></i>
+                        المعلومات الأساسية
+                    </h3>
+                    <form id="basicInfoForm" class="space-y-3 md:space-y-4">
+                        <div>
+                            <label class="block text-gray-400 mb-2 text-sm">
+                                <i class="fas fa-tag ml-1"></i>اسم اللوحة
+                            </label>
+                            <input type="text" id="dashboardName" class="w-full p-3 rounded bg-[#1a1a1a] border border-gray-700 focus:border-purple-500 focus:outline-none" placeholder="أدخل اسم اللوحة">
+                        </div>
+
+
+
+                        <div>
+                            <label class="block text-gray-400 mb-2 text-sm">
+                                <i class="fas fa-store ml-1"></i>اسم المتجر (اختياري)
+                            </label>
+                            <input type="text" id="storeName" class="w-full p-3 rounded bg-[#1a1a1a] border border-gray-700 focus:border-purple-500 focus:outline-none" placeholder="أدخل اسم المتجر">
+                        </div>
+
+                        <div>
+                            <label class="block text-gray-400 mb-2 text-sm">
+                                <i class="fas fa-link ml-1"></i>رابط المتجر (اختياري)
+                            </label>
+                            <input type="url" id="storeUrl" class="w-full p-3 rounded bg-[#1a1a1a] border border-gray-700 focus:border-purple-500 focus:outline-none" placeholder="https://example.com">
+                        </div>
+
+                        <button type="submit" class="w-full bg-purple-600 text-white py-3 rounded-lg hover:bg-purple-700 transition-colors">
+                            <i class="fas fa-save ml-2"></i>حفظ التغييرات
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Password & Security Card -->
+                <div class="bg-[#2a2a2a] rounded-lg p-6">
+                    <h3 class="text-xl font-bold mb-6 flex items-center">
+                        <i class="fas fa-shield-alt ml-2 text-green-500"></i>
+                        الأمان وكلمة المرور
+                    </h3>
+                    
+                    <div class="mb-6 p-4 bg-blue-900 bg-opacity-30 rounded-lg border border-blue-700">
+                        <p class="text-blue-300 text-sm">
+                            <i class="fas fa-info-circle ml-2"></i>
+                            آخر تغيير لكلمة المرور: <span id="lastPasswordChange">لم يتم التغيير</span>
+                        </p>
+                        <p class="text-blue-300 text-sm mt-1" id="passwordChangeStatus">
+                            يمكنك تغيير كلمة المرور الآن
+                        </p>
+                    </div>
+
+                    <form id="passwordForm" class="space-y-4">
+                        <div>
+                            <label class="block text-gray-400 mb-2 text-sm">
+                                <i class="fas fa-lock ml-1"></i>كلمة المرور الحالية
+                            </label>
+                            <div class="relative">
+                                <input type="password" id="currentPassword" class="w-full p-3 rounded bg-[#1a1a1a] border border-gray-700 focus:border-purple-500 focus:outline-none" placeholder="أدخل كلمة المرور الحالية">
+                                <button type="button" onclick="togglePasswordVisibility('currentPassword')" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white">
+                                    <i class="far fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-gray-400 mb-2 text-sm">
+                                <i class="fas fa-key ml-1"></i>كلمة المرور الجديدة
+                            </label>
+                            <div class="relative">
+                                <input type="password" id="newPassword" class="w-full p-3 rounded bg-[#1a1a1a] border border-gray-700 focus:border-purple-500 focus:outline-none" placeholder="أدخل كلمة المرور الجديدة">
+                                <button type="button" onclick="togglePasswordVisibility('newPassword')" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white">
+                                    <i class="far fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-gray-400 mb-2 text-sm">
+                                <i class="fas fa-check-double ml-1"></i>تأكيد كلمة المرور الجديدة
+                            </label>
+                            <div class="relative">
+                                <input type="password" id="confirmPassword" class="w-full p-3 rounded bg-[#1a1a1a] border border-gray-700 focus:border-purple-500 focus:outline-none" placeholder="أعد إدخال كلمة المرور الجديدة">
+                                <button type="button" onclick="togglePasswordVisibility('confirmPassword')" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white">
+                                    <i class="far fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <button type="submit" id="changePasswordBtn" class="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition-colors">
+                            <i class="fas fa-key ml-2"></i>تغيير كلمة المرور
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Date Format Settings -->
+            <div class="mt-8 bg-[#2a2a2a] rounded-lg p-6">
+                <h3 class="text-xl font-bold mb-6 flex items-center">
+                    <i class="fas fa-calendar-alt ml-2 text-orange-500"></i>
+                    إعدادات التاريخ
+                </h3>
+                <div class="flex items-center space-x-6 rtl:space-x-reverse">
+                    <label class="flex items-center">
+                        <input type="radio" name="dateFormat" value="gregorian" class="ml-2 w-4 h-4 text-purple-600">
+                        <span>التاريخ الميلادي</span>
+                    </label>
+                    <label class="flex items-center">
+                        <input type="radio" name="dateFormat" value="hijri" class="ml-2 w-4 h-4 text-purple-600">
+                        <span>التاريخ الهجري</span>
+                    </label>
+                </div>
+                <button onclick="saveDateFormat()" class="mt-4 bg-orange-600 text-white px-6 py-2 rounded-lg hover:bg-orange-700 transition-colors">
+                    <i class="fas fa-save ml-2"></i>حفظ إعدادات التاريخ
+                </button>
+            </div>
+
+
+    </main>
+
+
+
+
+    <script>
+        // Global variables
+        let currentUser = null;
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('🔄 تحميل صفحة إعدادات المستخدم...');
+
+            try {
+                // انتظار تهيئة قاعدة البيانات
+                await window.dbManager.waitForReady();
+                console.log('✅ تم تهيئة مدير قاعدة البيانات');
+
+                loadUserData();
+
+                // تأخير قصير للتأكد من تحميل DOM بالكامل
+                setTimeout(() => {
+                    initializeSidebar();
+                }, 100);
+
+            } catch (error) {
+                console.error('❌ خطأ في تهيئة الصفحة:', error);
+            }
+        });
+
+        // Initialize sidebar functionality
+        function initializeSidebar() {
+            console.log('🔄 تهيئة الشريط الجانبي...');
+
+            const menuButton = document.getElementById('menuButton');
+            const sidebar = document.getElementById('sidebar');
+            const sidebarOverlay = document.getElementById('sidebarOverlay');
+            const closeSidebar = document.getElementById('closeSidebar');
+
+            // التحقق من وجود العناصر
+            if (!menuButton) {
+                console.error('❌ لم يتم العثور على زر القائمة');
+                return;
+            }
+            if (!sidebar) {
+                console.error('❌ لم يتم العثور على الشريط الجانبي');
+                return;
+            }
+            if (!sidebarOverlay) {
+                console.error('❌ لم يتم العثور على overlay الشريط الجانبي');
+                return;
+            }
+
+            console.log('✅ تم العثور على جميع عناصر الشريط الجانبي');
+
+            // Open sidebar
+            menuButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('🔄 فتح الشريط الجانبي');
+                sidebar.classList.add('active');
+                sidebarOverlay.classList.add('active');
+            });
+
+            // Close sidebar
+            function closeSidebarFunc() {
+                console.log('🔄 إغلاق الشريط الجانبي');
+                sidebar.classList.remove('active');
+                sidebarOverlay.classList.remove('active');
+            }
+
+            if (closeSidebar) {
+                closeSidebar.addEventListener('click', closeSidebarFunc);
+            }
+
+            sidebarOverlay.addEventListener('click', closeSidebarFunc);
+
+            // Close sidebar on escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && sidebar.classList.contains('active')) {
+                    closeSidebarFunc();
+                }
+            });
+
+            console.log('✅ تم تهيئة الشريط الجانبي بنجاح');
+        }
+
+        // Load current user data
+        async function loadUserData() {
+            try {
+                const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+                if (!userData.id || !userData.email) {
+                    console.log('⚠️ لا توجد بيانات مستخدم صحيحة، توجيه لصفحة تسجيل الدخول');
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                currentUser = userData;
+                console.log('👤 تم تحميل بيانات المستخدم:', currentUser.email);
+
+                // Load additional user settings from database
+                if (window.dbManager) {
+                    const result = await window.dbManager.getUserSettings(userData.id);
+                    if (result.success && result.data) {
+                        console.log('⚙️ تم جلب إعدادات المستخدم من قاعدة البيانات');
+                        fillUserSettings(result.data);
+                    } else {
+                        console.log('⚙️ لا توجد إعدادات محفوظة، استخدام القيم الافتراضية');
+                        fillUserSettings({});
+                    }
+                }
+            } catch (error) {
+                console.error('❌ خطأ في تحميل بيانات المستخدم:', error);
+                window.location.href = 'login.html';
+            }
+        }
+
+
+
+        // جلب رقم الواتساب من آخر اشتراك
+        async function loadWhatsappFromSubscriptions() {
+            try {
+                console.log('🔍 البحث عن رقم الواتساب في الاشتراكات...');
+
+                // جرب الاشتراكات العادية أولاً
+                const regularResult = await window.dbManager.getAllSubscriptions();
+                if (regularResult.success && regularResult.subscriptions && regularResult.subscriptions.length > 0) {
+                    const latestSubscription = regularResult.subscriptions[0]; // أحدث اشتراك
+                    if (latestSubscription.whatsapp) {
+                        console.log('📞 تم العثور على رقم الواتساب في الاشتراكات العادية:', latestSubscription.whatsapp);
+                        displayWhatsappNumber(latestSubscription.whatsapp);
+                        return;
+                    }
+                }
+
+                // إذا لم نجد في العادية، جرب اشتراكات الملفات
+                const fileResult = await window.dbManager.getAllFileSubscriptions();
+                if (fileResult.success && fileResult.subscriptions && fileResult.subscriptions.length > 0) {
+                    const latestFileSubscription = fileResult.subscriptions[0]; // أحدث اشتراك ملف
+                    if (latestFileSubscription.whatsapp) {
+                        console.log('📞 تم العثور على رقم الواتساب في اشتراكات الملفات:', latestFileSubscription.whatsapp);
+                        displayWhatsappNumber(latestFileSubscription.whatsapp);
+                        return;
+                    }
+                }
+
+                console.log('⚠️ لم يتم العثور على رقم واتساب في أي اشتراك');
+            } catch (error) {
+                console.error('❌ خطأ في جلب رقم الواتساب من الاشتراكات:', error);
+            }
+        }
+
+        // عرض رقم الواتساب في الواجهة
+        function displayWhatsappNumber(whatsappNumber) {
+            const whatsapp = whatsappNumber.toString();
+            console.log('📞 عرض رقم الواتساب:', whatsapp);
+
+            const countryCodeList = ['+966', '+971', '+974', '+973', '+968', '+965', '+20'];
+            let countryCode = '+966';
+            let phoneNumber = whatsapp;
+
+            for (let code of countryCodeList) {
+                if (whatsapp.startsWith(code)) {
+                    countryCode = code;
+                    phoneNumber = whatsapp.substring(code.length);
+                    break;
+                }
+            }
+
+            console.log('📞 رمز الدولة:', countryCode, 'رقم الهاتف:', phoneNumber);
+            document.getElementById('countryCode').value = countryCode;
+            document.getElementById('whatsappNumber').value = phoneNumber;
+        }
+
+        // Fill user settings form
+        function fillUserSettings(settings) {
+            console.log('📋 ملء نموذج الإعدادات:', settings);
+
+            // ملء المعلومات الأساسية من الإعدادات المحفوظة أو بيانات المستخدم
+            if (settings && settings.dashboard_name) {
+                document.getElementById('dashboardName').value = settings.dashboard_name;
+            } else if (currentUser && currentUser.dashboard_name) {
+                document.getElementById('dashboardName').value = currentUser.dashboard_name;
+            }
+
+            if (settings && settings.store_name) {
+                document.getElementById('storeName').value = settings.store_name;
+            } else if (currentUser && currentUser.store_name) {
+                document.getElementById('storeName').value = currentUser.store_name;
+            }
+
+            if (settings && settings.store_url) {
+                document.getElementById('storeUrl').value = settings.store_url;
+            } else if (currentUser && currentUser.store_url) {
+                document.getElementById('storeUrl').value = currentUser.store_url;
+            }
+            if (settings.date_format) {
+                const dateFormatRadio = document.querySelector(`input[name="dateFormat"][value="${settings.date_format}"]`);
+                if (dateFormatRadio) {
+                    dateFormatRadio.checked = true;
+                }
+            } else {
+                // القيمة الافتراضية
+                const defaultRadio = document.querySelector(`input[name="dateFormat"][value="gregorian"]`);
+                if (defaultRadio) {
+                    defaultRadio.checked = true;
+                }
+            }
+            if (settings.last_password_change) {
+                document.getElementById('lastPasswordChange').textContent = new Date(settings.last_password_change).toLocaleDateString('ar-SA');
+                checkPasswordChangeEligibility(settings.last_password_change);
+            } else {
+                document.getElementById('lastPasswordChange').textContent = 'لم يتم التغيير';
+            }
+        }
+
+        // Check if user can change password (15 days rule)
+        function checkPasswordChangeEligibility(lastChange) {
+            const lastChangeDate = new Date(lastChange);
+            const now = new Date();
+            const daysDiff = Math.floor((now - lastChangeDate) / (1000 * 60 * 60 * 24));
+            
+            const statusElement = document.getElementById('passwordChangeStatus');
+            const changeBtn = document.getElementById('changePasswordBtn');
+            
+            if (daysDiff < 15) {
+                const remainingDays = 15 - daysDiff;
+                statusElement.textContent = `يمكنك تغيير كلمة المرور بعد ${remainingDays} يوم`;
+                statusElement.className = 'text-yellow-300 text-sm mt-1';
+                changeBtn.disabled = true;
+                changeBtn.className = 'w-full bg-gray-600 text-white py-3 rounded-lg cursor-not-allowed';
+            } else {
+                statusElement.textContent = 'يمكنك تغيير كلمة المرور الآن';
+                statusElement.className = 'text-green-300 text-sm mt-1';
+                changeBtn.disabled = false;
+                changeBtn.className = 'w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition-colors';
+            }
+        }
+
+
+
+        // Toggle password visibility
+        function togglePasswordVisibility(inputId) {
+            const input = document.getElementById(inputId);
+            const icon = input.nextElementSibling.querySelector('i');
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('far', 'fa-eye');
+                icon.classList.add('fas', 'fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fas', 'fa-eye-slash');
+                icon.classList.add('far', 'fa-eye');
+            }
+        }
+
+        // Generate new credentials for linked user
+        function generateNewCredentials() {
+            const randomEmail = `user_${Math.random().toString(36).substr(2, 8)}@${currentUser?.email?.split('@')[1] || 'example.com'}`;
+            const randomPassword = Math.random().toString(36).substr(2, 12);
+            
+            document.getElementById('generatedEmail').value = randomEmail;
+            document.getElementById('generatedPassword').value = randomPassword;
+        }
+
+        // Copy to clipboard
+        function copyToClipboard(elementId) {
+            const element = document.getElementById(elementId);
+            element.select();
+            document.execCommand('copy');
+            
+            // Show feedback
+            const button = element.nextElementSibling;
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-check"></i>';
+            button.classList.add('bg-green-600');
+            
+            setTimeout(() => {
+                button.innerHTML = originalText;
+                button.classList.remove('bg-green-600');
+            }, 2000);
+        }
+
+        // Toggle subscription restrictions
+        function toggleSubscriptionRestrictions() {
+            const checkbox = document.getElementById('restrictSubscriptionTypes');
+            const restrictions = document.getElementById('subscriptionRestrictions');
+            
+            if (checkbox.checked) {
+                restrictions.classList.remove('hidden');
+            } else {
+                restrictions.classList.add('hidden');
+                // Uncheck all restriction checkboxes
+                restrictions.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+            }
+        }
+
+        // Modal functions
+        function openAddUserModal() {
+            // Check if user can add more users (max 3)
+            if (linkedUsers.length >= 3) {
+                alert('لا يمكنك إضافة أكثر من 3 مستخدمين مرتبطين');
+                return;
+            }
+            
+            document.getElementById('addUserModal').classList.remove('hidden');
+            document.getElementById('addUserModal').classList.add('flex');
+            generateNewCredentials();
+        }
+
+        function closeAddUserModal() {
+            document.getElementById('addUserModal').classList.add('hidden');
+            document.getElementById('addUserModal').classList.remove('flex');
+            document.getElementById('addUserForm').reset();
+        }
+
+
+
+
+
+        function logout() {
+            localStorage.removeItem('userData');
+            window.location.href = 'login.html';
+        }
+
+        // Form submission handlers
+        document.getElementById('basicInfoForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            await saveBasicInfo();
+        });
+
+        document.getElementById('passwordForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            await changePassword();
+        });
+
+
+
+        // Save basic information
+        async function saveBasicInfo() {
+            try {
+                const formData = {
+                    dashboard_name: document.getElementById('dashboardName').value,
+                    store_name: document.getElementById('storeName').value,
+                    store_url: document.getElementById('storeUrl').value
+                };
+
+                if (window.dbManager) {
+                    const result = await window.dbManager.updateUserSettings(currentUser.id, formData);
+                    if (result.success) {
+                        alert('تم حفظ التغييرات بنجاح');
+                    } else {
+                        alert('حدث خطأ أثناء حفظ التغييرات: ' + result.error);
+                    }
+                }
+            } catch (error) {
+                console.error('خطأ في حفظ المعلومات الأساسية:', error);
+                alert('حدث خطأ أثناء حفظ التغييرات');
+            }
+        }
+
+        // Change password
+        async function changePassword() {
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            if (!currentPassword || !newPassword || !confirmPassword) {
+                alert('يرجى ملء جميع الحقول');
+                return;
+            }
+
+            if (newPassword !== confirmPassword) {
+                alert('كلمة المرور الجديدة وتأكيدها غير متطابقين');
+                return;
+            }
+
+            if (newPassword.length < 6) {
+                alert('كلمة المرور يجب أن تكون 6 أحرف على الأقل');
+                return;
+            }
+
+            try {
+                if (window.dbManager) {
+                    const result = await window.dbManager.changeUserPassword(currentUser.id, currentPassword, newPassword);
+                    if (result.success) {
+                        alert('تم تغيير كلمة المرور بنجاح');
+                        document.getElementById('passwordForm').reset();
+
+                        // Update last password change date
+                        document.getElementById('lastPasswordChange').textContent = new Date().toLocaleDateString('ar-SA');
+                        checkPasswordChangeEligibility(new Date().toISOString());
+                    } else {
+                        alert('حدث خطأ أثناء تغيير كلمة المرور: ' + result.error);
+                    }
+                }
+            } catch (error) {
+                console.error('خطأ في تغيير كلمة المرور:', error);
+                alert('حدث خطأ أثناء تغيير كلمة المرور');
+            }
+        }
+
+        // Save date format
+        async function saveDateFormat() {
+            const selectedFormat = document.querySelector('input[name="dateFormat"]:checked')?.value;
+            if (!selectedFormat) {
+                alert('يرجى اختيار نوع التاريخ');
+                return;
+            }
+
+            try {
+                if (window.dbManager) {
+                    const result = await window.dbManager.updateUserSettings(currentUser.id, { date_format: selectedFormat });
+                    if (result.success) {
+                        alert('تم حفظ إعدادات التاريخ بنجاح');
+                    } else {
+                        alert('حدث خطأ أثناء حفظ إعدادات التاريخ: ' + result.error);
+                    }
+                }
+            } catch (error) {
+                console.error('خطأ في حفظ إعدادات التاريخ:', error);
+                alert('حدث خطأ أثناء حفظ إعدادات التاريخ');
+            }
+        }
+
+
+
+        function logout() {
+            localStorage.removeItem('userData');
+            window.location.href = 'login.html';
+        }
+
+
+    </script>
+</body>
+</html>

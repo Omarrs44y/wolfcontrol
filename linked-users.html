@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>المستخدمين المرتبطين - نظام إدارة الاشتراكات</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="js/env-loader.js"></script>
+    <script src="js/theme.js"></script>
+    <script src="js/supabase-config.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        /* Sidebar Styles */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            right: -300px;
+            width: 300px;
+            height: 100vh;
+            background: #1a1a1a;
+            transition: right 0.3s ease;
+            z-index: 1000;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .sidebar.active {
+            right: 0;
+        }
+
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            color: #d1d5db;
+            text-decoration: none;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-item:hover {
+            background: #374151;
+            color: white;
+        }
+
+        .sidebar-item i {
+            margin-left: 12px;
+            width: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body class="bg-[#1a1a1a] text-white min-h-screen overflow-x-hidden">
+    <!-- Navbar -->
+    <nav class="bg-[#2a2a2a] py-2 md:py-4 px-4 md:px-6 shadow-lg">
+      <div class="container mx-auto flex justify-between items-center">
+        <!-- Logo Section - Responsive -->
+        <div class="flex items-center gap-2 md:gap-4">
+          <img src="./assets/logowolfco_dark.png" alt="Wolf Co Logo" class="logo navbar-logo">
+          <div class="text-center">
+            <h1 class="text-sm md:text-lg lg:text-xl font-bold">المستخدمين المرتبطين</h1>
+            <p class="text-xs md:text-sm text-gray-400 hidden sm:block">إدارة المستخدمين والصلاحيات</p>
+          </div>
+        </div>
+
+        <!-- Action Buttons - Responsive -->
+        <div class="flex items-center gap-2 md:gap-4">
+          <button id="menuButton" class="text-white hover:text-gray-300 transition-colors p-2">
+            <i class="fas fa-bars text-lg md:text-xl"></i>
+          </button>
+          <a href="logout.html" class="bg-red-600 hover:bg-red-700 text-white px-2 md:px-4 py-2 rounded-lg transition-colors flex items-center text-sm md:text-base">
+            <i class="fas fa-sign-out-alt ml-1 md:ml-2"></i>
+            <span class="hidden sm:inline">تسجيل الخروج</span>
+            <span class="sm:hidden">خروج</span>
+          </a>
+        </div>
+      </div>
+    </nav>
+
+    <!-- القائمة الجانبية -->
+    <div id="sidebar" class="sidebar">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-xl font-bold text-white">القائمة الرئيسية</h2>
+        <button id="closeSidebar" class="text-gray-400 hover:text-white transition-colors">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      
+      <nav>
+        <a href="dashboard.html" class="sidebar-item">
+          <i class="fas fa-arrow-right"></i>
+          <span>العودة للوحة التحكم</span>
+        </a>
+        <a href="user-settings.html" class="sidebar-item">
+          <i class="fas fa-user-edit"></i>
+          <span>تعديل المعلومات الشخصية</span>
+        </a>
+        <a href="#statistics" class="sidebar-item">
+          <i class="fas fa-chart-line"></i>
+          <span>احصائيات الاشتراكات</span>
+        </a>
+        <a href="#telegram" class="sidebar-item">
+          <i class="fab fa-telegram"></i>
+          <span>ربط حسابك التليجرام</span>
+        </a>
+        <a href="#support" class="sidebar-item">
+          <i class="fas fa-headset"></i>
+          <span>الدعم الفني</span>
+        </a>
+      </nav>
+    </div>
+
+    <!-- Sidebar Overlay -->
+    <div id="sidebarOverlay" class="sidebar-overlay"></div>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <!-- Page Title -->
+        <div class="mb-8">
+            <h2 class="text-2xl font-bold text-white">إدارة المستخدمين المرتبطين</h2>
+            <p class="text-gray-400 mt-2">يمكنك إضافة وإدارة المستخدمين المرتبطين بحسابك (حد أقصى 3 مستخدمين)</p>
+        </div>
+
+        <!-- Add User Button -->
+        <div class="mb-6 flex justify-between items-center">
+            <h3 class="text-xl font-bold">المستخدمين المرتبطين</h3>
+            <button id="addUserButton" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors" onclick="openAddUserModal(); return false;">
+                <i class="fas fa-user-plus ml-2"></i>إضافة مستخدم جديد
+            </button>
+        </div>
+
+        <!-- Users Count -->
+        <div class="mb-6 p-4 bg-blue-900 bg-opacity-30 rounded-lg border border-blue-700">
+            <p class="text-blue-300">
+                <i class="fas fa-users ml-2"></i>
+                عدد المستخدمين المرتبطين: <span id="linkedUsersCount">0</span> من 3
+            </p>
+        </div>
+
+        <!-- Users Table -->
+        <div class="bg-[#2a2a2a] rounded-lg overflow-hidden">
+            <table class="w-full">
+                <thead class="bg-[#1a1a1a]">
+                    <tr>
+                        <th class="px-6 py-4 text-right text-sm font-medium text-gray-400">المستخدم</th>
+                        <th class="px-6 py-4 text-right text-sm font-medium text-gray-400">تاريخ الإنشاء</th>
+                        <th class="px-6 py-4 text-right text-sm font-medium text-gray-400">الحالة</th>
+                        <th class="px-6 py-4 text-right text-sm font-medium text-gray-400">الصلاحيات</th>
+                        <th class="px-6 py-4 text-right text-sm font-medium text-gray-400">الإجراءات</th>
+                    </tr>
+                </thead>
+                <tbody id="linkedUsersTable" class="divide-y divide-gray-700">
+                    <!-- Users will be loaded here -->
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- Add User Modal -->
+    <div id="addUserModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4" style="display: none;">
+        <div class="bg-[#2a2a2a] rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div class="border-b border-gray-700 p-6">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-xl font-bold">إضافة مستخدم مرتبط جديد</h2>
+                    <button onclick="closeAddUserModal()" class="text-gray-400 hover:text-white">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="p-6">
+                <form id="addUserForm" class="space-y-6">
+                    <!-- Auto-generated credentials -->
+                    <div class="bg-green-900 bg-opacity-30 rounded-lg p-4 border border-green-700">
+                        <h4 class="font-bold text-green-300 mb-3">بيانات الدخول المُولدة تلقائياً:</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-green-300 mb-1 text-sm">البريد الإلكتروني:</label>
+                                <input type="email" id="generatedEmail" readonly class="w-full p-2 rounded bg-[#1a1a1a] border border-green-700 text-green-300 text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-green-300 mb-1 text-sm">كلمة المرور:</label>
+                                <div class="flex">
+                                    <input type="text" id="generatedPassword" readonly class="flex-1 p-2 rounded-r bg-[#1a1a1a] border border-green-700 text-green-300 text-sm">
+                                    <button type="button" onclick="copyToClipboard('generatedPassword')" class="px-3 bg-green-700 text-white rounded-l hover:bg-green-600">
+                                        <i class="fas fa-copy"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" onclick="generateNewCredentials()" class="mt-3 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 text-sm">
+                            <i class="fas fa-refresh ml-1"></i>إعادة توليد
+                        </button>
+                    </div>
+
+                    <!-- User Name -->
+                    <div>
+                        <label class="block text-white mb-2 font-medium">اسم المستخدم:</label>
+                        <input type="text" id="userName" name="userName" placeholder="أدخل اسم المستخدم" class="w-full p-3 rounded bg-[#2a2a2a] border border-gray-600 text-white placeholder-gray-400 focus:border-purple-500 focus:outline-none" required>
+                        <p class="text-gray-400 text-sm mt-1">سيتم عرض هذا الاسم في قائمة المستخدمين المرتبطين</p>
+                    </div>
+
+                    <!-- Permissions -->
+                    <div>
+                        <h4 class="font-bold mb-4">الصلاحيات:</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="space-y-3">
+                                <label class="flex items-center">
+                                    <input type="checkbox" name="permissions" value="edit_personal_info" class="ml-2 w-4 h-4 text-purple-600">
+                                    <span class="text-sm">تعديل المعلومات الشخصية</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" name="permissions" value="change_password" class="ml-2 w-4 h-4 text-purple-600">
+                                    <span class="text-sm">تغيير كلمة المرور</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" name="permissions" value="change_date_format" class="ml-2 w-4 h-4 text-purple-600">
+                                    <span class="text-sm">تغيير نوع التاريخ</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" name="permissions" value="add_subscriptions" class="ml-2 w-4 h-4 text-purple-600">
+                                    <span class="text-sm">إضافة اشتراكات</span>
+                                </label>
+                            </div>
+                            <div class="space-y-3">
+                                <label class="flex items-center">
+                                    <input type="checkbox" name="permissions" value="view_subscriptions" class="ml-2 w-4 h-4 text-purple-600">
+                                    <span class="text-sm">عرض الاشتراكات</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" name="permissions" value="edit_subscriptions" class="ml-2 w-4 h-4 text-purple-600">
+                                    <span class="text-sm">تعديل الاشتراكات</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" name="permissions" value="delete_subscriptions" class="ml-2 w-4 h-4 text-purple-600">
+                                    <span class="text-sm">حذف الاشتراكات</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" name="permissions" value="manage_categories" class="ml-2 w-4 h-4 text-purple-600">
+                                    <span class="text-sm">إدارة التصنيفات</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Subscription Type Restrictions -->
+                    <div>
+                        <h4 class="font-bold mb-4">تحديد أنواع الاشتراكات المسموحة (اختياري):</h4>
+                        <div class="mb-4">
+                            <label class="flex items-center mb-2">
+                                <input type="checkbox" id="restrictSubscriptionTypes" class="ml-2 w-4 h-4 text-purple-600" onchange="toggleSubscriptionRestrictions()">
+                                <span class="text-sm font-medium">تحديد أنواع اشتراكات معينة فقط</span>
+                            </label>
+                        </div>
+                        
+                        <div id="subscriptionRestrictions" class="hidden space-y-4">
+                            <div>
+                                <h5 class="font-medium mb-2">الاشتراكات العادية:</h5>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                                    <label class="flex items-center">
+                                        <input type="checkbox" name="allowedRegularSubs" value="netflix" class="ml-1 w-3 h-3">
+                                        <span>نتفلكس</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" name="allowedRegularSubs" value="shahid_vip" class="ml-1 w-3 h-3">
+                                        <span>شاهد مسلسلات</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" name="allowedRegularSubs" value="shahid_sport" class="ml-1 w-3 h-3">
+                                        <span>شاهد رياضي</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" name="allowedRegularSubs" value="shahid_year" class="ml-1 w-3 h-3">
+                                        <span>شاهد سنة</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" name="allowedRegularSubs" value="shahid_full" class="ml-1 w-3 h-3">
+                                        <span>شاهد شامل</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" name="allowedRegularSubs" value="use_pro" class="ml-1 w-3 h-3">
+                                        <span>يوز برو</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" name="allowedRegularSubs" value="canva_pro" class="ml-1 w-3 h-3">
+                                        <span>كانفا برو</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" name="allowedRegularSubs" value="canva_500" class="ml-1 w-3 h-3">
+                                        <span>كانفا ٥٠٠ دعوة</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" name="allowedRegularSubs" value="digital_sim" class="ml-1 w-3 h-3">
+                                        <span>شريحة رقمية</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" name="allowedRegularSubs" value="youtube_premium" class="ml-1 w-3 h-3">
+                                        <span>يوتيوب بريميوم</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" name="allowedRegularSubs" value="amazon_prime" class="ml-1 w-3 h-3">
+                                        <span>امازون برايم</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" name="allowedRegularSubs" value="bein_sports" class="ml-1 w-3 h-3">
+                                        <span>بي ان سبورت</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" name="allowedRegularSubs" value="osn_plus" class="ml-1 w-3 h-3">
+                                        <span>OSN+</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" name="allowedRegularSubs" value="disney_plus" class="ml-1 w-3 h-3">
+                                        <span>ديزني بلس</span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <h5 class="font-medium mb-2">اشتراكات الملفات:</h5>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                                    <label class="flex items-center">
+                                        <input type="checkbox" name="allowedFileSubs" value="shahid_sports" class="ml-1 w-3 h-3">
+                                        <span>ملف شاهد رياضي</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" name="allowedFileSubs" value="netflix" class="ml-1 w-3 h-3">
+                                        <span>ملف نتفلكس</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" name="allowedFileSubs" value="osn_plus" class="ml-1 w-3 h-3">
+                                        <span>ملف OSN+</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" name="allowedFileSubs" value="amazon_prime" class="ml-1 w-3 h-3">
+                                        <span>ملف امازون برايم</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" name="allowedFileSubs" value="shahid_series" class="ml-1 w-3 h-3">
+                                        <span>ملف شاهد مسلسلات</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" name="allowedFileSubs" value="shahid_full" class="ml-1 w-3 h-3">
+                                        <span>ملف شاهد شامل</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" name="allowedFileSubs" value="disney_plus" class="ml-1 w-3 h-3">
+                                        <span>ملف ديزني بلس</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end gap-3 pt-4 border-t border-gray-700">
+                        <button type="button" onclick="closeAddUserModal()" class="px-6 py-2 bg-gray-600 text-white rounded hover:bg-gray-700">
+                            إلغاء
+                        </button>
+                        <button type="submit" class="px-6 py-2 bg-purple-600 text-white rounded hover:bg-purple-700">
+                            <i class="fas fa-user-plus ml-2"></i>إضافة المستخدم
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let currentUser = null;
+        let linkedUsers = [];
+
+        // تعريف وظيفة فحص المستخدمين المرتبطين
+        async function checkAndDeactivateLinkedUsers() {
+            try {
+                if (window.dbManager) {
+                    const result = await window.dbManager.checkAndDeactivateLinkedUsers();
+                    console.log('تم فحص المستخدمين المرتبطين:', result);
+                    // إعادة تحميل قائمة المستخدمين المرتبطين
+                    loadLinkedUsers();
+                }
+            } catch (error) {
+                console.error('خطأ في فحص المستخدمين المرتبطين:', error);
+            }
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', async function() {
+            // انتظار تحميل متغيرات البيئة
+            if (window.envLoader) {
+                await window.envLoader.loadEnvironment();
+                console.log('تم تحميل متغيرات البيئة');
+            }
+            
+            // انتظار تحميل مكتبة Supabase
+            let attempts = 0;
+            const maxAttempts = 10;
+            while (attempts < maxAttempts && typeof supabaseDbManager === 'undefined') {
+                console.log(`محاولة ${attempts + 1} لتحميل مدير قاعدة البيانات...`);
+                await new Promise(resolve => setTimeout(resolve, 500));
+                attempts++;
+            }
+            
+            // تهيئة مدير قاعدة البيانات
+            if (typeof supabaseDbManager !== 'undefined') {
+                window.dbManager = supabaseDbManager;
+                console.log('تم تهيئة مدير قاعدة البيانات بنجاح');
+            } else {
+                console.error('مدير قاعدة البيانات غير متوفر بعد المحاولات المتعددة');
+                // محاولة إنشاء مدير قاعدة البيانات يدوياً
+                if (typeof SupabaseDatabaseManager !== 'undefined') {
+                    window.dbManager = new SupabaseDatabaseManager();
+                    console.log('تم إنشاء مدير قاعدة البيانات يدوياً');
+                }
+            }
+            
+            // تهيئة الواجهة
+            initializeSidebar();
+            generateNewCredentials();
+            
+            // تحميل بيانات المستخدم (سيقوم بتحميل المستخدمين المرتبطين أيضًا)
+            await loadUserData();
+            
+            // فحص حالة المستخدمين المرتبطين بعد تحميل البيانات
+            await checkAndDeactivateLinkedUsers();
+            
+            // إضافة مستمع حدث لزر إضافة مستخدم
+            document.getElementById('addUserButton').addEventListener('click', function() {
+                console.log('تم النقر على زر إضافة مستخدم');
+                openAddUserModal();
+            });
+        });
+        
+        // وظيفة للتحقق من حالة المستخدمين المرتبطين وتعطيلهم إذا كان المستخدم الأصلي غير نشط أو منتهي
+        async function checkAndDeactivateLinkedUsers() {
+            try {
+                if (!window.dbManager) {
+                    console.warn('مدير قاعدة البيانات غير متوفر، تخطي فحص المستخدمين المرتبطين');
+                    return;
+                }
+                
+                if (typeof window.dbManager.checkAndDeactivateLinkedUsers !== 'function') {
+                    console.warn('وظيفة checkAndDeactivateLinkedUsers غير متوفرة');
+                    return;
+                }
+                
+                // استدعاء وظيفة فحص انتهاء صلاحية المستخدمين في قاعدة البيانات
+                await window.dbManager.checkAndDeactivateLinkedUsers();
+                console.log('تم التحقق من حالة المستخدمين المرتبطين');
+                // إعادة تحميل قائمة المستخدمين المرتبطين بعد التحقق
+                loadLinkedUsers();
+            } catch (error) {
+                console.error('خطأ أثناء التحقق من حالة المستخدمين المرتبطين:', error);
+            }
+        }
+
+        // Initialize sidebar functionality
+        function initializeSidebar() {
+            const menuButton = document.getElementById('menuButton');
+            const sidebar = document.getElementById('sidebar');
+            const sidebarOverlay = document.getElementById('sidebarOverlay');
+            const closeSidebar = document.getElementById('closeSidebar');
+
+            // Open sidebar
+            menuButton.addEventListener('click', function() {
+                sidebar.classList.add('active');
+                sidebarOverlay.classList.add('active');
+            });
+
+            // Close sidebar
+            function closeSidebarFunc() {
+                sidebar.classList.remove('active');
+                sidebarOverlay.classList.remove('active');
+            }
+
+            closeSidebar.addEventListener('click', closeSidebarFunc);
+            sidebarOverlay.addEventListener('click', closeSidebarFunc);
+
+            // Close sidebar on escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && sidebar.classList.contains('active')) {
+                    closeSidebarFunc();
+                }
+            });
+        }
+
+        // Load current user data
+        async function loadUserData() {
+            try {
+                console.log('بدء تحميل بيانات المستخدم...');
+                
+                const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+                if (!userData.id) {
+                    console.error('لم يتم العثور على معرف المستخدم في التخزين المحلي');
+                    window.location.href = 'login.html';
+                    return;
+                }
+                
+                // التحقق من وجود مدير قاعدة البيانات مع إعادة المحاولة
+                let dbManagerAttempts = 0;
+                while (!window.dbManager && dbManagerAttempts < 5) {
+                    console.log(`محاولة ${dbManagerAttempts + 1} للعثور على مدير قاعدة البيانات...`);
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    dbManagerAttempts++;
+                }
+                
+                if (!window.dbManager) {
+                    console.error('مدير قاعدة البيانات غير متاح بعد المحاولات المتعددة');
+                    alert('حدث خطأ في تحميل مدير قاعدة البيانات. يرجى تحديث الصفحة والمحاولة مرة أخرى.');
+                    return;
+                }
+                
+                currentUser = userData;
+                console.log('تم تحميل بيانات المستخدم بنجاح:', currentUser.email);
+                
+                // تحميل المستخدمين المرتبطين بعد تحميل بيانات المستخدم الحالي
+                console.log('تم تحميل بيانات المستخدم الحالي، جاري تحميل المستخدمين المرتبطين');
+                await loadLinkedUsers();
+            } catch (error) {
+                console.error('خطأ في تحميل بيانات المستخدم:', error);
+                alert('حدث خطأ أثناء تحميل بيانات المستخدم: ' + (error.message || 'خطأ غير معروف'));
+            }
+        }
+
+        // Load linked users
+        async function loadLinkedUsers() {
+            try {
+                console.log('بدء تحميل المستخدمين المرتبطين...');
+                
+                // التحقق من بيانات المستخدم الحالي
+                if (!currentUser || !currentUser.id) {
+                    console.error('بيانات المستخدم الحالي غير متوفرة');
+                    return;
+                }
+                
+                // التحقق من وجود مدير قاعدة البيانات
+                if (!window.dbManager || typeof window.dbManager.getLinkedUsers !== 'function') {
+                    console.error('مدير قاعدة البيانات غير متوفر أو وظيفة getLinkedUsers غير موجودة');
+                    console.log('window.dbManager:', window.dbManager);
+                    console.log('وظائف متاحة:', window.dbManager ? Object.keys(window.dbManager) : 'لا شيء');
+                    return;
+                }
+
+                console.log('استدعاء getLinkedUsers مع معرف المستخدم:', currentUser.id);
+                const result = await window.dbManager.getLinkedUsers(currentUser.id);
+                console.log('نتيجة استدعاء getLinkedUsers:', result);
+                
+                if (result && result.success) {
+                    linkedUsers = result.data || [];
+                    console.log('تم تحميل المستخدمين المرتبطين بنجاح. العدد:', linkedUsers.length);
+                    updateLinkedUsersTable();
+                    document.getElementById('linkedUsersCount').textContent = linkedUsers.length;
+                } else {
+                    const errorMsg = result && result.error ? result.error : 'سبب غير معروف';
+                    console.error('خطأ في تحميل المستخدمين المرتبطين:', errorMsg);
+                }
+            } catch (error) {
+                console.error('خطأ في loadLinkedUsers:', error);
+            }
+        }
+
+        // Update linked users table
+        function updateLinkedUsersTable() {
+            const tbody = document.getElementById('linkedUsersTable');
+            tbody.innerHTML = '';
+
+            if (linkedUsers.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="px-6 py-8 text-center text-gray-400">
+                            <i class="fas fa-users text-4xl mb-2"></i>
+                            <p>لا توجد مستخدمين مرتبطين</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            linkedUsers.forEach(user => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="px-6 py-4">
+                        <div class="font-medium text-white">${user.name || 'غير محدد'}</div>
+                        <div class="text-sm text-gray-400">${user.email}</div>
+                    </td>
+                    <td class="px-6 py-4">${new Date(user.created_at).toLocaleDateString('ar-SA')}</td>
+                    <td class="px-6 py-4">
+                        <span class="px-2 py-1 rounded text-sm ${user.is_active ? 'bg-green-900 text-green-300' : 'bg-red-900 text-red-300'}">
+                            ${user.is_active ? 'نشط' : 'غير نشط'}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4">
+                        <button onclick="viewUserPermissions('${user.id}')" class="text-blue-400 hover:text-blue-300 text-sm">
+                            <i class="fas fa-eye ml-1"></i>عرض الصلاحيات
+                        </button>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="flex gap-2">
+                            <button onclick="editLinkedUser('${user.id}')" class="text-yellow-400 hover:text-yellow-300" title="تعديل">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button onclick="deleteLinkedUser('${user.id}')" class="text-red-400 hover:text-red-300" title="حذف">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Generate new credentials for linked user
+        function generateNewCredentials() {
+            console.log('توليد بيانات دخول جديدة');
+            
+            try {
+                // إنشاء بريد إلكتروني عشوائي باستخدام الطابع الزمني لضمان الفرادة
+                const timestamp = new Date().getTime();
+                const randomString = Math.random().toString(36).substr(2, 6);
+                const randomNum = Math.floor(Math.random() * 10000);
+                const domain = currentUser?.email?.split('@')[1] || 'example.com';
+                const randomEmail = `user_${randomString}_${timestamp}_${randomNum}@${domain}`;
+                
+                // إنشاء كلمة مرور عشوائية قوية تتضمن أحرف كبيرة وصغيرة وأرقام ورموز
+                const upperChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+                const lowerChars = 'abcdefghijklmnopqrstuvwxyz';
+                const numbers = '0123456789';
+                const symbols = '!@#$%^&*()_-+=<>?';
+                
+                let password = '';
+                // إضافة حرف كبير على الأقل
+                password += upperChars.charAt(Math.floor(Math.random() * upperChars.length));
+                // إضافة حرف صغير على الأقل
+                password += lowerChars.charAt(Math.floor(Math.random() * lowerChars.length));
+                // إضافة رقم على الأقل
+                password += numbers.charAt(Math.floor(Math.random() * numbers.length));
+                // إضافة رمز على الأقل
+                password += symbols.charAt(Math.floor(Math.random() * symbols.length));
+                
+                // إضافة المزيد من الأحرف العشوائية
+                const allChars = upperChars + lowerChars + numbers + symbols;
+                for (let i = 0; i < 8; i++) {
+                    password += allChars.charAt(Math.floor(Math.random() * allChars.length));
+                }
+                
+                // خلط الأحرف في كلمة المرور
+                const passwordArray = password.split('');
+                for (let i = passwordArray.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [passwordArray[i], passwordArray[j]] = [passwordArray[j], passwordArray[i]];
+                }
+                const randomPassword = passwordArray.join('');
+
+                // تعيين القيم في النموذج
+                document.getElementById('generatedEmail').value = randomEmail;
+                document.getElementById('generatedPassword').value = randomPassword;
+                
+                console.log('تم توليد بيانات الدخول بنجاح:', { email: randomEmail, password: '******' });
+            } catch (error) {
+                console.error('خطأ في توليد بيانات الدخول:', error);
+                // استخدام طريقة بديلة أبسط في حالة حدوث خطأ
+                const simpleEmail = `user_${Math.random().toString(36).substr(2, 8)}@example.com`;
+                const simplePassword = Math.random().toString(36).substr(2, 10);
+                
+                document.getElementById('generatedEmail').value = simpleEmail;
+                document.getElementById('generatedPassword').value = simplePassword;
+            }
+        }
+
+        // Copy to clipboard
+        function copyToClipboard(elementId) {
+            const element = document.getElementById(elementId);
+            element.select();
+            document.execCommand('copy');
+
+            // Show feedback
+            const button = element.nextElementSibling;
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-check"></i>';
+            button.classList.add('bg-green-600');
+
+            setTimeout(() => {
+                button.innerHTML = originalText;
+                button.classList.remove('bg-green-600');
+            }, 2000);
+        }
+
+        // Toggle subscription restrictions
+        function toggleSubscriptionRestrictions() {
+            const checkbox = document.getElementById('restrictSubscriptionTypes');
+            const restrictions = document.getElementById('subscriptionRestrictions');
+
+            if (checkbox.checked) {
+                restrictions.classList.remove('hidden');
+            } else {
+                restrictions.classList.add('hidden');
+                // Uncheck all restriction checkboxes
+                restrictions.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+            }
+        }
+
+        // Modal functions
+        function openAddUserModal() {
+            console.log('openAddUserModal function called');
+            
+            try {
+                // Check if linkedUsers is defined
+                if (!linkedUsers || !Array.isArray(linkedUsers)) {
+                    console.error('linkedUsers is not defined or not an array');
+                    linkedUsers = [];
+                }
+                
+                // Check if user can add more users (max 3)
+                if (linkedUsers.length >= 3) {
+                    alert('لا يمكنك إضافة أكثر من 3 مستخدمين مرتبطين');
+                    return;
+                }
+
+                const modal = document.getElementById('addUserModal');
+                if (!modal) {
+                    console.error('Modal element not found');
+                    return;
+                }
+                
+                // إظهار النافذة المنبثقة
+                modal.style.display = 'flex';
+                modal.classList.remove('hidden');
+                document.body.style.overflow = 'hidden'; // منع التمرير في الخلفية
+                
+                // توليد بيانات دخول جديدة
+                generateNewCredentials();
+                
+                console.log('تم فتح النافذة المنبثقة بنجاح');
+            } catch (error) {
+                console.error('خطأ في فتح النافذة المنبثقة:', error);
+            }
+        }
+
+        function closeAddUserModal() {
+            const modal = document.getElementById('addUserModal');
+            modal.style.display = 'none';
+            modal.classList.add('hidden');
+            document.body.style.overflow = 'auto'; // إعادة تمكين التمرير
+            document.getElementById('addUserForm').reset();
+        }
+
+        // Form submission handlers
+        document.getElementById('addUserForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            console.log('تم تقديم نموذج إضافة المستخدم');
+            await addLinkedUser();
+        });
+
+        // Add linked user
+        async function addLinkedUser() {
+            console.log('بدء وظيفة إضافة مستخدم مرتبط');
+            try {
+                // التحقق من وجود مدير قاعدة البيانات قبل البدء
+                if (!window.dbManager) {
+                    console.error('خطأ: window.dbManager غير متوفر');
+                    alert('حدث خطأ: مدير قاعدة البيانات غير متوفر. يرجى تحديث الصفحة والمحاولة مرة أخرى.');
+                    return;
+                }
+
+                // التحقق من وجود وظيفة createLinkedUser
+                if (typeof window.dbManager.createLinkedUser !== 'function') {
+                    console.error('وظيفة createLinkedUser غير موجودة في مدير قاعدة البيانات');
+                    console.log('الوظائف المتاحة:', Object.keys(window.dbManager));
+                    alert('حدث خطأ: وظيفة إنشاء المستخدم المرتبط غير متاحة. يرجى تحديث الصفحة والمحاولة مرة أخرى.');
+                    return;
+                }
+
+                // التحقق من بيانات المستخدم الحالي
+                console.log('التحقق من بيانات المستخدم الحالي:', currentUser);
+                if (!currentUser || !currentUser.id) {
+                    console.error('لم يتم تحميل بيانات المستخدم الحالي بشكل صحيح');
+                    alert('حدث خطأ: لم يتم تحميل بيانات المستخدم الحالي. يرجى تحديث الصفحة والمحاولة مرة أخرى.');
+                    return;
+                }
+
+                // جمع بيانات النموذج
+                const email = document.getElementById('generatedEmail').value;
+                const password = document.getElementById('generatedPassword').value;
+                const userName = document.getElementById('userName').value.trim();
+                const permissions = Array.from(document.querySelectorAll('input[name="permissions"]:checked')).map(cb => cb.value);
+
+                if (!email || !password) {
+                    console.error('البريد الإلكتروني أو كلمة المرور غير موجودة');
+                    alert('يرجى التأكد من توليد بيانات الدخول بشكل صحيح');
+                    return;
+                }
+
+                if (!userName) {
+                    console.error('اسم المستخدم مطلوب');
+                    alert('يرجى إدخال اسم المستخدم');
+                    return;
+                }
+
+                console.log('البريد الإلكتروني:', email);
+                console.log('كلمة المرور:', password);
+                console.log('اسم المستخدم:', userName);
+                console.log('الصلاحيات المحددة:', permissions);
+
+                // جمع بيانات الاشتراكات المسموحة (إذا تم تحديدها)
+                let allowedSubscriptions = null;
+                if (document.getElementById('restrictSubscriptionTypes').checked) {
+                    const regularSubs = Array.from(document.querySelectorAll('input[name="allowedRegularSubs"]:checked')).map(cb => cb.value);
+                    const fileSubs = Array.from(document.querySelectorAll('input[name="allowedFileSubs"]:checked')).map(cb => cb.value);
+                    allowedSubscriptions = {
+                        regular: regularSubs,
+                        files: fileSubs
+                    };
+                    console.log('الاشتراكات المسموحة:', allowedSubscriptions);
+                }
+
+                // إعداد بيانات المستخدم
+                const userData = {
+                    email,
+                    password,
+                    name: userName,
+                    parent_user_id: currentUser.id,
+                    permissions,
+                    allowed_subscriptions: allowedSubscriptions,
+                    is_linked_user: true,
+                    is_temporary: true // تعيين المستخدم كمؤقت للتمييز بين المستخدمين المرتبطين
+                };
+                console.log('بيانات المستخدم المراد إضافته:', userData);
+
+                // استدعاء وظيفة إنشاء المستخدم المرتبط
+                console.log('جاري استدعاء وظيفة createLinkedUser...');
+                console.log('نوع window.dbManager:', typeof window.dbManager);
+                console.log('وظائف window.dbManager المتاحة:', Object.keys(window.dbManager));
+                console.log('جاري استدعاء createLinkedUser مع البيانات:', JSON.stringify(userData));
+                
+                // استدعاء وظيفة إنشاء المستخدم المرتبط
+                const result = await window.dbManager.createLinkedUser(userData);
+                console.log('نتيجة إضافة المستخدم:', result);
+                
+                if (result && result.success) {
+                    console.log('تم إضافة المستخدم بنجاح:', result.data);
+                    alert('تم إضافة المستخدم بنجاح');
+                    closeAddUserModal();
+                    await loadLinkedUsers(); // إعادة تحميل قائمة المستخدمين المرتبطين
+                } else {
+                    const errorMsg = result && result.error ? result.error : 'سبب غير معروف';
+                    console.error('فشل إضافة المستخدم:', errorMsg);
+                    
+                    // رسائل خطأ أكثر تفصيلاً للمستخدم
+                    if (errorMsg.includes('لا يمكن إضافة أكثر من 3 مستخدمين')) {
+                        alert('لا يمكن إضافة أكثر من 3 مستخدمين مرتبطين');
+                    } else if (errorMsg.includes('البريد الإلكتروني مستخدم بالفعل')) {
+                        alert('البريد الإلكتروني مستخدم بالفعل، يرجى استخدام بريد إلكتروني آخر');
+                    } else {
+                        alert('حدث خطأ أثناء إضافة المستخدم: ' + errorMsg);
+                    }
+                }
+            } catch (error) {
+                console.error('خطأ في إضافة المستخدم المرتبط:', error);
+                
+                // تحسين رسائل الخطأ للمستخدم
+                let errorMessage = 'خطأ غير معروف';
+                if (error.message) {
+                    if (error.message.includes('network')) {
+                        errorMessage = 'خطأ في الاتصال بالخادم، يرجى التحقق من اتصالك بالإنترنت';
+                    } else if (error.message.includes('timeout')) {
+                        errorMessage = 'انتهت مهلة الاتصال بالخادم، يرجى المحاولة مرة أخرى';
+                    } else {
+                        errorMessage = error.message;
+                    }
+                }
+                
+                alert('حدث خطأ أثناء إضافة المستخدم: ' + errorMessage);
+            }
+        }
+
+        // View user permissions
+        function viewUserPermissions(userId) {
+            const user = linkedUsers.find(u => u.id === userId);
+            if (!user) return;
+
+            let permissionsText = 'الصلاحيات:\n';
+            if (user.permissions && user.permissions.length > 0) {
+                const permissionNames = {
+                    'edit_personal_info': 'تعديل المعلومات الشخصية',
+                    'change_password': 'تغيير كلمة المرور',
+                    'change_date_format': 'تغيير نوع التاريخ',
+                    'add_subscriptions': 'إضافة اشتراكات',
+                    'view_subscriptions': 'عرض الاشتراكات',
+                    'edit_subscriptions': 'تعديل الاشتراكات',
+                    'delete_subscriptions': 'حذف الاشتراكات',
+                    'manage_categories': 'إدارة التصنيفات'
+                };
+
+                user.permissions.forEach(perm => {
+                    permissionsText += `• ${permissionNames[perm] || perm}\n`;
+                });
+            } else {
+                permissionsText += 'لا توجد صلاحيات محددة';
+            }
+
+            if (user.allowed_subscriptions) {
+                permissionsText += '\nالاشتراكات المسموحة:\n';
+                if (user.allowed_subscriptions.regular && user.allowed_subscriptions.regular.length > 0) {
+                    permissionsText += 'الاشتراكات العادية: ' + user.allowed_subscriptions.regular.join(', ') + '\n';
+                }
+                if (user.allowed_subscriptions.files && user.allowed_subscriptions.files.length > 0) {
+                    permissionsText += 'اشتراكات الملفات: ' + user.allowed_subscriptions.files.join(', ') + '\n';
+                }
+            }
+
+            alert(permissionsText);
+        }
+
+        // Edit linked user
+        function editLinkedUser(userId) {
+            alert('ميزة تعديل المستخدم ستكون متاحة قريباً');
+        }
+
+        // Delete linked user
+        async function deleteLinkedUser(userId) {
+            if (!confirm('هل أنت متأكد من حذف هذا المستخدم؟')) return;
+
+            try {
+                if (window.dbManager) {
+                    const result = await window.dbManager.deleteLinkedUser(userId);
+                    if (result.success) {
+                        alert('تم حذف المستخدم بنجاح');
+                        loadLinkedUsers();
+                    } else {
+                        alert('حدث خطأ أثناء حذف المستخدم: ' + result.error);
+                    }
+                }
+            } catch (error) {
+                console.error('خطأ في حذف المستخدم المرتبط:', error);
+                alert('حدث خطأ أثناء حذف المستخدم');
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('userData');
+            window.location.href = 'login.html';
+        }
+    </script>
+</body>
+</html>

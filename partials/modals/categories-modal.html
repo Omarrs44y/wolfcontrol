@@ -1,0 +1,91 @@
+<div id="categoriesModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-3">
+  <div class="bg-[#2a2a2a] rounded-lg w-full max-w-lg my-6 relative">
+    <div class="border-b border-gray-700 p-3">
+      <div class="flex justify-between items-center">
+        <h2 class="text-base font-bold"><i class="fas fa-tags ml-1.5"></i>إدارة التصنيفات</h2>
+        <button onclick="closeCategoriesModal()" class="text-gray-400 hover:text-white transition-colors">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+    </div>
+    <div class="p-4">
+      <form id="categoryForm" onsubmit="handleCategorySubmit(event)" class="mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-gray-400 mb-1 text-sm">اسم التصنيف</label>
+            <div class="flex flex-col gap-2">
+              <select id="predefinedCategory" onchange="updateCategoryName(this.value)" class="w-full p-2 rounded bg-[#1a1a1a] text-white border border-gray-700 focus:border-yellow-500">
+                <option value="">اختر من القائمة (اختياري)</option>
+                <option value="netflix">نتفلكس</option>
+                <option value="shahid_sports">شاهد رياضي</option>
+                <option value="osn_plus">OSN+</option>
+                <option value="amazon_prime">امازون برايم</option>
+                <option value="shahid_series">شاهد مسلسلات</option>
+                <option value="shahid_full">شاهد شامل</option>
+                <option value="disney_plus">ديزني بلس</option>
+              </select>
+              <input type="text" id="categoryName" required class="w-full p-2 rounded bg-[#1a1a1a] text-white border border-gray-700 focus:border-yellow-500" placeholder="أو أدخل اسماً مخصصاً" />
+            </div>
+          </div>
+          <div>
+            <label class="block text-gray-400 mb-1 text-sm">لون التصنيف</label>
+            <div class="flex gap-2">
+              <input type="color" id="categoryColor" required value="#fbbf24" class="h-9 w-9 rounded border border-gray-700" />
+              <select id="predefinedColors" onchange="updateColorPicker()" class="flex-1 p-2 rounded bg-[#1a1a1a] text-white border border-gray-700">
+                <option value="">اختر لون</option>
+                <option value="#fbbf24">ذهبي</option>
+                <option value="#ef4444">أحمر</option>
+                <option value="#dc2626">أحمر داكن</option>
+                <option value="#f87171">أحمر فاتح</option>
+                <option value="#3b82f6">أزرق</option>
+                <option value="#1d4ed8">أزرق داكن</option>
+                <option value="#60a5fa">أزرق فاتح</option>
+                <option value="#22c55e">أخضر</option>
+                <option value="#15803d">أخضر داكن</option>
+                <option value="#4ade80">أخضر فاتح</option>
+                <option value="#eab308">أصفر</option>
+                <option value="#ca8a04">أصفر داكن</option>
+                <option value="#facc15">أصفر فاتح</option>
+                <option value="#8b5cf6">بنفسجي</option>
+                <option value="#6d28d9">بنفسجي داكن</option>
+                <option value="#a78bfa">بنفسجي فاتح</option>
+                <option value="#ec4899">وردي</option>
+                <option value="#be185d">وردي داكن</option>
+                <option value="#f472b6">وردي فاتح</option>
+                <option value="#f97316">برتقالي</option>
+                <option value="#c2410c">برتقالي داكن</option>
+                <option value="#fb923c">برتقالي فاتح</option>
+                <option value="#06b6d4">تركواز</option>
+                <option value="#0e7490">تركواز داكن</option>
+                <option value="#22d3ee">تركواز فاتح</option>
+                <option value="#14b8a6">نعناعي</option>
+                <option value="#0f766e">نعناعي داكن</option>
+                <option value="#2dd4bf">نعناعي فاتح</option>
+                <option value="#64748b">رمادي</option>
+                <option value="#334155">رمادي داكن</option>
+                <option value="#94a3b8">رمادي فاتح</option>
+                <option value="#c026d3">فوشيا</option>
+                <option value="#86198f">فوشيا داكن</option>
+                <option value="#e879f9">فوشيا فاتح</option>
+                <option value="#10b981">زمردي</option>
+                <option value="#047857">زمردي داكن</option>
+                <option value="#34d399">زمردي فاتح</option>
+                <option value="#6366f1">نيلي</option>
+                <option value="#4338ca">نيلي داكن</option>
+                <option value="#818cf8">نيلي فاتح</option>
+                <option value="#d946ef">أرجواني</option>
+                <option value="#a21caf">أرجواني داكن</option>
+                <option value="#e879f9">أرجواني فاتح</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <button type="submit" class="mt-4 w-full bg-yellow-600 text-white p-2 rounded hover:bg-yellow-700">
+          <i class="fas fa-plus ml-1"></i>إضافة تصنيف
+        </button>
+      </form>
+      <div id="categoriesList" class="space-y-2"></div>
+    </div>
+  </div>
+</div>
+

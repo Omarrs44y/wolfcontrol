@@ -1,0 +1,23 @@
+<div class="mb-6">
+  <div class="border-b border-gray-700">
+    <div class="hidden sm:flex gap-4">
+      <button onclick='switchTab("subscriptions")' id="subscriptionsTab" class="px-4 py-3 font-medium text-sm focus:outline-none tab-button active border-b-2 border-transparent hover:border-red-500 transition-colors">
+        <i class="fas fa-users ml-2"></i>قائمة الاشتراكات
+      </button>
+      <button onclick='switchTab("files")' id="filesTab" class="px-4 py-3 font-medium text-sm focus:outline-none tab-button border-b-2 border-transparent hover:border-red-500 transition-colors">
+        <i class="fas fa-folder ml-2"></i>قائمة اشتراكات الملفات
+      </button>
+      <button onclick='switchTab("customers")' id="customersTab" class="px-4 py-3 font-medium text-sm focus:outline-none tab-button admin-only border-b-2 border-transparent hover:border-red-500 transition-colors" style="display: none">
+        <i class="fas fa-user-friends ml-2"></i>إدارة العملاء
+      </button>
+    </div>
+    <div class="sm:hidden">
+      <select id="mobileTabSelect" onchange="switchTab(this.value)" class="w-full bg-[#2a2a2a] text-white p-3 rounded-lg border border-gray-700 focus:border-red-500 focus:outline-none">
+        <option value="subscriptions">📋 قائمة الاشتراكات</option>
+        <option value="files">📁 قائمة اشتراكات الملفات</option>
+        <option value="customers" class="admin-only" style="display: none">👥 إدارة العملاء</option>
+      </select>
+    </div>
+  </div>
+</div>
+

@@ -1,0 +1,304 @@
+/* Mobile Responsive Styles for Dashboard */
+
+/* تحسينات عامة للجوال */
+@media (max-width: 768px) {
+  /* تحسين الحاوي الرئيسي */
+  .main-content {
+    padding: 0.5rem;
+  }
+
+  /* تحسين بطاقات الإحصائيات */
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+
+  .stats-card {
+    padding: 0.75rem;
+  }
+
+  .stats-card h3 {
+    font-size: 0.75rem;
+  }
+
+  .stats-card p {
+    font-size: 1.25rem;
+  }
+
+  .stats-card i {
+    font-size: 1.5rem;
+  }
+
+  /* تحسين الأزرار */
+  .action-buttons {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+
+  .action-button {
+    padding: 0.75rem;
+    font-size: 0.875rem;
+  }
+
+  /* تحسين النماذج */
+  .modal-content {
+    margin: 0.5rem;
+    max-height: 95vh;
+  }
+
+  .modal-header {
+    padding: 0.75rem;
+  }
+
+  .modal-body {
+    padding: 0.75rem;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .form-input {
+    padding: 0.75rem;
+    font-size: 1rem; /* منع التكبير في iOS */
+  }
+
+  /* تحسين الجداول */
+  .table-container {
+    font-size: 0.75rem;
+  }
+
+  .table-header {
+    padding: 0.5rem;
+  }
+
+  .table-cell {
+    padding: 0.5rem;
+  }
+
+  /* تحسين البطاقات */
+  .subscription-card {
+    margin-bottom: 0.75rem;
+    border-radius: 0.5rem;
+  }
+
+  .card-header {
+    margin-bottom: 0.5rem;
+  }
+
+  .card-title {
+    font-size: 0.875rem;
+  }
+
+  .card-subtitle {
+    font-size: 0.75rem;
+  }
+
+  .card-body {
+    gap: 0.5rem;
+  }
+
+  .card-field-label {
+    font-size: 0.625rem;
+  }
+
+  .card-field-value {
+    font-size: 0.75rem;
+  }
+
+  /* تحسين التبويبات */
+  .tabs-container {
+    margin-bottom: 1rem;
+  }
+
+  .mobile-tab-select {
+    padding: 0.75rem;
+    font-size: 0.875rem;
+  }
+
+  /* تحسين الشريط الجانبي */
+  .sidebar {
+    width: 280px;
+  }
+
+  .sidebar-item {
+    padding: 0.75rem;
+    font-size: 0.875rem;
+  }
+
+  .sidebar-item i {
+    width: 1.25rem;
+    font-size: 0.875rem;
+  }
+
+  /* تحسين النافبار */
+  .navbar {
+    padding: 0.5rem 1rem;
+  }
+
+  .navbar-logo {
+    height: 2rem;
+  }
+
+  .navbar-title {
+    font-size: 1rem;
+  }
+
+  .menu-button {
+    padding: 0.5rem;
+  }
+}
+
+/* تحسينات للشاشات الصغيرة جداً */
+@media (max-width: 480px) {
+  .main-content {
+    padding: 0.25rem;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+
+  .stats-card {
+    padding: 0.5rem;
+  }
+
+  .subscription-card {
+    padding: 0.5rem;
+  }
+
+  .card-body {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-content {
+    margin: 0.25rem;
+  }
+
+  .form-input {
+    padding: 0.5rem;
+  }
+
+  .action-button {
+    padding: 0.5rem;
+    font-size: 0.75rem;
+  }
+
+  .table-container {
+    font-size: 0.625rem;
+  }
+}
+
+/* تحسينات للشاشات الكبيرة */
+@media (min-width: 1024px) {
+  .stats-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .action-buttons {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  }
+
+  .form-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* تحسينات للشاشات العريضة */
+@media (min-width: 1280px) {
+  .main-content {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .subscription-card {
+    max-width: none;
+  }
+}
+
+/* تحسينات للطباعة */
+@media print {
+  .sidebar,
+  .navbar,
+  .action-buttons,
+  .modal,
+  .mobile-tab-select {
+    display: none !important;
+  }
+
+  .main-content {
+    margin: 0;
+    padding: 0;
+  }
+
+  .subscription-card {
+    break-inside: avoid;
+    margin-bottom: 1rem;
+    border: 1px solid #ccc;
+  }
+
+  .table-container {
+    font-size: 0.75rem;
+  }
+}
+
+/* تحسينات للوضع المظلم */
+@media (prefers-color-scheme: dark) {
+  .subscription-card {
+    border-color: #374151;
+  }
+
+  .form-input {
+    background-color: #1f2937;
+    border-color: #374151;
+  }
+
+  .modal-content {
+    background-color: #1f2937;
+  }
+}
+
+/* تحسينات للحركة المخفضة */
+@media (prefers-reduced-motion: reduce) {
+  .subscription-card,
+  .tab-button,
+  .action-button {
+    transition: none;
+  }
+
+  .animate-spin {
+    animation: none;
+  }
+
+  .fade-in {
+    animation: none;
+  }
+}
+
+/* تحسينات للتباين العالي */
+@media (prefers-contrast: high) {
+  .subscription-card {
+    border-width: 2px;
+  }
+
+  .status-badge {
+    border: 1px solid currentColor;
+  }
+
+  .action-button {
+    border: 1px solid currentColor;
+  }
+}
+
+/* تحسينات للشفافية المخفضة */
+@media (prefers-reduced-transparency: reduce) {
+  .modal {
+    background-color: rgba(0, 0, 0, 0.9);
+  }
+
+  .subscription-card {
+    background-color: #1f2937;
+  }
+}

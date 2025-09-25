@@ -1,0 +1,259 @@
+<!-- Add/Edit Modal - متجاوب -->
+<div id="subscriptionModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-2 sm:p-4">
+  <div class="bg-[#2a2a2a] rounded-lg w-full max-w-xl mx-auto my-2 sm:my-4 max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
+    <!-- رأس النموذج -->
+    <div class="p-3 sm:p-4 border-b border-gray-700 sticky top-0 bg-[#2a2a2a] z-10">
+      <div class="flex justify-between items-center">
+        <h3 class="text-base sm:text-lg font-bold" id="modalTitle">إضافة اشتراك جديد</h3>
+        <button onclick="closeSubscriptionModal()" class="text-gray-400 hover:text-white p-1">
+          <i class="fas fa-times text-lg"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- محتوى النموذج -->
+    <div class="p-3 sm:p-4">
+      <form id="subscriptionForm" onsubmit="handleSubscriptionSubmit(event)" class="space-y-3 sm:space-y-4">
+        <!-- القسم الأول: المعلومات الأساسية -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <!-- اسم العميل -->
+          <div class="sm:col-span-1">
+            <label class="block text-gray-400 mb-1 text-xs sm:text-sm">
+              <i class="fas fa-user ml-1"></i>اسم العميل (اختياري)
+            </label>
+            <input type="text" id="customerName"
+              class="w-full p-2 sm:p-3 rounded bg-[#1a1a1a] border border-gray-700 focus:border-red-500 focus:outline-none text-xs sm:text-sm"
+              placeholder="أدخل اسم العميل">
+          </div>
+
+          <!-- نوع الاشتراك -->
+          <div class="sm:col-span-1">
+            <label class="block text-gray-400 mb-1 text-xs sm:text-sm">
+              <i class="fas fa-tv ml-1"></i>نوع الاشتراك
+            </label>
+            <select id="subscriptionType" required
+              class="w-full p-2 sm:p-3 rounded bg-[#1a1a1a] border border-gray-700 focus:border-red-500 focus:outline-none text-xs sm:text-sm">
+              <option value="">اختر نوع الاشتراك</option>
+              <option value="netflix">🎬 نتفلكس</option>
+              <option value="shahid_vip">📺 شاهد مسلسلات</option>
+              <option value="shahid_sport">⚽ شاهد رياضي</option>
+              <option value="shahid_year">📅 شاهد سنة</option>
+              <option value="shahid_full">🎭 شاهد شامل</option>
+              <option value="use_pro">📱 يوز برو</option>
+              <option value="canva_pro">🎨 كانفا برو</option>
+              <option value="canva_500"><i class="fas fa-images"></i> كانفا ٥٠٠ دعوة</option>
+              <option value="digital_sim"><i class="fas fa-sim-card"></i> شريحة رقمية</option>
+              <option value="youtube_premium"><i class="fab fa-youtube"></i> يوتيوب بريميوم</option>
+              <option value="amazon_prime"><i class="fab fa-amazon"></i> امازون برايم</option>
+              <option value="bein_sports"><i class="fas fa-football-ball"></i> بي ان سبورت</option>
+              <option value="osn_plus"><i class="fas fa-tv"></i> OSN+</option>
+              <option value="disney_plus"><i class="fas fa-crown"></i> ديزني بلس</option>
+              <option value="other"><i class="fas fa-ellipsis-h"></i> اشتراك آخر</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- إضافة حقل الاشتراك المخصص -->
+        <div id="otherSubscriptionDiv" class="hidden">
+          <label class="block text-gray-400 mb-1 text-sm">
+            <i class="fas fa-pen ml-1"></i>اسم الاشتراك المخصص
+          </label>
+          <input type="text" id="customSubscriptionName"
+            class="w-full p-2 rounded bg-[#1a1a1a] border border-gray-700 focus:border-red-500 focus:outline-none text-sm"
+            placeholder="أدخل اسم الاشتراك">
+        </div>
+
+        <!-- القسم الثاني: معلومات الاتصال -->
+        <div class="space-y-3">
+          <!-- البريد الإلكتروني -->
+          <div>
+            <label class="block text-gray-400 mb-1 text-sm">
+              <i class="fas fa-envelope ml-1"></i>البريد الإلكتروني
+            </label>
+            <input type="email" id="customerEmail" required
+              class="w-full p-2 rounded bg-[#1a1a1a] border border-gray-700 focus:border-red-500 focus:outline-none text-sm"
+              placeholder="أدخل البريد الإلكتروني">
+          </div>
+
+          <!-- إضافة كلمة مرور للاشتراك -->
+          <div>
+            <div class="flex items-center mb-1">
+              <input type="checkbox" id="addPassword" class="ml-2 w-4 h-4 rounded border-gray-700 bg-[#1a1a1a]">
+              <label for="addPassword" class="text-gray-400 cursor-pointer select-none text-sm">
+                <i class="fas fa-lock ml-1"></i>إضافة كلمة مرور للاشتراك
+              </label>
+            </div>
+            <div id="passwordFields" class="hidden">
+              <div class="relative">
+                <input type="password" id="subscriptionPassword"
+                  class="w-full p-2 rounded bg-[#1a1a1a] border border-gray-700 focus:border-red-500 focus:outline-none text-sm"
+                  placeholder="أدخل كلمة المرور">
+                <button type="button" onclick="toggleSubscriptionPasswordVisibility()"
+                  class="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white">
+                  <i id="subscriptionPasswordToggleIcon" class="far fa-eye"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- رقم الواتساب -->
+          <div>
+            <label class="block text-gray-400 mb-1 text-sm">
+              <i class="fab fa-whatsapp ml-1"></i>رقم الواتساب
+            </label>
+            <div class="flex gap-2">
+              <select id="countryCode" required
+                class="w-24 p-2 rounded bg-[#1a1a1a] border border-gray-700 focus:border-red-500 focus:outline-none text-sm">
+                <option value="+966">🇸🇦 +966</option>
+                <option value="+971">🇦🇪 +971</option>
+                <option value="+974">🇶َ +974</option>
+                <option value="+973">🇧َح +973</option>
+                <option value="+968">🇴🇲 +968</option>
+                <option value="+965">🇰🇼 +965</option>
+                <option value="+20">🇪🇬 +20</option>
+              </select>
+              <input type="tel" id="customerWhatsapp" required
+                class="flex-1 p-2 rounded bg-[#1a1a1a] border border-gray-700 focus:border-red-500 focus:outline-none text-sm"
+                placeholder="أدخل رقم الواتساب">
+            </div>
+          </div>
+        </div>
+
+        <!-- القسم الثالث: معلومات الاشتراك -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <!-- العملة -->
+          <div>
+            <label class="block text-gray-400 mb-1 text-sm">
+              <i class="fas fa-money-bill ml-1"></i>العملة
+            </label>
+            <select id="currency" required class="w-full p-2 rounded bg-[#1a1a1a] border border-gray-700 focus:border-red-500 focus:outline-none text-sm">
+              <option value="sar">🇸🇦 ريال سعودي</option>
+              <option value="aed">🇦🇪 درهم إماراتي</option>
+              <option value="qar">🇶🇦 ريال قطري</option>
+              <option value="kwd">🇰🇼 دينار كويتي</option>
+              <option value="bhd">🇧َح دينار بحريني</option>
+              <option value="omr">🇴🇲 ريال عماني</option>
+              <option value="egp">🇪🇬 جنيه مصري</option>
+              <option value="try">🇹🇷 ليرة تركية</option>
+              <option value="inr">🇮🇳 روبية هندية</option>
+              <option value="ngn">🇳🇬 نايرا نيجيري</option>
+            </select>
+          </div>
+
+          <!-- مدة الاشتراك -->
+          <div>
+            <label class="block text-gray-400 mb-1 text-sm">
+              <i class="fas fa-clock ml-1"></i>مدة الاشتراك
+            </label>
+            <select id="subscriptionDuration" onchange="handleDurationChange()" required
+              class="w-full p-2 rounded bg-[#1a1a1a] border border-gray-700 focus:border-red-500 focus:outline-none text-sm">
+              <option value="">اختر المدة</option>
+              <option value="1">شهر واحد</option>
+              <option value="3">3 أشهر</option>
+              <option value="6">6 أشهر</option>
+              <option value="12">سنة</option>
+              <option value="custom">تاريخ محدد</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- تاريخ الانتهاء المخصص -->
+        <div id="customDateDiv" class="hidden">
+          <label class="block text-gray-400 mb-1 text-sm">
+            <i class="fas fa-calendar ml-1"></i>تاريخ الانتهاء
+          </label>
+          <input type="date" id="expiryDate"
+            class="w-full p-2 rounded bg-[#1a2a2a] border border-gray-700 focus:border-red-500 focus:outline-none text-sm">
+        </div>
+
+        <!-- القسم الرابع: حساب جوجل بلاي -->
+        <div class="border-t border-gray-700 pt-3">
+          <div class="flex items-center mb-1">
+            <input type="checkbox" id="addGooglePlay" class="ml-2 w-4 h-4 rounded border-gray-700 bg-[#1a1a1a]" onchange="toggleGooglePlaySection(this)">
+            <label for="addGooglePlay" class="text-gray-400 cursor-pointer select-none text-sm">
+              <i class="fab fa-google-play ml-1"></i>إضافة حساب جوجل بلاي
+            </label>
+          </div>
+          <div id="googlePlaySection" class="hidden space-y-3">
+            <div>
+              <label class="block text-gray-400 mb-1 text-sm">
+                <i class="far fa-envelope ml-1"></i>البريد الإلكتروني
+              </label>
+              <input type="email" name="googlePlayEmail" class="w-full p-2 rounded bg-[#1a1a1a] border border-gray-700 focus:border-purple-500 text-sm">
+            </div>
+            <div>
+              <label class="block text-gray-400 mb-1 text-sm">
+                <i class="fas fa-lock ml-1"></i>كلمة المرور
+              </label>
+              <div class="relative">
+                <input type="password" name="googlePlayPassword" class="w-full p-2 rounded bg-[#1a1a1a] border border-gray-700 focus:border-purple-500 text-sm">
+                <button type="button" onclick="togglePasswordVisibility(this)" class="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white">
+                  <i class="far fa-eye"></i>
+                </button>
+              </div>
+            </div>
+            <div class="flex items-center mb-1">
+              <input type="checkbox" id="addGpaCode" class="ml-2 w-4 h-4 rounded border-gray-700 bg-[#1a1a1a]" onchange="toggleGpaSection(this)">
+              <label for="addGpaCode" class="text-gray-400 cursor-pointer select-none text-sm">
+                <i class="fas fa-barcode ml-1"></i>إضافة كود GPA
+              </label>
+            </div>
+            <div id="gpaSection" class="hidden">
+              <input type="text" name="gpaCode" class="w-full p-2 rounded bg-[#1a1a1a] border border-gray-700 focus:border-purple-500 text-sm" placeholder="أدخل كود GPA">
+            </div>
+          </div>
+        </div>
+
+        <!-- القسم الخامس: الملاحظات -->
+        <div class="border-t border-gray-700 pt-3">
+          <div class="flex items-center mb-1">
+            <input type="checkbox" id="addNotes" class="ml-2 w-4 h-4 rounded border-gray-700 bg-[#1a1a1a]" onchange="toggleNotesSection(this)">
+            <label for="addNotes" class="text-gray-400 cursor-pointer select-none text-sm">
+              <i class="fas fa-sticky-note ml-1"></i>إضافة ملاحظات
+            </label>
+          </div>
+          <div id="notesSection" class="hidden">
+            <textarea name="notes" rows="3" class="w-full p-2 rounded bg-[#1a1a1a] border border-gray-700 focus:border-purple-500 text-sm resize-none" placeholder="أدخل ملاحظاتك هنا..."></textarea>
+          </div>
+        </div>
+
+        <!-- القسم السادس: معلومات الفاتورة -->
+        <div class="border-t border-gray-700 pt-3">
+          <div class="flex items-center mb-1">
+            <input type="checkbox" id="addInvoiceInfo" class="ml-2 w-4 h-4 rounded border-gray-700 bg-[#1a1a1a]" onchange="toggleInvoiceSection(this)">
+            <label for="addInvoiceInfo" class="text-gray-400 cursor-pointer select-none text-sm">
+              <i class="fas fa-file-invoice ml-1"></i>إضافة معلومات الفاتورة
+            </label>
+          </div>
+          <div id="invoiceSection" class="hidden space-y-3">
+            <div>
+              <label class="block text-gray-400 mb-1 text-sm">
+                <i class="fas fa-hashtag ml-1"></i>رقم الفاتورة
+              </label>
+              <input type="text" name="invoiceNumber" class="w-full p-2 rounded bg-[#1a1a1a] border border-gray-700 focus:border-purple-500 text-sm" placeholder="أدخل رقم الفاتورة">
+            </div>
+            <div class="flex items-center mb-1">
+              <input type="checkbox" id="addOrderDate" class="ml-2 w-4 h-4 rounded border-gray-700 bg-[#1a1a1a]" onchange="toggleOrderDateSection(this)">
+              <label for="addOrderDate" class="text-gray-400 cursor-pointer select-none text-sm">
+                <i class="fas fa-calendar-alt ml-1"></i>إضافة تاريخ الطلب
+              </label>
+            </div>
+            <div id="orderDateSection" class="hidden">
+              <input type="date" name="orderDate" class="w-full p-2 rounded bg-[#1a1a1a] border border-gray-700 focus:border-purple-500 text-sm">
+            </div>
+          </div>
+        </div>
+
+        <!-- زر الحفظ -->
+        <div class="flex justify-end pt-3 border-t border-gray-700">
+          <button type="submit"
+            class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-colors flex items-center gap-2 text-sm">
+            <i class="fas fa-save"></i>
+            حفظ الاشتراك
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+

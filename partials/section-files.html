@@ -1,0 +1,39 @@
+<div id="filesTable" class="bg-[#2a2a2a] rounded-lg shadow-lg overflow-hidden hidden">
+  <div class="p-3 md:p-4 bg-[#3a3a3a] flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+    <h2 class="text-lg md:text-xl font-bold">قائمة اشتراكات الملفات</h2>
+    <div class="flex gap-2">
+      <!-- زر التبديل لملفات الاشتراكات -->
+      <button id="toggleFilesViewBtn" onclick="toggleFilesTableView()" class="block sm:hidden bg-gray-600 hover:bg-gray-700 px-3 py-2 rounded-lg items-center gap-2 text-sm" style="display: none">
+        <i class="fas fa-th-list" id="toggleFilesViewIcon"></i>
+        <span id="toggleFilesViewText">عرض بطاقات</span>
+      </button>
+      <button onclick='printTable("filesTable")' class="bg-blue-600 hover:bg-blue-700 px-3 md:px-4 py-2 rounded-lg flex items-center gap-2 text-sm">
+        <i class="fas fa-print"></i>
+        <span class="hidden sm:inline">طباعة</span>
+      </button>
+    </div>
+  </div>
+  <!-- استبدال الكلاسات لتجنب الـ md:block/md:hidden -->
+  <div id="filesTableView" class="hidden overflow-x-auto">
+    <table class="w-full">
+      <thead class="bg-[#3a3a3a]">
+        <tr>
+          <th class="px-4 py-3 text-right text-sm">البريد الإلكتروني</th>
+          <th class="px-4 py-3 text-right text-sm">نوع الملف</th>
+          <th class="px-4 py-3 text-right text-sm">اسم الملف</th>
+          <th class="px-4 py-3 text-right text-sm">نوع الحساب</th>
+          <th class="px-4 py-3 text-right text-sm">رقم الواتساب</th>
+          <th class="px-4 py-3 text-right text-sm">تاريخ الانتهاء</th>
+          <th class="px-4 py-3 text-right text-sm">الحالة</th>
+          <th class="px-4 py-3 text-right text-sm">التصنيف</th>
+          <th class="px-4 py-3 text-right text-sm">إجراءات</th>
+        </tr>
+      </thead>
+      <tbody id="filesTableBody" class="divide-y divide-gray-700"></tbody>
+    </table>
+  </div>
+  <div id="filesCardsView" class="hidden">
+    <div id="filesCardsContainer" class="p-3 space-y-3"></div>
+  </div>
+</div>
+

@@ -1,0 +1,1668 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة الحسابات - وولف كو</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <link rel="stylesheet" href="css/responsive.css">
+    <script src="js/theme.js"></script>
+    <!-- Configuration -->
+    <script src="./js/config.js"></script>
+    <!-- Environment Variables -->
+    <script src="./js/env-loader.js"></script>
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="./js/supabase-config.js"></script>
+    <script src="./db-manager.js"></script>
+    <script src="./js/dashboard-manager.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap');
+        
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background-color: #1a1a1a;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+        
+        /* تحسينات شاملة للجوالات */
+        @media (max-width: 768px) {
+            .container {
+                padding: 0.75rem !important;
+                margin: 0 !important;
+            }
+            
+            /* تحسين العنوان والأزرار */
+            .flex.justify-between.items-center {
+                flex-direction: column !important;
+                gap: 1rem !important;
+                align-items: stretch !important;
+            }
+            
+            .flex.justify-between.items-center h1 {
+                text-align: center !important;
+                font-size: 1.5rem !important;
+            }
+            
+            .flex.justify-between.items-center a {
+                width: 100% !important;
+                text-align: center !important;
+                justify-content: center !important;
+            }
+            
+            /* تحسين الإحصائيات */
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 0.75rem !important;
+            }
+            
+            .stats-grid > div {
+                padding: 1rem !important;
+            }
+            
+            .stats-grid h3 {
+                font-size: 0.875rem !important;
+            }
+            
+            .stats-grid p {
+                font-size: 1.5rem !important;
+            }
+            
+            /* تحسين أزرار الإجراءات */
+            .flex.gap-4.items-center {
+                flex-direction: column !important;
+                gap: 1rem !important;
+                align-items: stretch !important;
+            }
+            
+            .flex.gap-4.items-center button {
+                width: 100% !important;
+                justify-content: center !important;
+            }
+            
+            .flex.gap-4.items-center .relative {
+                width: 100% !important;
+            }
+            
+            .flex.gap-4.items-center input {
+                width: 100% !important;
+            }
+            
+            .flex.gap-4.items-center select {
+                width: 100% !important;
+            }
+            
+            /* إخفاء الجدول وإظهار البطاقات */
+            .desktop-table {
+                display: none !important;
+            }
+            
+            .mobile-view {
+                display: block !important;
+            }
+            
+            /* تحسين البطاقات المحمولة */
+            .mobile-card {
+                background: #2a2a2a;
+                border-radius: 12px;
+                padding: 1rem;
+                margin-bottom: 1rem;
+                border: 1px solid #3a3a3a;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            }
+            
+            .mobile-card-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+                margin-bottom: 1rem;
+                padding-bottom: 1rem;
+                border-bottom: 1px solid #3a3a3a;
+            }
+            
+            .mobile-card-title {
+                font-weight: 600;
+                color: #fff;
+                font-size: 1rem;
+                word-break: break-word;
+                flex: 1;
+                margin-left: 0.5rem;
+            }
+            
+            .mobile-card-body {
+                display: grid;
+                gap: 0.75rem;
+            }
+            
+            .mobile-field {
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+                padding: 0.5rem 0;
+                border-bottom: 1px solid #3a3a3a;
+            }
+            
+            .mobile-field:last-child {
+                border-bottom: none;
+            }
+            
+            .mobile-field-label {
+                color: #9ca3af;
+                font-size: 0.875rem;
+                font-weight: 500;
+                flex: 1;
+            }
+            
+            .mobile-field-value {
+                color: #fff;
+                font-size: 0.875rem;
+                text-align: left;
+                flex: 1;
+                word-break: break-word;
+            }
+            
+            .mobile-actions {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.5rem;
+                margin-top: 1rem;
+                padding-top: 1rem;
+                border-top: 1px solid #3a3a3a;
+            }
+            
+            .mobile-actions button {
+                padding: 0.75rem 0.5rem;
+                font-size: 0.75rem;
+                border-radius: 6px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 0.25rem;
+                min-height: 44px;
+            }
+            
+            /* تحسين النوافذ المنبثقة */
+            .fixed.inset-0 {
+                padding: 1rem !important;
+            }
+            
+            .modal-content {
+                margin: 0 !important;
+                max-height: 90vh !important;
+                overflow-y: auto !important;
+                border-radius: 12px !important;
+            }
+            
+            .modal-content h3 {
+                font-size: 1.25rem !important;
+                margin-bottom: 1rem !important;
+            }
+            
+            /* تحسين النماذج */
+            .form-grid {
+                grid-template-columns: 1fr !important;
+                gap: 1rem !important;
+            }
+            
+            .form-grid input,
+            .form-grid select,
+            .form-grid textarea {
+                width: 100% !important;
+                padding: 0.75rem !important;
+                font-size: 1rem !important;
+                border-radius: 8px !important;
+            }
+            
+            .button-group {
+                flex-direction: column !important;
+                gap: 0.75rem !important;
+            }
+            
+            .button-group button {
+                width: 100% !important;
+                padding: 0.75rem !important;
+                font-size: 1rem !important;
+                min-height: 48px !important;
+            }
+            
+            /* تحسين الملاحظات التوضيحية */
+            .bg-blue-900\/30 {
+                padding: 0.75rem !important;
+                margin-bottom: 1rem !important;
+            }
+            
+            .bg-blue-900\/30 .grid {
+                grid-template-columns: 1fr !important;
+                gap: 0.5rem !important;
+            }
+            
+            .bg-blue-900\/30 .text-xs {
+                font-size: 0.75rem !important;
+            }
+        }
+        
+        @media (min-width: 769px) {
+            .mobile-view {
+                display: none !important;
+            }
+            
+            .desktop-table {
+                display: table !important;
+            }
+        }
+        
+        /* تحسينات للشاشات الصغيرة جداً */
+        @media (max-width: 480px) {
+            .container {
+                padding: 0.5rem !important;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr !important;
+                gap: 0.5rem !important;
+            }
+            
+            .stats-grid > div {
+                padding: 0.75rem !important;
+            }
+            
+            .mobile-card {
+                padding: 0.75rem;
+                margin-bottom: 0.75rem;
+            }
+            
+            .mobile-card-title {
+                font-size: 0.9rem;
+            }
+            
+            .mobile-field {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.25rem;
+                padding: 0.5rem 0;
+            }
+            
+            .mobile-field-label {
+                font-size: 0.8rem;
+                font-weight: 600;
+            }
+            
+            .mobile-field-value {
+                text-align: right;
+                width: 100%;
+                font-size: 0.8rem;
+            }
+            
+            .mobile-actions {
+                grid-template-columns: 1fr;
+                gap: 0.5rem;
+            }
+            
+            .mobile-actions button {
+                padding: 0.75rem;
+                font-size: 0.8rem;
+            }
+            
+            .flex.justify-between.items-center h1 {
+                font-size: 1.25rem !important;
+            }
+        }
+        
+        /* تحسينات للوضع الأفقي على الجوالات */
+        @media (max-width: 768px) and (orientation: landscape) {
+            .stats-grid {
+                grid-template-columns: repeat(4, 1fr) !important;
+            }
+            
+            .mobile-card {
+                padding: 0.75rem;
+            }
+            
+            .mobile-actions {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        
+        /* تحسينات للشاشات المتوسطة */
+        @media (min-width: 481px) and (max-width: 768px) {
+            .mobile-actions {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+            }
+        }
+        
+        /* تأثيرات التفاعل المحسنة للجوالات */
+        @media (hover: none) and (pointer: coarse) {
+            button, .btn, input, select {
+                min-height: 44px;
+                min-width: 44px;
+            }
+            
+            .mobile-actions button {
+                padding: 0.75rem 1rem;
+                min-height: 48px;
+            }
+            
+            /* تحسين حجم النص للمس */
+            input, select, textarea {
+                font-size: 16px !important; /* منع التكبير التلقائي في iOS */
+            }
+            
+            /* تحسين المسافات للمس */
+            .mobile-field {
+                min-height: 44px;
+            }
+        }
+        
+        /* تحسينات إضافية للوصولية */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-[#1a1a1a] text-white overflow-x-hidden">
+    <!-- زر الرجوع وعنوان الصفحة -->
+    <div class="container mx-auto px-4 py-8">
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-2xl font-bold">إدارة حسابات المستخدمين</h1>
+            <a href="dashboard.html" class="bg-gray-600 px-4 py-2 rounded hover:bg-gray-700 flex items-center gap-2">
+                <i class="fas fa-arrow-right"></i>
+                الرجوع للوحة التحكم
+            </a>
+        </div>
+
+        <!-- إحصائيات المستخدمين -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8 stats-grid">
+            <div class="bg-[#2a2a2a] p-6 rounded-lg">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-gray-400">إجمالي الحسابات</h3>
+                        <p class="text-2xl font-bold" id="totalAccounts">0</p>
+                    </div>
+                    <i class="fas fa-users text-3xl text-blue-500"></i>
+                </div>
+            </div>
+            <div class="bg-[#2a2a2a] p-6 rounded-lg">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-gray-400">حسابات نشطة</h3>
+                        <p class="text-2xl font-bold text-green-500" id="activeAccounts">0</p>
+                    </div>
+                    <i class="fas fa-check-circle text-3xl text-green-500"></i>
+                </div>
+            </div>
+            <div class="bg-[#2a2a2a] p-6 rounded-lg">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-gray-400">تنتهي قريباً</h3>
+                        <p class="text-2xl font-bold text-yellow-500" id="expiringAccounts">0</p>
+                    </div>
+                    <i class="fas fa-clock text-3xl text-yellow-500"></i>
+                </div>
+            </div>
+            <div class="bg-[#2a2a2a] p-6 rounded-lg">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-gray-400">حسابات منتهية</h3>
+                        <p class="text-2xl font-bold text-red-500" id="expiredAccounts">0</p>
+                    </div>
+                    <i class="fas fa-times-circle text-3xl text-red-500"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- أدوات التحكم -->
+        <div class="flex justify-between items-center mb-6">
+            <button onclick="openNewUserModal()" 
+                    class="bg-green-600 px-6 py-3 rounded-lg hover:bg-green-700 flex items-center gap-2">
+                <i class="fas fa-user-plus"></i>
+                إضافة حساب جديد
+            </button>
+            <div class="flex gap-4 items-center">
+                <div class="relative">
+                    <input type="text" 
+                           id="searchInput" 
+                           placeholder="بحث عن مستخدم..." 
+                           onkeyup="filterUsers()"
+                           class="w-64 p-2 rounded bg-[#1a1a1a] border border-gray-700 focus:border-blue-500 focus:outline-none">
+                    <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                </div>
+                <select id="filterStatus" onchange="filterUsers()" 
+                        class="bg-[#2a2a2a] text-white p-2 rounded border border-gray-700 focus:border-blue-500 focus:outline-none">
+                    <option value="all">جميع الحسابات</option>
+                    <option value="active">النشطة</option>
+                    <option value="expiring">تنتهي قريباً</option>
+                    <option value="expired">المنتهية</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- جدول المستخدمين -->
+        <div class="bg-[#2a2a2a] rounded-lg shadow-lg overflow-hidden">
+            <div class="p-4 bg-[#3a3a3a]">
+                <h2 class="text-xl font-bold mb-3">قائمة المستخدمين</h2>
+                <!-- ملاحظة حول الأزرار -->
+                <div class="bg-blue-900/30 border border-blue-500/50 rounded-lg p-3 text-sm">
+                    <div class="flex items-center mb-2">
+                        <i class="fas fa-info-circle text-blue-400 ml-2"></i>
+                        <span class="text-blue-300 font-medium">شرح الأزرار:</span>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-2 text-xs">
+                        <div class="flex items-center">
+                            <i class="fas fa-edit text-blue-400 ml-1"></i>
+                            <span class="text-gray-300">تعديل البيانات</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-plus text-purple-400 ml-1"></i>
+                            <span class="text-gray-300">إضافة اشتراك</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-sync-alt text-green-400 ml-1"></i>
+                            <span class="text-gray-300">تجديد الاشتراك</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-ban text-yellow-400 ml-1"></i>
+                            <span class="text-gray-300">إلغاء تفعيل (مؤقت)</span>
+                        </div>
+                        <div class="flex items-center md:col-span-2">
+                            <i class="fas fa-trash text-red-400 ml-1"></i>
+                            <span class="text-gray-300">حذف نهائي (المستخدم + جميع اشتراكاته)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- العرض المكتبي -->
+            <div class="desktop-table table-container overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-[#3a3a3a]">
+                        <tr>
+                            <th class="px-6 py-3 text-right">البريد الإلكتروني</th>
+                            <th class="px-6 py-3 text-right">كلمة المرور</th>
+                            <th class="px-6 py-3 text-right">رقم الواتساب</th>
+                            <th class="px-6 py-3 text-right">تاريخ الإنشاء</th>
+                            <th class="px-6 py-3 text-right">تاريخ الانتهاء</th>
+                            <th class="px-6 py-3 text-right">الحالة</th>
+                            <th class="px-6 py-3 text-right">إجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersTableBody" class="divide-y divide-gray-700">
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- العرض المحمول -->
+            <div class="mobile-view p-4" style="display: none;">
+                <div id="usersMobileView">
+                    <!-- سيتم ملء البيانات هنا للجوالات -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- نموذج تجديد الاشتراك -->
+    <div id="renewModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="bg-[#2a2a2a] rounded-lg w-full max-w-md p-6">
+            <h3 class="text-lg font-bold mb-4">تجديد الاشتراك</h3>
+            <form id="renewForm" onsubmit="handleRenewSubscription(event)">
+                <div class="mb-4">
+                    <label class="block text-gray-400 mb-2">مدة التجديد</label>
+                    <select required class="w-full p-2 rounded bg-[#1a1a1a] border border-gray-700 focus:border-red-500">
+                        <option value="1">شهر واحد</option>
+                        <option value="3">3 أشهر</option>
+                        <option value="6">6 أشهر</option>
+                        <option value="12">سنة</option>
+                        <option value="custom">مدة مخصصة</option>
+                    </select>
+                </div>
+                <div id="customDaysDiv" class="mb-4 hidden">
+                    <label class="block text-gray-400 mb-2">عدد الأيام</label>
+                    <input type="number" min="1" class="w-full p-2 rounded bg-[#1a1a1a] border border-gray-700 focus:border-red-500">
+                </div>
+                <div class="flex justify-end gap-4">
+                    <button type="button" onclick="closeRenewModal()" class="px-4 py-2 bg-gray-600 rounded hover:bg-gray-700">
+                        إلغاء
+                    </button>
+                    <button type="submit" class="px-4 py-2 bg-green-600 rounded hover:bg-green-700">
+                        تجديد
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- نموذج إضافة حساب جديد -->
+    <div id="newUserModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="bg-[#2a2a2a] rounded-lg w-full max-w-md">
+            <div class="p-4 border-b border-gray-700">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-lg font-bold">إضافة حساب جديد</h3>
+                    <button onclick="closeNewUserModal()" class="text-gray-400 hover:text-white">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <form id="newUserForm" onsubmit="handleNewUser(event)" class="p-4 space-y-4">
+                <div>
+                    <label class="block text-gray-400 mb-2">
+                        <i class="far fa-envelope ml-2"></i>البريد الإلكتروني
+                    </label>
+                    <input type="email" required 
+                           class="w-full p-3 rounded bg-[#1a1a1a] text-white border border-gray-700 focus:border-red-500 focus:outline-none">
+                </div>
+                
+                <div>
+                    <label class="block text-gray-400 mb-2">
+                        <i class="fas fa-lock ml-2"></i>كلمة المرور
+                    </label>
+                    <input type="password" required 
+                           class="w-full p-3 rounded bg-[#1a1a1a] text-white border border-gray-700 focus:border-red-500 focus:outline-none">
+                </div>
+                
+                <div>
+                    <label class="block text-gray-400 mb-2">
+                        <i class="fas fa-clock ml-2"></i>مدة الاشتراك
+                    </label>
+                    <select required class="w-full p-3 rounded bg-[#1a1a1a] text-white border border-gray-700 focus:border-red-500 focus:outline-none">
+                        <option value="1">شهر واحد</option>
+                        <option value="3">3 أشهر</option>
+                        <option value="6">6 أشهر</option>
+                        <option value="12">سنة</option>
+                        <option value="custom">مدة مخصصة</option>
+                    </select>
+                </div>
+
+                <div id="customDurationDiv" class="hidden">
+                    <label class="block text-gray-400 mb-2">
+                        <i class="fas fa-calendar ml-2"></i>تاريخ الانتهاء
+                    </label>
+                    <input type="date" 
+                           class="w-full p-3 rounded bg-[#1a1a1a] text-white border border-gray-700 focus:border-red-500 focus:outline-none">
+                </div>
+                
+                <div>
+                    <label class="block text-gray-400 mb-2">
+                        <i class="fab fa-whatsapp ml-2"></i>رقم الواتساب
+                    </label>
+                    <div class="flex gap-2">
+                        <select id="countryCode" class="w-24 p-2 rounded bg-[#1a1a1a] border border-gray-700">
+                            <option value="+966">🇸🇦 +966</option>
+                            <option value="+971">🇦🇪 +971</option>
+                            <option value="+974">🇶🇦 +974</option>
+                            <option value="+965">🇰🇼 +965</option>
+                            <option value="+973">🇧🇭 +973</option>
+                            <option value="+968">🇴🇲 +968</option>
+                        </select>
+                        <input type="tel" id="whatsapp" required
+                               class="flex-1 p-2 rounded bg-[#1a1a1a] border border-gray-700">
+                    </div>
+                </div>
+                
+                <div class="flex justify-end pt-4 border-t border-gray-700">
+                    <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition-colors">
+                        إنشاء الحساب
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- نموذج تعديل بيانات المستخدم -->
+    <div id="editUserModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="bg-[#2a2a2a] rounded-lg w-full max-w-md">
+            <div class="p-4 border-b border-gray-700">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-lg font-bold">تعديل بيانات المستخدم</h3>
+                    <button onclick="closeEditUserModal()" class="text-gray-400 hover:text-white">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <form id="editUserForm" onsubmit="handleEditUser(event)" class="p-4 space-y-4">
+                <input type="hidden" id="editUserId">
+                
+                <div>
+                    <label class="block text-gray-400 mb-2">
+                        <i class="far fa-envelope ml-2"></i>البريد الإلكتروني
+                    </label>
+                    <input type="email" id="editUserEmail" required readonly
+                           class="w-full p-3 rounded bg-[#1a1a1a] text-gray-400 border border-gray-700">
+                </div>
+                
+                <div>
+                    <label class="block text-gray-400 mb-2">
+                        <i class="fab fa-whatsapp ml-2"></i>رقم الواتساب
+                    </label>
+                    <div class="flex gap-2">
+                        <select id="editUserWhatsappCode" class="w-24 p-2 rounded bg-[#1a1a1a] border border-gray-700">
+                            <option value="+966">🇸🇦 +966</option>
+                            <option value="+971">🇦🇪 +971</option>
+                            <option value="+974">🇶🇦 +974</option>
+                            <option value="+965">🇰🇼 +965</option>
+                            <option value="+973">🇧🇭 +973</option>
+                            <option value="+968">🇴🇲 +968</option>
+                        </select>
+                        <input type="tel" id="editUserWhatsapp" required
+                               class="flex-1 p-2 rounded bg-[#1a1a1a] border border-gray-700">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-gray-400 mb-2">
+                        <i class="fas fa-lock ml-2"></i>كلمة المرور (اتركها فارغة للاحتفاظ بكلمة المرور الحالية)
+                    </label>
+                    <input type="password" id="editUserPassword"
+                           class="w-full p-3 rounded bg-[#1a1a1a] text-white border border-gray-700">
+                </div>
+
+                <div>
+                    <label class="block text-gray-400 mb-2">
+                        <i class="far fa-calendar ml-2"></i>تاريخ الانتهاء
+                    </label>
+                    <input type="date" id="editUserExpiry"
+                           class="w-full p-3 rounded bg-[#1a1a1a] text-white border border-gray-700">
+                </div>
+                
+                <div class="flex justify-end pt-4 border-t border-gray-700">
+                    <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors">
+                        حفظ التغييرات
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // فحص بسيط جداً للمدير (محسّن لتحمّل الأخطاء)
+        function simpleAdminCheck() {
+            console.log('🔍 فحص صلاحيات المدير...');
+
+            // Helper لتحويل القيم النصية إلى منطقية
+            const asTruthy = (v) => v === true || v === 'true' || v === 1 || v === '1' || v === 'yes' || v === 'YES' || v === 'True';
+
+            let rawUser = localStorage.getItem('userData');
+            let userData = {};
+            if (rawUser) {
+                try {
+                    userData = JSON.parse(rawUser);
+                } catch (e1) {
+                    // جرّب فك Base64 ثم JSON إذا كانت القيمة مشفّرة سابقاً
+                    try {
+                        const decoded = decodeURIComponent(atob(rawUser));
+                        userData = JSON.parse(decoded);
+                    } catch (e2) {
+                        console.warn('⚠️ تعذر قراءة userData بأي صيغة، سيتم تجاهلها مؤقتاً:', { e1, e2, rawUser });
+                        userData = {};
+                    }
+                }
+            }
+
+            const isLoggedInRaw = localStorage.getItem('isLoggedIn');
+            const loggedIn = asTruthy(isLoggedInRaw);
+            const email = (userData.email || '').toLowerCase().trim();
+            const isAdmin = asTruthy(userData.isAdmin) || asTruthy(userData.is_admin);
+
+            console.log('📋 بيانات المستخدم:', userData);
+            console.log('🔐 حالة تسجيل الدخول (raw):', isLoggedInRaw, '=> normalized:', loggedIn);
+            console.log('📧 البريد:', email, '👑 isAdmin:', isAdmin);
+
+            if ((loggedIn && email === 'mtjgrwolf@gmail.com') || isAdmin) {
+                console.log('✅ تم التحقق من صلاحيات المدير');
+                return true;
+            }
+
+            if (!loggedIn) {
+                console.log('❌ المستخدم غير مسجل دخول');
+                alert('يجب تسجيل الدخول أولاً');
+                window.location.href = 'login.html';
+                return false;
+            }
+
+            console.log('❌ المستخدم ليس مدير');
+            alert('غير مصرح لك بالوصول لهذه الصفحة');
+            window.location.href = 'dashboard.html';
+            return false;
+        }
+        
+        // التحقق باستخدام MCP مباشرة من قاعدة البيانات
+        async function checkWithMCP(email) {
+            try {
+                console.log('🔍 التحقق من المدير باستخدام MCP...');
+                
+                // التحقق من أن البريد الإلكتروني هو للمدير المعتمد
+                if (email !== 'mtjgrwolf@gmail.com') {
+                    console.log('❌ البريد الإلكتروني غير صحيح للمدير');
+                    blockAccess('غير مصرح لك بالوصول لهذه الصفحة');
+                    return false;
+                }
+                
+                // محاكاة استدعاء MCP للتحقق من قاعدة البيانات
+                // في التطبيق الحقيقي، هذا سيكون استدعاء فعلي لـ MCP
+                const mcpResult = await simulateMCPCall(email);
+                
+                if (mcpResult && mcpResult.isAdmin) {
+                    console.log('✅ تم التحقق من المدير باستخدام MCP');
+                    return true;
+                }
+                
+                console.log('❌ فشل التحقق من MCP - المستخدم ليس مدير');
+                blockAccess('غير مصرح لك بالوصول لهذه الصفحة');
+                return false;
+            } catch (error) {
+                console.error('❌ خطأ في MCP:', error);
+                blockAccess('حدث خطأ في التحقق من الصلاحيات');
+                return false;
+            }
+        }
+        
+        // محاكاة استدعاء MCP (في التطبيق الحقيقي سيكون استدعاء فعلي)
+        async function simulateMCPCall(email) {
+            // محاكاة النتيجة الفعلية من MCP
+            // النتيجة الفعلية من MCP: [{"email":"mtjgrwolf@gmail.com","is_admin":true}]
+            if (email === 'mtjgrwolf@gmail.com') {
+                return {
+                    email: 'mtjgrwolf@gmail.com',
+                    isAdmin: true
+                };
+            }
+            return null;
+        }
+        
+        // حظر الوصول
+        function blockAccess(message) {
+            document.body.innerHTML = `
+                <div class="min-h-screen bg-red-900 flex items-center justify-center">
+                    <div class="text-center text-white p-8 max-w-md mx-auto">
+                        <i class="fas fa-shield-alt text-6xl mb-4 text-red-300"></i>
+                        <h1 class="text-2xl font-bold mb-4">🚫 وصول محظور</h1>
+                        <p class="mb-6 text-red-200">${message}</p>
+                        <div class="space-y-3">
+                            <a href="login.html" class="block bg-red-600 px-6 py-3 rounded-lg hover:bg-red-700 transition-colors">
+                                <i class="fas fa-sign-in-alt ml-2"></i>
+                                تسجيل الدخول
+                            </a>
+                            <a href="dashboard.html" class="block bg-gray-600 px-6 py-3 rounded-lg hover:bg-gray-700 transition-colors">
+                                <i class="fas fa-home ml-2"></i>
+                                العودة للرئيسية
+                            </a>
+                        </div>
+                        <p class="mt-6 text-sm text-red-300">
+                            <i class="fas fa-info-circle ml-1"></i>
+                            هذه الصفحة مخصصة للمدير فقط
+                        </p>
+                    </div>
+                </div>
+            `;
+            
+            // إعادة توجيه تلقائية بعد 5 ثوان
+            setTimeout(() => {
+                window.location.href = 'login.html';
+            }, 5000);
+        }
+
+        // حماية إضافية من الوصول المباشر
+        class DirectAccessProtection {
+            constructor() {
+                this.init();
+            }
+
+            init() {
+                // منع النسخ واللصق
+                document.addEventListener('copy', this.preventAction);
+                document.addEventListener('cut', this.preventAction);
+                document.addEventListener('paste', this.preventAction);
+                
+                // منع النقر بالزر الأيمن
+                document.addEventListener('contextmenu', this.preventAction);
+                
+                // منع اختصارات المطور
+                document.addEventListener('keydown', this.preventDevTools);
+                
+                // منع السحب والإفلات
+                document.addEventListener('dragstart', this.preventAction);
+                
+                // مراقبة تغيير حجم النافذة (قد يشير لفتح أدوات المطور)
+                this.originalHeight = window.outerHeight;
+                this.originalWidth = window.outerWidth;
+                setInterval(() => this.checkDevTools(), 1000);
+                
+                // حماية من التلاعب بـ localStorage
+                this.protectLocalStorage();
+            }
+
+            preventAction(e) {
+                e.preventDefault();
+                return false;
+            }
+
+            preventDevTools(e) {
+                 // منع F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U
+                 if (e.keyCode === 123 || 
+                     (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74)) ||
+                     (e.ctrlKey && e.keyCode === 85)) {
+                     e.preventDefault();
+                     alert('محاولة وصول غير مصرح بها');
+                     return false;
+                 }
+             }
+
+             checkDevTools() {
+                 const heightDiff = window.outerHeight - window.innerHeight;
+                 const widthDiff = window.outerWidth - window.innerWidth;
+                 
+                 if (heightDiff > 200 || widthDiff > 200) {
+                     alert('تم اكتشاف محاولة فتح أدوات المطور');
+                 }
+             }
+
+            protectLocalStorage() {
+                // تشفير البيانات الحساسة
+                const originalSetItem = localStorage.setItem;
+                const originalGetItem = localStorage.getItem;
+                
+                localStorage.setItem = function(key, value) {
+                    const skipKeys = ['isLoggedIn', 'userData'];
+                    if (skipKeys.includes(key)) {
+                        // لا تشفير لهذه المفاتيح لضمان التوافق
+                        return originalSetItem.call(this, key, value);
+                    }
+                    if (key.includes('admin') || key.includes('user') || key.includes('session')) {
+                        value = btoa(encodeURIComponent(value)); // تشفير بسيط
+                    }
+                    return originalSetItem.call(this, key, value);
+                };
+                
+                localStorage.getItem = function(key) {
+                    const skipKeys = ['isLoggedIn', 'userData'];
+                    if (skipKeys.includes(key)) {
+                        // لا فك تشفير لهذه المفاتيح
+                        return originalGetItem.call(this, key);
+                    }
+                    let value = originalGetItem.call(this, key);
+                    if (value && (key.includes('admin') || key.includes('user') || key.includes('session'))) {
+                        try {
+                            return decodeURIComponent(atob(value)); // فك التشفير
+                        } catch (e) {
+                            // إذا كانت القيمة غير مشفرة مسبقاً، نعيدها كما هي لضمان التوافق
+                            return value;
+                        }
+                    }
+                    return value;
+                };
+            }
+        }
+
+        // تفعيل الحماية الإضافية
+        const directAccessProtection = new DirectAccessProtection();
+
+        // دالة فحص المدير المحدثة - بسيطة
+        function checkAdmin() {
+            return simpleAdminCheck();
+        }
+
+        // تحديث الإحصائيات
+        async function updateStats() {
+            try {
+                const result = await dbManager.getAllUsers();
+
+                if (result.success) {
+                    const users = result.users;
+                    const now = new Date();
+                    const sevenDaysFromNow = new Date();
+                    sevenDaysFromNow.setDate(now.getDate() + 7);
+
+                    const stats = {
+                        total: users.length,
+                        active: 0,
+                        expiring: 0,
+                        expired: 0
+                    };
+
+                    // فلترة المستخدمين لإخفاء حساب المدير من الإحصائيات
+                const filteredUsers = users.filter(user => !user.is_admin);
+                
+                // تحديث الإحصائيات للمستخدمين العاديين فقط
+                stats.total = filteredUsers.length;
+                
+                filteredUsers.forEach(user => {
+                    if (!user.expiry_date) {
+                        return;
+                    }
+
+                    const expiryDate = new Date(user.expiry_date);
+                    if (expiryDate > now && user.is_active) {
+                        stats.active++;
+                        if (expiryDate <= sevenDaysFromNow) {
+                            stats.expiring++;
+                        }
+                    } else {
+                        stats.expired++;
+                    }
+                });
+
+                    document.getElementById('totalAccounts').textContent = stats.total;
+                    document.getElementById('activeAccounts').textContent = stats.active;
+                    document.getElementById('expiringAccounts').textContent = stats.expiring;
+                    document.getElementById('expiredAccounts').textContent = stats.expired;
+                } else {
+                    console.error('Error loading users:', result.error);
+                }
+            } catch (error) {
+                console.error('Error updating stats:', error);
+            }
+        }
+
+        // فلترة المستخدمين
+        async function filterUsers() {
+            try {
+                const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+                const filterStatus = document.getElementById('filterStatus').value;
+                const now = new Date();
+                const sevenDaysFromNow = new Date();
+                sevenDaysFromNow.setDate(now.getDate() + 7);
+
+                // جلب المستخدمين من مدير قاعدة البيانات (Supabase)
+                const result = await dbManager.getAllUsers();
+                if (!result.success) {
+                    console.error('Error loading users for filter:', result.error);
+                    return;
+                }
+
+                const users = result.users || [];
+
+                const filteredUsers = users.filter(user => {
+                    // إخفاء حساب المدير من النتائج
+                    if (user.is_admin) return false;
+                    
+                    const email = (user.email || '').toLowerCase();
+                    const matchesSearch = email.includes(searchTerm);
+
+                    const expiryDate = user.expiry_date ? new Date(user.expiry_date) : null;
+                    const isActive = user.is_active !== false;
+
+                    switch (filterStatus) {
+                        case 'active':
+                            return matchesSearch && !!expiryDate && expiryDate > now && isActive;
+                        case 'expiring':
+                            return matchesSearch && !!expiryDate && expiryDate > now && expiryDate <= sevenDaysFromNow && isActive;
+                        case 'expired':
+                            return matchesSearch && ((!!expiryDate && expiryDate <= now) || !isActive);
+                        default:
+                            return matchesSearch;
+                    }
+                });
+
+                await updateUsersTable(filteredUsers);
+            } catch (error) {
+                console.error('Error filtering users:', error);
+            }
+        }
+
+        // تحديث جدول المستخدمين
+        async function updateUsersTable(users = null) {
+            try {
+                if (users === null) {
+                    const result = await dbManager.getAllUsers();
+                    if (result.success) {
+                        users = result.users;
+                    } else {
+                        console.error('Error loading users:', result.error);
+                        return;
+                    }
+                }
+
+                const tbody = document.getElementById('usersTableBody');
+                const mobileView = document.getElementById('usersMobileView');
+                tbody.innerHTML = '';
+                mobileView.innerHTML = '';
+
+                // فلترة المستخدمين لإخفاء حساب المدير
+                const filteredUsers = users.filter(user => !user.is_admin);
+                
+                filteredUsers.forEach(user => {
+                    const row = document.createElement('tr');
+                    const now = new Date();
+
+                    let statusText = '';
+                    let statusClass = '';
+                    let daysLeft = 0;
+
+                    if (user.is_admin) {
+                        statusText = 'مدير';
+                        statusClass = 'bg-purple-500/20 text-purple-500';
+                    } else if (!user.expiry_date) {
+                        statusText = 'غير محدد';
+                        statusClass = 'bg-gray-500/20 text-gray-500';
+                    } else {
+                        const expiryDate = new Date(user.expiry_date);
+                        const isExpired = expiryDate < now;
+                        daysLeft = Math.ceil((expiryDate - now) / (1000 * 60 * 60 * 24));
+
+                        if (isExpired) {
+                            statusText = 'منتهي';
+                            statusClass = 'bg-red-500/20 text-red-500';
+                        } else {
+                            statusText = `متبقي ${daysLeft} يوم`;
+                            statusClass = 'bg-green-500/20 text-green-500';
+                        }
+                    }
+
+                    row.innerHTML = `
+                        <td class="px-6 py-4">${user.email}</td>
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-2">
+                                <span class="font-mono text-sm bg-gray-700 px-2 py-1 rounded select-all" 
+                                      onclick="copyToClipboard('${user.password_hash ? user.password_hash.substring(0, 8) + '...' : 'password123'}')"
+                                      title="اضغط للنسخ - كلمة المرور المشفرة">
+                                    ${user.password_hash ? user.password_hash.substring(0, 8) + '...' : 'password123'}
+                                </span>
+                                <button onclick="copyToClipboard('${user.password_hash ? user.password_hash.substring(0, 8) + '...' : 'password123'}')"
+                                        class="text-blue-500 hover:text-blue-600 text-xs" 
+                                        title="نسخ كلمة المرور">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                                ${!user.is_admin && user.password_hash ? `
+                                    <button onclick="resetUserPassword('${user.id}', '${user.email}')" 
+                                            class="text-orange-500 hover:text-orange-600 text-xs" 
+                                            title="إعادة تعيين كلمة المرور">
+                                        <i class="fas fa-key"></i>
+                                    </button>
+                                ` : ''}
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            ${user.whatsapp ? `
+                                <div class="flex items-center gap-2">
+                                    <span class="select-all">${user.whatsapp}</span>
+                                    <button onclick="copyToClipboard('${user.whatsapp}')"
+                                            class="text-green-500 hover:text-green-600 text-xs" 
+                                            title="نسخ رقم الواتساب">
+                                        <i class="fab fa-whatsapp"></i>
+                                    </button>
+                                </div>
+                            ` : '-'}
+                        </td>
+                        <td class="px-6 py-4">${new Date(user.created_at).toLocaleDateString('ar-SA')}</td>
+                        <td class="px-6 py-4">${user.expiry_date ? new Date(user.expiry_date).toLocaleDateString('ar-SA') : '-'}</td>
+                        <td class="px-6 py-4">
+                            <span class="px-2 py-1 rounded text-sm ${statusClass}">
+                                ${statusText}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex gap-2">
+                                ${!user.is_admin ? `
+                                    <button onclick="openEditUser('${user.id}')" class="text-blue-500 hover:text-blue-600" title="تعديل">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button onclick="openRenewModal('${user.id}')"
+                                            class="text-green-500 hover:text-green-600" title="تجديد">
+                                        <i class="fas fa-sync-alt"></i>
+                                    </button>
+                                    <button onclick="terminateUser('${user.id}')"
+                                            class="text-yellow-500 hover:text-yellow-600" title="إلغاء تفعيل">
+                                        <i class="fas fa-ban"></i>
+                                    </button>
+                                    <button onclick="deleteUser('${user.id}')"
+                                            class="text-red-500 hover:text-red-600" title="حذف نهائي">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                ` : '<span class="text-gray-500">مدير</span>'}
+                            </div>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                    
+                    // إنشاء بطاقة للعرض المحمول
+                    const mobileCard = document.createElement('div');
+                    mobileCard.className = 'mobile-card';
+                    mobileCard.innerHTML = `
+                        <div class="mobile-card-header">
+                            <div class="mobile-card-title">${user.email}</div>
+                            <span class="px-2 py-1 rounded text-sm ${statusClass}">
+                                ${statusText}
+                            </span>
+                        </div>
+                        <div class="mobile-card-body">
+                            <div class="mobile-field">
+                                   <span class="mobile-field-label">كلمة المرور</span>
+                                   <div class="flex items-center gap-2">
+                                       <span class="mobile-field-value font-mono text-sm bg-gray-700 px-2 py-1 rounded select-all"
+                                               onclick="copyToClipboard('${user.password_hash ? user.password_hash.substring(0, 8) + '...' : 'password123'}')"
+                                               title="اضغط للنسخ - كلمة المرور المشفرة">
+                                             ${user.password_hash ? user.password_hash.substring(0, 8) + '...' : 'password123'}
+                                         </span>
+                                         <button onclick="copyToClipboard('${user.password_hash ? user.password_hash.substring(0, 8) + '...' : 'password123'}')"
+                                                 class="text-blue-500 hover:text-blue-600 text-xs" 
+                                                 title="نسخ كلمة المرور">
+                                             <i class="fas fa-copy"></i>
+                                         </button>
+                                       ${!user.is_admin && user.password_hash ? `
+                                           <button onclick="resetUserPassword('${user.id}', '${user.email}')" 
+                                                   class="text-orange-500 hover:text-orange-600 text-xs" 
+                                                   title="إعادة تعيين كلمة المرور">
+                                               <i class="fas fa-key"></i>
+                                           </button>
+                                       ` : ''}
+                                   </div>
+                               </div>
+                            <div class="mobile-field">
+                                 <span class="mobile-field-label">رقم الواتساب</span>
+                                 ${user.whatsapp ? `
+                                     <div class="flex items-center gap-2">
+                                         <span class="mobile-field-value select-all">${user.whatsapp}</span>
+                                         <button onclick="copyToClipboard('${user.whatsapp}')"
+                                                 class="text-green-500 hover:text-green-600 text-xs" 
+                                                 title="نسخ رقم الواتساب">
+                                             <i class="fab fa-whatsapp"></i>
+                                         </button>
+                                     </div>
+                                 ` : '<span class="mobile-field-value">-</span>'}
+                             </div>
+                            <div class="mobile-field">
+                                <span class="mobile-field-label">تاريخ الإنشاء</span>
+                                <span class="mobile-field-value">${new Date(user.created_at).toLocaleDateString('ar-SA')}</span>
+                            </div>
+                            <div class="mobile-field">
+                                <span class="mobile-field-label">تاريخ الانتهاء</span>
+                                <span class="mobile-field-value">${user.expiry_date ? new Date(user.expiry_date).toLocaleDateString('ar-SA') : '-'}</span>
+                            </div>
+                            ${!user.is_admin && daysLeft > 0 ? `
+                                <div class="mobile-field">
+                                    <span class="mobile-field-label">الأيام المتبقية</span>
+                                    <span class="mobile-field-value text-${daysLeft <= 7 ? 'yellow' : 'green'}-500">${daysLeft} يوم</span>
+                                </div>
+                            ` : ''}
+                        </div>
+                        ${!user.is_admin ? `
+                            <div class="mobile-actions">
+                                <button onclick="openEditUser('${user.id}')" class="bg-blue-600 hover:bg-blue-700 text-white rounded" title="تعديل">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button onclick="openRenewModal('${user.id}')" class="bg-green-600 hover:bg-green-700 text-white rounded" title="تجديد">
+                                    <i class="fas fa-sync-alt"></i>
+                                </button>
+                                <button onclick="terminateUser('${user.id}')" class="bg-yellow-600 hover:bg-yellow-700 text-white rounded" title="إلغاء تفعيل">
+                                    <i class="fas fa-ban"></i>
+                                </button>
+                                <button onclick="deleteUser('${user.id}')" class="bg-red-600 hover:bg-red-700 text-white rounded" title="حذف نهائي">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        ` : `
+                            <div class="mobile-actions">
+                                <div class="text-center text-gray-500 py-2">حساب مدير</div>
+                            </div>
+                        `}
+                    `;
+                    mobileView.appendChild(mobileCard);
+                });
+            } catch (error) {
+                console.error('Error updating users table:', error);
+            }
+        }
+
+        let currentUserId = '';
+
+        function openRenewModal(userId) {
+            currentUserId = userId;
+            document.getElementById('renewModal').classList.remove('hidden');
+        }
+
+        function closeRenewModal() {
+            document.getElementById('renewModal').classList.add('hidden');
+            currentUserId = '';
+        }
+
+        async function handleRenewSubscription(event) {
+            event.preventDefault();
+            if (!currentUserId) return;
+
+            const form = event.target;
+            const duration = form.querySelector('select').value;
+            const customDays = form.querySelector('input[type="number"]')?.value;
+
+            const now = new Date();
+            let expiryDate = new Date();
+
+            if (duration === 'custom' && customDays) {
+                expiryDate.setDate(now.getDate() + parseInt(customDays));
+            } else {
+                expiryDate.setMonth(now.getMonth() + parseInt(duration));
+            }
+
+            try {
+                const updateRes = await dbManager.updateUserProfile(currentUserId, { expiry_date: expiryDate.toISOString(), is_active: true });
+                if (!updateRes.success) {
+                    alert(updateRes.error || 'فشل في تجديد الاشتراك');
+                    return;
+                }
+                closeRenewModal();
+                await updateUsersTable();
+                alert('تم تجديد الاشتراك بنجاح');
+            } catch (error) {
+                console.error('Error renewing subscription:', error);
+                alert('حدث خطأ أثناء تجديد الاشتراك');
+            }
+        }
+
+        async function terminateUser(userId) {
+            if (!confirm('هل أنت متأكد من إلغاء تفعيل هذا المستخدم؟\n\nملاحظة: إلغاء التفعيل يمنع المستخدم من تسجيل الدخول لكن يحتفظ ببياناته.')) return;
+
+            try {
+                const result = await dbManager.deactivateUser(userId);
+
+                if (result.success) {
+                    await updateStats();
+                    await updateUsersTable();
+                    alert('تم إلغاء تفعيل المستخدم بنجاح');
+                } else {
+                    alert(result.error || 'حدث خطأ أثناء إلغاء تفعيل المستخدم');
+                }
+            } catch (error) {
+                console.error('Error deactivating user:', error);
+                alert('حدث خطأ أثناء إلغاء تفعيل المستخدم');
+            }
+        }
+
+        async function deleteUser(userId) {
+            if (!confirm('⚠️ تحذير: حذف نهائي!\n\nهل أنت متأكد من حذف هذا المستخدم نهائياً؟\n\nسيتم حذف:\n- حساب المستخدم\n- جميع اشتراكاته\n- جميع بياناته\n\nهذا الإجراء لا يمكن التراجع عنه!')) return;
+
+            // تأكيد إضافي
+            const confirmText = prompt('للتأكيد، اكتب "حذف نهائي" لحذف المستخدم:');
+            if (confirmText !== 'حذف نهائي') {
+                alert('تم إلغاء العملية');
+                return;
+            }
+
+            try {
+                const result = await dbManager.deleteUser(userId);
+
+                if (result.success) {
+                    await updateStats();
+                    await updateUsersTable();
+                    alert('✅ تم حذف المستخدم وجميع بياناته نهائياً');
+                } else {
+                    alert(result.error || 'حدث خطأ أثناء حذف المستخدم');
+                }
+            } catch (error) {
+                console.error('Error deleting user:', error);
+                alert('حدث خطأ أثناء حذف المستخدم');
+            }
+        }
+
+        // إعادة تعيين كلمة المرور
+        async function resetUserPassword(userId, userEmail) {
+            const newPassword = prompt(`إعادة تعيين كلمة المرور للمستخدم:\n${userEmail}\n\nأدخل كلمة المرور الجديدة:`);
+            
+            if (!newPassword) {
+                alert('تم إلغاء العملية');
+                return;
+            }
+
+            if (newPassword.length < 6) {
+                alert('كلمة المرور يجب أن تكون 6 أحرف على الأقل');
+                return;
+            }
+
+            try {
+                const result = await dbManager.updateUserPassword(userId, newPassword);
+
+                if (result.success) {
+                    alert(`✅ تم تحديث كلمة المرور بنجاح\n\nكلمة المرور الجديدة: ${newPassword}\n\nيرجى إبلاغ المستخدم بكلمة المرور الجديدة`);
+                    await updateUsersTable();
+                } else {
+                    alert(result.error || 'حدث خطأ أثناء تحديث كلمة المرور');
+                }
+            } catch (error) {
+                console.error('Error resetting password:', error);
+                alert('حدث خطأ أثناء إعادة تعيين كلمة المرور');
+            }
+        }
+
+        // نسخ النص إلى الحافظة
+        function copyToClipboard(text) {
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text).then(() => {
+                    showCopySuccess();
+                }).catch(err => {
+                    console.error('فشل في النسخ:', err);
+                    fallbackCopyTextToClipboard(text);
+                });
+            } else {
+                fallbackCopyTextToClipboard(text);
+            }
+        }
+
+        // طريقة بديلة للنسخ
+        function fallbackCopyTextToClipboard(text) {
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.top = '0';
+            textArea.style.left = '0';
+            textArea.style.position = 'fixed';
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    showCopySuccess();
+                } else {
+                    alert('فشل في نسخ النص');
+                }
+            } catch (err) {
+                console.error('فشل في النسخ:', err);
+                alert('فشل في نسخ النص');
+            }
+            
+            document.body.removeChild(textArea);
+        }
+
+        // إظهار رسالة نجاح النسخ
+        function showCopySuccess() {
+            const toast = document.createElement('div');
+            toast.textContent = '✅ تم النسخ بنجاح';
+            toast.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #10b981;
+                color: white;
+                padding: 10px 20px;
+                border-radius: 5px;
+                z-index: 10000;
+                font-size: 14px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            `;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                document.body.removeChild(toast);
+            }, 2000);
+        }
+
+        // تحديث حقل المدة المخصصة
+        document.querySelector('select').addEventListener('change', function() {
+            const customDaysDiv = document.getElementById('customDaysDiv');
+            if (this.value === 'custom') {
+                customDaysDiv.classList.remove('hidden');
+                customDaysDiv.querySelector('input').required = true;
+            } else {
+                customDaysDiv.classList.add('hidden');
+                customDaysDiv.querySelector('input').required = false;
+            }
+        });
+
+        // تهيئة dbManager - نفضل Supabase كمدير قاعدة البيانات الافتراضي
+        let dbManager;
+        async function initializeDbManager() {
+            try {
+                if (typeof supabaseDbManager !== 'undefined') {
+                    dbManager = supabaseDbManager; // استخدام Supabase أولاً
+                } else if (typeof DatabaseManager !== 'undefined') {
+                    dbManager = new DatabaseManager();
+                    if (dbManager.waitForReady) {
+                        await dbManager.waitForReady();
+                    }
+                } else {
+                    throw new Error('لم يتم العثور على أي مدير قاعدة بيانات متاح');
+                }
+                window.dbManager = dbManager;
+            } catch (error) {
+                console.error('Error initializing dbManager:', error);
+                // محاولة استخدام Supabase كحل أخير
+                if (typeof supabaseDbManager !== 'undefined') {
+                    dbManager = supabaseDbManager;
+                    window.dbManager = dbManager;
+                }
+            }
+        }
+
+        // تهيئة الصفحة مع الحماية المتقدمة
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+                console.log('🚀 بدء تهيئة الصفحة...');
+                
+                // انتظار تحميل متغيرات البيئة
+                if (window.envLoader) {
+                    console.log('🔧 تحميل متغيرات البيئة...');
+                    await window.envLoader.loadEnvironment();
+                    console.log('✅ تم تحميل متغيرات البيئة:', window.ENV);
+                }
+                
+                // تهيئة قاعدة البيانات
+                console.log('🗄️ تهيئة قاعدة البيانات...');
+                await initializeDbManager();
+                
+                // التأكد من وجود المدير في قاعدة البيانات
+                console.log('👤 التأكد من وجود المدير...');
+                if (window.dbManager && window.dbManager.ensureAdminExists) {
+                    const adminResult = await window.dbManager.ensureAdminExists();
+                    console.log('📋 نتيجة فحص المدير:', adminResult);
+                    if (adminResult.success && adminResult.created) {
+                        console.log('✅ تم إنشاء حساب المدير في قاعدة البيانات');
+                    }
+                }
+                
+
+                
+                // فحص صلاحيات المدير
+                console.log('🔐 فحص صلاحيات المدير...');
+                const hasAccess = checkAdmin();
+                if (!hasAccess) {
+                    return; // إيقاف التحميل إذا لم يكن لديه صلاحية
+                }
+                
+                // تحميل البيانات فقط بعد التأكد من الصلاحيات
+                console.log('📊 تحميل البيانات...');
+                await updateStats();
+                await updateUsersTable();
+                
+                // إضافة مراقب للنشاط لتجديد الجلسة
+                setupActivityMonitor();
+                
+                console.log('✅ تم تهيئة الصفحة بنجاح');
+                
+            } catch (error) {
+                 console.error('❌ خطأ في تهيئة الصفحة:', error);
+                 alert('حدث خطأ في تحميل الصفحة');
+                 window.location.href = 'login.html';
+             }
+        });
+
+        // مراقب النشاط لتجديد الجلسة
+        function setupActivityMonitor() {
+            let activityTimer;
+            const resetTimer = () => {
+                clearTimeout(activityTimer);
+                localStorage.setItem('lastActivity', Date.now().toString());
+                activityTimer = setTimeout(() => {
+                    alert('ستنتهي جلستك خلال دقيقة واحدة بسبب عدم النشاط');
+                    setTimeout(() => {
+                        localStorage.clear();
+                        window.location.href = 'login.html';
+                    }, 60000);
+                }, 30 * 60 * 1000); // 30 دقيقة
+            };
+            
+            // مراقبة النشاط
+            ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'].forEach(event => {
+                document.addEventListener(event, resetTimer, true);
+            });
+            
+            resetTimer(); // بدء المؤقت
+        }
+
+        function openNewUserModal() {
+            document.getElementById('newUserModal').classList.remove('hidden');
+        }
+
+        function closeNewUserModal() {
+            document.getElementById('newUserModal').classList.add('hidden');
+            document.getElementById('newUserForm').reset();
+            document.getElementById('customDurationDiv').classList.add('hidden');
+        }
+
+        async function handleNewUser(event) {
+            event.preventDefault();
+            const form = event.target;
+            const email = form.querySelector('input[type="email"]').value;
+            const password = form.querySelector('input[type="password"]').value;
+            const duration = form.querySelector('select').value;
+            const countryCode = form.querySelector('#countryCode').value;
+            const whatsappNumber = form.querySelector('#whatsapp').value;
+            
+            // تكوين رقم الواتساب الكامل
+            const whatsapp = whatsappNumber ? `${countryCode}${whatsappNumber}` : null;
+
+            try {
+                let durationMonths;
+                if (duration === 'custom') {
+                    const customDate = new Date(form.querySelector('input[type="date"]').value);
+                    const now = new Date();
+                    durationMonths = Math.ceil((customDate - now) / (1000 * 60 * 60 * 24 * 30));
+                } else {
+                    durationMonths = parseInt(duration);
+                }
+
+                const result = await dbManager.createUser(email, password, durationMonths, whatsapp);
+
+                if (result.success) {
+                    closeNewUserModal();
+                    await updateStats();
+                    await updateUsersTable();
+                    alert('تم إنشاء الحساب بنجاح');
+                } else {
+                    alert(result.error || 'حدث خطأ أثناء إنشاء الحساب');
+                }
+            } catch (error) {
+                console.error('Error creating user:', error);
+                alert('حدث خطأ أثناء إنشاء الحساب');
+            }
+
+            // تم إزالة حفظ المستخدم في localStorage - الاعتماد على Supabase فقط
+        }
+
+        // إضافة مستمع لتغيير مدة الاشتراك
+        document.querySelector('#newUserForm select').addEventListener('change', function() {
+            const customDurationDiv = document.getElementById('customDurationDiv');
+            const dateInput = customDurationDiv.querySelector('input[type="date"]');
+            
+            if (this.value === 'custom') {
+                customDurationDiv.classList.remove('hidden');
+                dateInput.required = true;
+            } else {
+                customDurationDiv.classList.add('hidden');
+                dateInput.required = false;
+            }
+        });
+
+        // دالة فتح نموذج تعديل المستخدم
+        async function openEditUser(userId) {
+            try {
+                const result = await dbManager.getAllUsers();
+                if (result.success) {
+                    const user = result.users.find(u => u.id === userId);
+
+                    if (user) {
+                        document.getElementById('editUserId').value = user.id;
+                        document.getElementById('editUserEmail').value = user.email;
+
+                        if (user.whatsapp) {
+                            const whatsapp = user.whatsapp.toString();
+                            if (whatsapp.startsWith('+966')) {
+                                document.getElementById('editUserWhatsappCode').value = '+966';
+                                document.getElementById('editUserWhatsapp').value = whatsapp.substring(4);
+                            } else {
+                                document.getElementById('editUserWhatsappCode').value = '+966';
+                                document.getElementById('editUserWhatsapp').value = whatsapp;
+                            }
+                        }
+
+                        // تعبئة تاريخ الانتهاء إذا كان موجوداً
+                        if (user.expiry_date) {
+                            const expiryDate = new Date(user.expiry_date);
+                            const formattedDate = expiryDate.toISOString().split('T')[0];
+                            document.getElementById('editUserExpiry').value = formattedDate;
+                        }
+
+                        document.getElementById('editUserModal').classList.remove('hidden');
+                    }
+                } else {
+                    alert('فشل في تحميل بيانات المستخدم');
+                }
+            } catch (error) {
+                console.error('Error loading user data:', error);
+                alert('حدث خطأ أثناء تحميل بيانات المستخدم');
+            }
+        }
+
+        // دالة إغلاق نموذج التعديل
+        function closeEditUserModal() {
+            document.getElementById('editUserModal').classList.add('hidden');
+            document.getElementById('editUserForm').reset();
+        }
+
+        // دالة معالجة تعديل بيانات المستخدم
+        async function handleEditUser(event) {
+            event.preventDefault();
+            try {
+                const userId = document.getElementById('editUserId').value;
+                const email = document.getElementById('editUserEmail').value;
+                const password = document.getElementById('editUserPassword').value;
+                const countryCode = document.getElementById('editUserWhatsappCode').value;
+                const whatsapp = document.getElementById('editUserWhatsapp').value;
+                const expiryInput = document.getElementById('editUserExpiry');
+                const expiryDateVal = expiryInput && expiryInput.value ? new Date(expiryInput.value) : null;
+
+                const profileData = {};
+                if (whatsapp) profileData.whatsapp = `${countryCode}${whatsapp}`;
+                if (expiryDateVal) profileData.expiry_date = new Date(expiryDateVal.setHours(23,59,59,999)).toISOString();
+
+                if (Object.keys(profileData).length > 0) {
+                    const updateRes = await dbManager.updateUserProfile(userId, profileData);
+                    if (!updateRes.success) {
+                        alert(updateRes.error || 'فشل تحديث بيانات المستخدم');
+                        return;
+                    }
+                }
+
+                if (password && password.trim().length > 0) {
+                    const passRes = await dbManager.updateUserPassword(userId, password.trim());
+                    if (!passRes.success) {
+                        alert(passRes.error || 'فشل تحديث كلمة المرور');
+                        return;
+                    }
+                }
+
+                closeEditUserModal();
+                await updateUsersTable();
+                alert('تم تحديث بيانات المستخدم بنجاح');
+            } catch (error) {
+                console.error('Error updating user:', error);
+                alert('حدث خطأ أثناء تحديث بيانات المستخدم');
+            }
+        }
+
+    </script>
+
+
+</body>
+</html>

@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>انتهاء الاشتراك - وولف كنترول</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/responsive.css">
+    <script src="js/theme.js"></script>
+    <style>
+        body {
+            font-family: 'Tajawal', sans-serif;
+            direction: rtl;
+        }
+        
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .animated-bg {
+            background: linear-gradient(45deg, 
+                #1a1a1a 0%,
+                #2a2a2a 25%,
+                #1f1f1f 50%,
+                #2d2d2d 75%,
+                #1a1a1a 100%
+            );
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+        }
+        
+        .expired-card {
+            backdrop-filter: blur(10px);
+            background: rgba(42, 42, 42, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .btn-renew {
+            background: linear-gradient(45deg, #10b981, #059669);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-renew:hover {
+            background: linear-gradient(45deg, #059669, #047857);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3);
+        }
+        
+        .btn-cancel {
+            background: linear-gradient(45deg, #6b7280, #4b5563);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-cancel:hover {
+            background: linear-gradient(45deg, #4b5563, #374151);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(107, 114, 128, 0.3);
+        }
+        
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.8s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .bounce-in {
+            animation: bounceIn 1s ease-out;
+        }
+        
+        @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.05); }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+    </style>
+</head>
+<body class="bg-[#1a1a1a] text-white min-h-screen animated-bg flex items-center justify-center">
+    <!-- Background Pattern -->
+    <div class="absolute inset-0 opacity-10">
+        <div class="absolute inset-0" style="background-image: url('data:image/svg+xml,<svg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"><g fill="none" fill-rule="evenodd"><g fill="%23ffffff" fill-opacity="0.1"><circle cx="30" cy="30" r="2"/></g></svg>');"></div>
+    </div>
+
+    <!-- Expired Subscription Container -->
+    <div class="relative z-10 w-full max-w-lg mx-4 fade-in">
+        <!-- Logo Section -->
+        <div class="text-center mb-8">
+            <img src="./assets/logowolfco.png" alt="Wolf Control Logo" class="w-24 h-24 mx-auto mb-4 bounce-in">
+            <h1 class="text-2xl font-bold text-white mb-2">وولف كنترول</h1>
+        </div>
+
+        <!-- Expired Card -->
+        <div class="expired-card rounded-2xl p-8 shadow-2xl text-center">
+            <!-- Warning Icon -->
+            <div class="mb-6">
+                <i class="fas fa-exclamation-triangle text-6xl text-yellow-500 mb-4 pulse-animation"></i>
+                <h2 class="text-2xl font-bold mb-2 text-red-400">انتهت صلاحية اشتراكك</h2>
+                <p class="text-gray-400">عذراً، لقد انتهت صلاحية اشتراكك في وولف كنترول</p>
+            </div>
+
+            <!-- User Info -->
+            <div class="bg-gray-800/50 rounded-lg p-4 mb-6">
+                <div class="flex items-center justify-center mb-2">
+                    <i class="fas fa-user-circle text-2xl text-gray-400 ml-2"></i>
+                    <span id="userEmail" class="text-gray-300">جاري التحميل...</span>
+                </div>
+                <div class="text-sm text-gray-500">
+                    <i class="fas fa-calendar-times ml-1"></i>
+                    تاريخ انتهاء الاشتراك: <span id="expiryDate">جاري التحميل...</span>
+                </div>
+            </div>
+
+            <!-- Subscription Details -->
+            <div class="bg-red-500/10 border border-red-500/30 rounded-lg p-4 mb-6">
+                <h3 class="text-lg font-bold text-red-400 mb-2">
+                    <i class="fas fa-info-circle ml-2"></i>ماذا يعني هذا؟
+                </h3>
+                <ul class="text-sm text-gray-300 text-right space-y-1">
+                    <li><i class="fas fa-times text-red-500 ml-2"></i>لا يمكنك الوصول إلى لوحة التحكم</li>
+                    <li><i class="fas fa-times text-red-500 ml-2"></i>تم إيقاف جميع الخدمات المرتبطة بحسابك</li>
+                    <li><i class="fas fa-times text-red-500 ml-2"></i>لن تتلقى التحديثات والإشعارات</li>
+                </ul>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="space-y-4">
+                <button 
+                    id="renewBtn"
+                    class="btn-renew w-full py-3 px-4 rounded-lg text-white font-medium focus:outline-none focus:ring-4 focus:ring-green-500/50"
+                >
+                    <i class="fas fa-sync-alt ml-2"></i>تجديد الاشتراك الآن
+                </button>
+                
+                <button 
+                    id="cancelBtn"
+                    class="btn-cancel w-full py-3 px-4 rounded-lg text-white font-medium focus:outline-none focus:ring-4 focus:ring-gray-500/50"
+                >
+                    <i class="fas fa-times ml-2"></i>إلغاء
+                </button>
+            </div>
+
+            <!-- Contact Info -->
+            <div class="mt-6 pt-6 border-t border-gray-700">
+                <p class="text-sm text-gray-400 mb-3">تحتاج مساعدة؟</p>
+                <div class="flex justify-center gap-4" id="contactLinks">
+                    <!-- Contact links will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center mt-6">
+            <p class="text-xs text-gray-500">
+                © 2025 وولف كنترول. جميع الحقوق محفوظة.
+            </p>
+        </div>
+    </div>
+
+    <!-- Configuration -->
+    <script src="./js/config.js"></script>
+
+    <script>
+        // DOM Elements
+        const userEmailElement = document.getElementById('userEmail');
+        const expiryDateElement = document.getElementById('expiryDate');
+        const renewBtn = document.getElementById('renewBtn');
+        const cancelBtn = document.getElementById('cancelBtn');
+
+        // Load user data
+        function loadUserData() {
+            const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+            
+            if (userData.email) {
+                userEmailElement.textContent = userData.email;
+                
+                if (userData.expiryDate) {
+                    const expiryDate = new Date(userData.expiryDate);
+                    expiryDateElement.textContent = expiryDate.toLocaleDateString('ar-SA');
+                } else {
+                    expiryDateElement.textContent = 'غير محدد';
+                }
+            } else {
+                // If no user data, redirect to login
+                window.location.href = 'login.html';
+            }
+        }
+
+        // Handle renew button click
+        renewBtn.addEventListener('click', function() {
+            // Get renewal URL from environment variables
+            const renewalUrl = window.ENV?.RENEWAL_WEBSITE_URL || 'https://example.com';
+            window.open(renewalUrl, '_blank');
+        });
+
+        // Handle cancel button click
+        cancelBtn.addEventListener('click', function() {
+            // Clear user data and redirect to home page
+            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('userData');
+            window.location.href = 'index.html';
+        });
+
+        // Check if user should be on this page
+        function checkExpiredStatus() {
+            const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+            
+            // If user is admin, redirect to dashboard
+            if (userData.isAdmin) {
+                window.location.href = 'dashboard.html';
+                return;
+            }
+            
+            // If user has valid subscription, redirect to dashboard
+            if (userData.expiryDate && new Date(userData.expiryDate) > new Date()) {
+                window.location.href = 'dashboard.html';
+                return;
+            }
+            
+            // If not logged in, redirect to login
+            if (!userData.email) {
+                window.location.href = 'login.html';
+                return;
+            }
+        }
+
+        // Load contact information
+        function loadContactInfo() {
+            const contactLinks = document.getElementById('contactLinks');
+            const whatsapp = window.ENV?.SUPPORT_WHATSAPP;
+            const email = window.ENV?.SUPPORT_EMAIL;
+            const phone = window.ENV?.SUPPORT_PHONE;
+
+            let linksHTML = '';
+
+            if (whatsapp) {
+                linksHTML += `<a href="https://wa.me/${whatsapp.replace('+', '')}" target="_blank" class="text-green-400 hover:text-green-300 transition-colors">
+                    <i class="fab fa-whatsapp text-xl"></i>
+                </a>`;
+            }
+
+            if (email) {
+                linksHTML += `<a href="mailto:${email}" class="text-blue-400 hover:text-blue-300 transition-colors">
+                    <i class="fas fa-envelope text-xl"></i>
+                </a>`;
+            }
+
+            if (phone) {
+                linksHTML += `<a href="tel:${phone}" class="text-purple-400 hover:text-purple-300 transition-colors">
+                    <i class="fas fa-phone text-xl"></i>
+                </a>`;
+            }
+
+            contactLinks.innerHTML = linksHTML;
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            checkExpiredStatus();
+            loadUserData();
+            loadContactInfo();
+        });
+
+        // Auto-logout after 5 minutes of inactivity
+        let inactivityTimer;
+        
+        function resetInactivityTimer() {
+            clearTimeout(inactivityTimer);
+            inactivityTimer = setTimeout(() => {
+                localStorage.removeItem('isLoggedIn');
+                localStorage.removeItem('userData');
+                window.location.href = 'login.html';
+            }, 5 * 60 * 1000); // 5 minutes
+        }
+
+        // Reset timer on user activity
+        ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'].forEach(event => {
+            document.addEventListener(event, resetInactivityTimer, true);
+        });
+
+        // Start the timer
+        resetInactivityTimer();
+    </script>
+</body>
+</html>
